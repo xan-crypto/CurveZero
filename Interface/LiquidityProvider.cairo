@@ -69,12 +69,13 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         assert_nn(depo_USD)
     end
 
-    # Obtain the address of the account contract.
+    # Obtain the address of the account contract & czcore
     let (user) = get_caller_address()
+    let (_czcore_addy) = czcore_addy.read()
 	
     # check for existing lp tokens and capital
-    let (_lp_total) = lp_total.read()
-    let (_capital_total) = capital_total.read()
+    let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
+    let (_capital_total) = CZCore.get_capital_total(_czcore_addy)
     # calc new total capital
     let new_capital_total = _capital_total + depo_USD
 
@@ -84,22 +85,22 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         let new_lp_issuance = depo_USD
 
         # store all new data
-        lp_total.write(new_lp_total)
-        capital_total.write(new_capital_total)
+        CZCore.set_lp_total(_czcore_addy,new_lp_total)
+        CZCore.set_capital_total(_czcore_addy,new_capital_total)
 
-        let (res) = lp_balances.read(user)
-        lp_balances.write(user, res + new_lp_issuance)
+        let (res) = CZCore.get_lp_balance(_czcore_addy,user)
+        CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
         return (new_lp_issuance)
     else:	
 	let (new_lp_total, _) = unsigned_div_rem(new_capital_total*_lp_total,_capital_total)
 	let new_lp_issuance = new_lp_total - _lp_total
 
         # store all new data
-        lp_total.write(new_lp_total)
-        capital_total.write(new_capital_total)
+        CZCore.set_lp_total(_czcore_addy,new_lp_total)
+        CZCore.set_capital_total(_czcore_addy,new_capital_total)
 
-        let (res) = lp_balances.read(user)
-        lp_balances.write(user, res + new_lp_issuance)
+        let (res) = CZCore.get_lp_balance(_czcore_addy,user)
+        CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
         return (new_lp_issuance)
     end
 end
@@ -108,9 +109,12 @@ end
 @external
 func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(with_LP : felt) -> (usd : felt):
 
+    # Obtain the address of the czcore contract
+    let (_czcore_addy) = czcore_addy.read()
+
     # check for existing lp tokens and capital
-    let (_lp_total) = lp_total.read()
-    let (_capital_total) = capital_total.read()
+    let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
+    let (_capital_total) = CZCore.get_capital_total(_czcore_addy)
 
     # Verify that the amount is positive.
     with_attr error_message("Amount must be positive and below LP total available."):
@@ -119,7 +123,7 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 
     # Obtain the address of the account contract.
     let (user) = get_caller_address()
-    let (lp_user) = lp_balances.read(user=user)
+    let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
 
     with_attr error_message("Insufficent lp tokens to redeem."):
         assert_nn(lp_user-with_LP)
@@ -133,10 +137,10 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     let new_capital_redeem = _capital_total - new_capital_total
 
     # store all new data
-    lp_total.write(new_lp_total)
-    capital_total.write(new_capital_total)
+    CZCore.set_lp_total(_czcore_addy,new_lp_total)
+    CZCore.set_capital_total(_czcore_addy,new_capital_total)
 
-    let (res) = lp_balances.read(user)
-    lp_balances.write(user, res - with_LP)
+    let (res) = CZCore.get_lp_balance(_czcore_addy,user)
+    CZCore.set_lp_balance(_czcore_addy,user, res - with_LP)
     return (new_capital_redeem)
 end
