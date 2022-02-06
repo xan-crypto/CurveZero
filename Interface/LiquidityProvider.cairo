@@ -12,8 +12,7 @@ end
 
 # set the addy of the trusted addy contract on deploy
 @constructor
-func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}():
-    let (deployer) = get_caller_address()
+func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(deployer : felt):
     deployer_addy.write(deployer)
     return ()
 end
