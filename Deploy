@@ -8,7 +8,7 @@ starknet deploy --contract TrustedAddy_compiled.json --inputs [lp contract addy]
 
 # deploy CZCore contract
 starknet-compile CZCore.cairo     --output CZCore_compiled.json     --abi CZCore_abi.json
-starknet deploy --contract CZCore.json --inputs [trusted contract addy]
+starknet deploy --contract CZCore_compiled.json --inputs [trusted contract addy]
 
 # update LP contract addy to point to CZCore
 starknet invoke \
@@ -16,3 +16,8 @@ starknet invoke \
     --abi LiquidityProvider_abi.json \
     --function set_czcore_addy \
     --inputs [CZCore contract addy]
+
+Last test
+[lp contract addy] = 0x065c6b574e563d959c3ed03121c2f155382eb15a817d86438b25e283ff082669
+[trusted contract addy] = 0x00364420d451d57cc431e38d5b2d9bf2ad1a964ec62f3d71bc25a204ec158cd2
+[CZCore contract addy] = 0x0543100672a0c2ddaf9ce15231673e537600fa12c7fdbe96e85e7b51b07bf98f
