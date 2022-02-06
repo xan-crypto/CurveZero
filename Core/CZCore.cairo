@@ -26,6 +26,13 @@ namespace TrustedAddy:
     end
 end
 
+# interface to controller contract
+@contract_interface
+namespace Controller:
+    func is_paused() -> (addy : felt):
+    end
+end
+
 # the LP token balances by user
 @storage_var
 func lp_balances(user : felt) -> (res : felt):
