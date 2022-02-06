@@ -30,7 +30,7 @@ end
 
 # pause (pause new loans, refin/repay allowed, pause LP PP new/redeem, pause GT stake/unstake)
 @external
-func set_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}:
+func set_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (caller) = get_caller_address()
     let (deployer) = deployer_addy.read()
     with_attr error_message("Only deployer can pause system."):
@@ -42,7 +42,7 @@ end
 
 # unpause
 @external
-func set_unpaused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}:
+func set_unpaused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (caller) = get_caller_address()
     let (deployer) = deployer_addy.read()
     with_attr error_message("Only deployer can unpause system."):
