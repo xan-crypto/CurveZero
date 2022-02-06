@@ -22,6 +22,8 @@ end
 namespace TrustedAddy:
     func get_lp_addy() -> (addy : felt):
     end
+    func get_controller_addy() -> (addy : felt):
+    end
 end
 
 # the LP token balances by user
@@ -39,11 +41,18 @@ end
 # set the balance of the given user
 @external
 func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt):
+    # check authorised caller
     let (caller) = get_caller_address()
     let (trust_contract) = trusted_addy.read()
     let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
+    end
+    # check if paused
+    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
+    let (paused) = Controller.is_paused(controller)
+    with_attr error_message("System is paused."):
+        assert paused = 0
     end
     lp_balances.write(user,amount)
     return ()
@@ -64,11 +73,18 @@ end
 # set the LP total
 @external
 func set_lp_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
+    # check authorised caller
     let (caller) = get_caller_address()
     let (trust_contract) = trusted_addy.read()
     let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
+    end
+     # check if paused
+    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
+    let (paused) = Controller.is_paused(controller)
+    with_attr error_message("System is paused."):
+        assert paused = 0
     end
     lp_total.write(amount)
     return ()
@@ -89,11 +105,18 @@ end
 # set the USD capital total
 @external
 func set_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
+    # check authorised caller
     let (caller) = get_caller_address()
     let (trust_contract) = trusted_addy.read()
     let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
+    end
+    # check if paused
+    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
+    let (paused) = Controller.is_paused(controller)
+    with_attr error_message("System is paused."):
+        assert paused = 0
     end
     capital_total.write(amount)
     return ()
@@ -114,11 +137,18 @@ end
 # set the USD loan total
 @external
 func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
+    # check authorised caller
     let (caller) = get_caller_address()
     let (trust_contract) = trusted_addy.read()
     let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
+    end
+    # check if paused
+    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
+    let (paused) = Controller.is_paused(controller)
+    with_attr error_message("System is paused."):
+        assert paused = 0
     end
     loan_total.write(amount)
     return ()
@@ -139,6 +169,7 @@ end
 # set the insolvency_shortfall
 @external
 func set_insolvency_shortfall{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
+    # check authorised caller
     let (caller) = get_caller_address()
     let (trust_contract) = trusted_addy.read()
     let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
