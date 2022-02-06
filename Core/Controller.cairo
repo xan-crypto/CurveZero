@@ -21,6 +21,13 @@ end
 func paused() -> (res : felt):
 end
 
+# return paused = 1 unpaused = 0
+@view
+func is_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
+    let (res) = paused.read()
+    return (res)
+end
+
 # pause (pause new loans, refin/repay allowed, pause LP PP new/redeem, pause GT stake/unstake)
 @external
 func set_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}:
