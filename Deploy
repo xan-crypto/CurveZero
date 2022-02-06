@@ -2,9 +2,13 @@
 starknet-compile LiquidityProvider.cairo     --output LiquidityProvider_compiled.json     --abi LiquidityProvider_abi.json
 starknet deploy --contract LiquidityProvider_compiled.json --inputs [deployer addy]
 
+# deploy Controller contract
+starknet-compile Controller.cairo     --output Controller_compiled.json     --abi Controller_abi.json
+starknet deploy --contract Controller_compiled.json --inputs [deployer addy]
+
 # deploy TrustedAddy contract
 starknet-compile TrustedAddy.cairo     --output TrustedAddy_compiled.json     --abi TrustedAddy_abi.json
-starknet deploy --contract TrustedAddy_compiled.json --inputs [lp contract addy]
+starknet deploy --contract TrustedAddy_compiled.json --inputs [lp contract addy] [controller contract addy]
 
 # deploy CZCore contract
 starknet-compile CZCore.cairo     --output CZCore_compiled.json     --abi CZCore_abi.json
