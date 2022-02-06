@@ -79,9 +79,49 @@ end
 func capital_total() -> (res : felt):
 end
 
+# returns the total USDC capital
+@view
+func get_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
+    let (res) = capital_total.read()
+    return (res)
+end
+
+# set the USD capital total
+@external
+func set_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
+    let (caller) = get_caller_address()
+    let (trust_contract) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    capital_total.write(amount)
+    return ()
+end
+
 # Total USDC loans
 @storage_var
 func loan_total() -> (res : felt):
+end
+
+# returns the total USDC loans
+@view
+func get_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
+    let (res) = loan_total.read()
+    return (res)
+end
+
+# set the USD loan total
+@external
+func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
+    let (caller) = get_caller_address()
+    let (trust_contract) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    loan_total.write(amount)
+    return ()
 end
 
 # Insolvency shortfall
@@ -89,3 +129,22 @@ end
 func insolvency_shortfall() -> (res : felt):
 end
 
+# returns the insolvency shortfall
+@view
+func get_insolvency_shortfall{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
+    let (res) = insolvency_shortfall.read()
+    return (res)
+end
+
+# set the insolvency_shortfall
+@external
+func set_insolvency_shortfall{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
+    let (caller) = get_caller_address()
+    let (trust_contract) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    insolvency_shortfall.write(amount)
+    return ()
+end
