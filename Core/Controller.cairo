@@ -37,7 +37,7 @@ func set_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
         assert caller = deployer
     end
     paused.write(1)
-    return (1)
+    return ()
 end
 
 # unpause
@@ -49,5 +49,5 @@ func set_unpaused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
         assert caller = deployer
     end
     paused.write(0)
-    return (0)
+    return ()
 end
