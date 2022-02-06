@@ -5,6 +5,43 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
 
+# addy of the CZCore contract
+@storage_var
+func czcore_addy() -> (addy : felt):
+end
+
+# set the CZCore contract addy
+@external
+func set_czcore_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
+    czcore_addy.write(addy)
+    return ()
+end
+
+# interface to trusted addys contract
+@contract_interface
+namespace CZCore:
+    func get_lp_balance(user : felt) -> (res : felt):
+    end
+    func set_lp_balance(user : felt, amount : felt):
+    end
+    func get_lp_total() -> (res : felt):
+    end
+    func set_lp_total(amount : felt):
+    end
+    func get_capital_total() -> (res : felt):
+    end
+    func set_capital_total(amount : felt):
+    end
+    func get_loan_total() -> (res : felt):
+    end
+    func set_loan_total(amount : felt):
+    end
+    func get_insolvency_shortfall() -> (res : felt):
+    end
+    func set_insolvency_shortfall(amount : felt):
+    end
+end
+
 # Issue LP tokens to user
 @external
 func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(depo_USD : felt) -> (lp : felt):
