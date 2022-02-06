@@ -1,0 +1,18 @@
+# deploy LP contract
+starknet-compile LiquidityProvider.cairo     --output LiquidityProvider_compiled.json     --abi LiquidityProvider_abi.json
+starknet deploy --contract LiquidityProvider_compiled.json
+
+# deploy TrustedAddy contract
+starknet-compile TrustedAddy.cairo     --output TrustedAddy_compiled.json     --abi TrustedAddy_abi.json
+starknet deploy --contract TrustedAddy_compiled.json --inputs [lp contract addy]
+
+# deploy CZCore contract
+starknet-compile CZCore.cairo     --output CZCore_compiled.json     --abi CZCore_abi.json
+starknet deploy --contract CZCore.json --inputs [trusted contract addy]
+
+# update LP contract addy to point to CZCore
+starknet invoke \
+    --address [lp contract addy] \
+    --abi LiquidityProvider_abi.json \
+    --function set_czcore_addy \
+    --inputs [CZCore contract addy]
