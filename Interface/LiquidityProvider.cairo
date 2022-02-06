@@ -1,35 +1,9 @@
 # LP contract
 
-
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
-
-# LP token balances by user
-@storage_var
-func lp_balances(user : felt) -> (res : felt):
-end
-
-# Total LP tokens in issue
-@storage_var
-func lp_total() -> (res : felt):
-end
-
-# Total USDC capital
-@storage_var
-func capital_total() -> (res : felt):
-end
-
-# Total USDC loans
-@storage_var
-func loan_total() -> (res : felt):
-end
-
-# Insurance shortfall
-@storage_var
-func insurance_shortfall() -> (res : felt):
-end
 
 # Issue LP tokens to user
 @external
@@ -110,29 +84,4 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     let (res) = lp_balances.read(user)
     lp_balances.write(user, res - with_LP)
     return (new_capital_redeem)
-end
-
-# Returns the balance of the given user.
-@view
-func get_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (res : felt):
-    let (res) = lp_balances.read(user=user)
-    return (res)
-end
-
-@view
-func get_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
-    let (res) = loan_total.read()
-    return (res)
-end
-
-@view
-func get_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
-    let (res) = capital_total.read()
-    return (res)
-end
-
-@view
-func get_lp_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
-    let (res) = lp_total.read()
-    return (res)
 end
