@@ -1,6 +1,6 @@
 # deploy LP contract
 starknet-compile LiquidityProvider.cairo     --output LiquidityProvider_compiled.json     --abi LiquidityProvider_abi.json
-starknet deploy --contract LiquidityProvider_compiled.json
+starknet deploy --contract LiquidityProvider_compiled.json --inputs [deployer addy]
 
 # deploy TrustedAddy contract
 starknet-compile TrustedAddy.cairo     --output TrustedAddy_compiled.json     --abi TrustedAddy_abi.json
@@ -17,7 +17,14 @@ starknet invoke \
     --function set_czcore_addy \
     --inputs [CZCore contract addy]
 
+starknet invoke \
+    --address 0x073d4397ac2990f96751f939e4c5163660936ec5e4912e3e2917a184dfb8db55 \
+    --abi LiquidityProvider_abi.json \
+    --function set_czcore_addy \
+    --inputs 0x03b0f0eb8152f1e7f6e2186e6ca04399d4891a94fb205e0125762a828e5d66dc
+
 Last test
-[lp contract addy] = 0x065c6b574e563d959c3ed03121c2f155382eb15a817d86438b25e283ff082669
-[trusted contract addy] = 0x00364420d451d57cc431e38d5b2d9bf2ad1a964ec62f3d71bc25a204ec158cd2
-[CZCore contract addy] = 0x0543100672a0c2ddaf9ce15231673e537600fa12c7fdbe96e85e7b51b07bf98f
+[deployer addy] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+[lp contract addy] = 0x073d4397ac2990f96751f939e4c5163660936ec5e4912e3e2917a184dfb8db55
+[trusted contract addy] = 0x02591ed6737df40044436ef7385e7f5f5a3e55b261fb7f9808a3ab5a6a9a1d13
+[CZCore contract addy] = 0x03b0f0eb8152f1e7f6e2186e6ca04399d4891a94fb205e0125762a828e5d66dc
