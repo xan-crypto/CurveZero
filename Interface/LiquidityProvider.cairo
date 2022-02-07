@@ -49,14 +49,6 @@ namespace CZCore:
     end
     func set_capital_total(amount : felt):
     end
-    func get_loan_total() -> (res : felt):
-    end
-    func set_loan_total(amount : felt):
-    end
-    func get_insolvency_shortfall() -> (res : felt):
-    end
-    func set_insolvency_shortfall(amount : felt):
-    end
 end
 
 # Issue LP tokens to user
@@ -142,4 +134,23 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     let (res) = CZCore.get_lp_balance(_czcore_addy,user)
     CZCore.set_lp_balance(_czcore_addy,user, res - with_LP)
     return (new_capital_redeem)
+end
+
+# whats my LP tokens worth
+@view
+func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd : felt):
+
+    # Obtain the address of the czcore contract
+    let (_czcore_addy) = czcore_addy.read()
+
+    # check total lp tokens and capital
+    let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
+    let (_capital_total) = CZCore.get_capital_total(_czcore_addy)
+
+    # Obtain the user lp tokens
+    let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
+
+    # calc new capital total and capital to return
+    let (capital_user, _) = unsigned_div_rem(lp_user*_capital_total,_lp_total)
+    return (capital_user)
 end
