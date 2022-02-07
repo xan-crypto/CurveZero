@@ -51,6 +51,11 @@ namespace CZCore:
     end
 end
 
+# events keeping tracks of what happened
+@event
+func lp_token_change(addy : felt, lp_change : felt, capital_change : felt):
+end
+
 # Issue LP tokens to user
 @external
 func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(depo_USD : felt) -> (lp : felt):
@@ -81,9 +86,11 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 
         let (res) = CZCore.get_lp_balance(_czcore_addy,user)
         CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
+        # event
+        lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
         return (new_lp_issuance)
     else:	
-	let (new_lp_total, _) = unsigned_div_rem(new_capital_total*_lp_total,_capital_total)
+        let (new_lp_total, _) = unsigned_div_rem(new_capital_total*_lp_total,_capital_total)
 	let new_lp_issuance = new_lp_total - _lp_total
 
         # store all new data
@@ -92,6 +99,8 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 
         let (res) = CZCore.get_lp_balance(_czcore_addy,user)
         CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
+        # event
+        lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
         return (new_lp_issuance)
     end
 end
@@ -133,6 +142,8 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 
     let (res) = CZCore.get_lp_balance(_czcore_addy,user)
     CZCore.set_lp_balance(_czcore_addy,user, res - with_LP)
+    # event
+    lp_token_change.emit(addy=user,lp_change=-with_LP,capital_change=-new_capital_redeem)
     return (new_capital_redeem)
 end
 
