@@ -34,7 +34,7 @@ func set_czcore_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return ()
 end
 
-# interface to trusted addys contract
+# interface to CZCore contract
 @contract_interface
 namespace CZCore:
     func get_lp_balance(user : felt) -> (res : felt):
