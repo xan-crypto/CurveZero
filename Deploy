@@ -1,18 +1,18 @@
 # deploy LP contract
-starknet-compile LiquidityProvider.cairo     --output LiquidityProvider_compiled.json     --abi LiquidityProvider_abi.json
-starknet deploy --contract LiquidityProvider_compiled.json --inputs [deployer addy]
+starknet-compile Interface/LiquidityProvider.cairo     --output Compiled/LiquidityProvider_compiled.json     --abi Compiled/LiquidityProvider_abi.json
+starknet deploy --contract Compiled/LiquidityProvider_compiled.json --inputs [deployer addy]
 
 # deploy Controller contract
-starknet-compile Controller.cairo     --output Controller_compiled.json     --abi Controller_abi.json
-starknet deploy --contract Controller_compiled.json --inputs [deployer addy]
+starknet-compile Core/Controller.cairo     --output Compiled/Controller_compiled.json     --abi Compiled/Controller_abi.json
+starknet deploy --contract Compiled/Controller_compiled.json --inputs [deployer addy]
 
 # deploy TrustedAddy contract
-starknet-compile TrustedAddy.cairo     --output TrustedAddy_compiled.json     --abi TrustedAddy_abi.json
-starknet deploy --contract TrustedAddy_compiled.json --inputs [lp contract addy] [controller contract addy]
+starknet-compile Config/TrustedAddy.cairo     --output Compiled/TrustedAddy_compiled.json     --abi Compiled/TrustedAddy_abi.json
+starknet deploy --contract Compiled/TrustedAddy_compiled.json --inputs [lp] [pp] [cb] [ll] [gt] [if] [controller]
 
 # deploy CZCore contract
-starknet-compile CZCore.cairo     --output CZCore_compiled.json     --abi CZCore_abi.json
-starknet deploy --contract CZCore_compiled.json --inputs [trusted contract addy]
+starknet-compile Core/CZCore.cairo     --output Compiled/CZCore_compiled.json     --abi Compiled/CZCore_abi.json
+starknet deploy --contract Compiled/CZCore_compiled.json --inputs [trusted contract addy]
 
 # update LP contract addy to point to CZCore
 starknet invoke \
@@ -30,5 +30,6 @@ starknet invoke \
 Last test
 [deployer addy] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 [lp contract addy] = 0x073d4397ac2990f96751f939e4c5163660936ec5e4912e3e2917a184dfb8db55
+[controller contract addy] = 0x073d4397ac2990f96751f939e4c5163660936ec5e4912e3e2917a184dfb8db55
 [trusted contract addy] = 0x02591ed6737df40044436ef7385e7f5f5a3e55b261fb7f9808a3ab5a6a9a1d13
 [CZCore contract addy] = 0x03b0f0eb8152f1e7f6e2186e6ca04399d4891a94fb205e0125762a828e5d66dc
