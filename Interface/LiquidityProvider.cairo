@@ -22,6 +22,13 @@ end
 func czcore_addy() -> (addy : felt):
 end
 
+# get the CZCore contract addy
+@view
+func get_czcore_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = czcore_addy.read()
+    return (addy)
+end
+
 # set the CZCore contract addy
 @external
 func set_czcore_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
