@@ -1,4 +1,5 @@
 # Addys that CZCore accepts
+# this prevents anyone from calling CZCore functions
 
 %lang starknet
 %builtins pedersen range_check
@@ -9,15 +10,52 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 func lp_addy() -> (addy : felt):
 end
 
+# addy of the pp contract
+@storage_var
+func pp_addy() -> (addy : felt):
+end
+
+# addy of the cb contract
+@storage_var
+func cb_addy() -> (addy : felt):
+end
+
+# addy of the ll contract
+@storage_var
+func ll_addy() -> (addy : felt):
+end
+
+# addy of the gt contract
+@storage_var
+func gt_addy() -> (addy : felt):
+end
+
+# addy of the if contract
+@storage_var
+func if_addy() -> (addy : felt):
+end
+
 # addy of the controller contract
 @storage_var
 func controller_addy() -> (addy : felt):
 end
 
-# run on deployment only, must have constructor in name and decorator
+# set the relevant addys on deployment, is there a better way to do this?
 @constructor
-func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(_lp_addy : felt, _controller_addy : felt):
+func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(
+    _lp_addy : felt,
+    _pp_addy : felt,
+    _cb_addy : felt,
+    _ll_addy : felt,
+    _gt_addy : felt,
+    _if_addy : felt,
+    _controller_addy : felt):
     lp_addy.write(_lp_addy)
+    pp_addy.write(_pp_addy)
+    cb_addy.write(_cb_addy)
+    ll_addy.write(_ll_addy)
+    gt_addy.write(_gt_addy)
+    if_addy.write(_if_addy)
     controller_addy.write(_controller_addy)
     return ()
 end
@@ -26,6 +64,41 @@ end
 @view
 func get_lp_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
     let (addy) = lp_addy.read()
+    return (addy)
+end
+
+# return pp addy
+@view
+func get_pp_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = pp_addy.read()
+    return (addy)
+end
+
+# return cb addy
+@view
+func get_cb_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = cb_addy.read()
+    return (addy)
+end
+
+# return ll addy
+@view
+func get_ll_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = ll_addy.read()
+    return (addy)
+end
+
+# return gt addy
+@view
+func get_gt_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = gt_addy.read()
+    return (addy)
+end
+
+# return if addy
+@view
+func get_if_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = if_addy.read()
     return (addy)
 end
 
