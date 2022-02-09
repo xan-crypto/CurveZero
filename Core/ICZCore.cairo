@@ -1,5 +1,7 @@
 # this contains all the interfaces that CZCore needs
 
+%lang starknet
+
 # interface to trusted addys contract
 @contract_interface
 namespace TrustedAddy:
