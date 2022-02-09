@@ -4,6 +4,7 @@
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
+from Core.ICZCore import ICZCore
 
 # addy of the trusted addy contract
 @storage_var
@@ -15,22 +16,6 @@ end
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(_trusted_addy : felt):
     trusted_addy.write(_trusted_addy)
     return ()
-end
-
-# interface to trusted addys contract
-@contract_interface
-namespace TrustedAddy:
-    func get_lp_addy() -> (addy : felt):
-    end
-    func get_controller_addy() -> (addy : felt):
-    end
-end
-
-# interface to controller contract
-@contract_interface
-namespace Controller:
-    func is_paused() -> (addy : felt):
-    end
 end
 
 # the LP token balances by user
