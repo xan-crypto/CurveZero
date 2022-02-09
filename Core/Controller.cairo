@@ -16,6 +16,13 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     return ()
 end
 
+# who is deployer
+@view
+func get_deployer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
+    let (addy) = deployer_addy.read()
+    return (addy)
+end
+
 # paused = 1 unpaused = 0
 @storage_var
 func paused() -> (res : felt):
