@@ -18,6 +18,13 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     return ()
 end
 
+# view trusted addy
+@view
+func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = trusted_addy.read()
+    return (addy)
+end
+
 # the LP token balances by user
 @storage_var
 func lp_balances(user : felt) -> (res : felt):
