@@ -33,3 +33,19 @@ Last test
 [controller contract addy] = 0x05aad8622690732dee6b5a226d4e0b05df73692e1628d55df38c7b5379c7ba73
 [trusted contract addy] = 0x0759ae60c499d9d364992e55779d2a9d2242c1a8f930b893da1dde72cd83353f
 [CZCore contract addy] = 0x001116736bc0357781bfaf8b62202dd338f8c4a734177ad1f66caa5411ee70db
+
+# check transactions / testing
+starknet tx_status --hash [tx_hash]
+starknet get_transaction --hash [tx_hash]
+starknet get_transaction_receipt --hash [tx_hash]
+
+starknet call \
+    --address 0x04e0cf7f535e97b871e1273cb57b21169e59bcda32cdc0e156d8bc9056f46013 \
+    --abi contract_abi.json \
+    --function get_balance 
+
+starknet invoke \
+    --address 0x032ab636834291290c879257561088480f9961fa353e752d268eff97c0120941 \
+    --abi Compiled/LiquidityProvider_abi.json \
+    --function lp_token_worth \
+    --inputs 0x0077113fdcee61d3257d7617d7b01a766a7fcd1dd05e96a91f00e13ea4e77399
