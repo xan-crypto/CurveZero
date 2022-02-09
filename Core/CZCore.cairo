@@ -4,7 +4,7 @@
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
-from Core.ICZCore import ICZCore
+from Core.ICZCore import (TrustedAddy,Controller)
 
 # addy of the trusted addy contract
 @storage_var
