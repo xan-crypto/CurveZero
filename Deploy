@@ -29,10 +29,10 @@ starknet invoke \
 
 Last test
 [deployer addy] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp contract addy] = 0x032ab636834291290c879257561088480f9961fa353e752d268eff97c0120941
-[controller contract addy] = 0x05aad8622690732dee6b5a226d4e0b05df73692e1628d55df38c7b5379c7ba73
-[trusted contract addy] = 0x0759ae60c499d9d364992e55779d2a9d2242c1a8f930b893da1dde72cd83353f
-[CZCore contract addy] = 0x001116736bc0357781bfaf8b62202dd338f8c4a734177ad1f66caa5411ee70db
+[lp contract addy] = 0x0714618509cc70b586dd2c29dc66e304c76c34397adeacebb7efdb5bd5a5973a
+[controller contract addy] = 0x015e5e2b9b2094d3faff115e8747e8080be0e3680f996375d554be8912588818
+[trusted contract addy] = 0x069172d254960d9ad805868d7eeb314c40a11d04dc05e0e781390b2c7ee3c83b
+[CZCore contract addy] = 0x05780f7a9cace7e204bbf8d0eeb529c122c517d8e210b55855c446bb46653038
 
 # check transactions / testing
 starknet tx_status --hash [tx_hash]
