@@ -17,6 +17,13 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     return ()
 end
 
+# who is deployer
+@view
+func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
+    let (addy) = deployer_addy.read()
+    return (addy)
+end
+
 # addy of the CZCore contract
 @storage_var
 func czcore_addy() -> (addy : felt):
