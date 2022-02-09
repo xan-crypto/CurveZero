@@ -169,6 +169,10 @@ func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
 
     # calc user capital to return
-    let (capital_user, _) = unsigned_div_rem(lp_user*_capital_total,_lp_total)
-    return (capital_user)
+    if lp_user == 0:
+    	return (0)
+    else:
+        let (capital_user, _) = unsigned_div_rem(lp_user*_capital_total,_lp_total)
+	return (capital_user)
+    end
 end
