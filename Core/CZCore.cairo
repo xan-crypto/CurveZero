@@ -78,6 +78,7 @@ func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 end
 
 ##################################################################
+# functions to set and get lp tokens by user
 # the LP token balances by user
 @storage_var
 func lp_balances(user : felt) -> (res : felt):
@@ -110,6 +111,7 @@ func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return ()
 end
 
+##################################################################
 # total LP tokens in issue
 @storage_var
 func lp_total() -> (res : felt):
@@ -142,6 +144,7 @@ func set_lp_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return ()
 end
 
+##################################################################
 # Total USDC capital
 @storage_var
 func capital_total() -> (res : felt):
@@ -174,6 +177,7 @@ func set_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return ()
 end
 
+##################################################################
 # Total USDC loans
 @storage_var
 func loan_total() -> (res : felt):
@@ -206,6 +210,7 @@ func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return ()
 end
 
+##################################################################
 # Insolvency shortfall
 @storage_var
 func insolvency_shortfall() -> (res : felt):
