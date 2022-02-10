@@ -7,7 +7,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from Core.ICZCore import (TrustedAddy,Controller)
 
 ##################################################################
-# trusted addy contract holds all the addys for the interface/config contracts, CZCore only response to these addys
+# trusted addy contract holds all the addys for the interface/config contracts, CZCore only responds to these addys
 # addy of the trusted addy contract
 @storage_var
 func trusted_addy() -> (addy : felt):
