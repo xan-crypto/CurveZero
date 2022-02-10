@@ -72,6 +72,12 @@ func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
+    # check if paused
+    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
+    let (paused) = Controller.is_paused(controller)
+    with_attr error_message("System is paused."):
+        assert paused = 0
+    end
     let (addy) = usdc_addy.read()
     ERC20_USDC.ERC20_transferFrom(addy,sender=sender,recipient=recipient,amount=amount)
     return ()
