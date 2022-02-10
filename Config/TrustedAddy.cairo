@@ -5,6 +5,8 @@
 %builtins pedersen range_check
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
+##################################################################
+# all the trusted addys that CZCore will response to
 # addy of the lp contract
 @storage_var
 func lp_addy() -> (addy : felt):
