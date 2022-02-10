@@ -40,6 +40,11 @@ end
 func controller_addy() -> (addy : felt):
 end
 
+# addy of the settings contract
+@storage_var
+func settings_addy() -> (addy : felt):
+end
+
 # set the relevant addys on deployment, is there a better way to do this?
 @constructor
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(
@@ -49,7 +54,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     _ll_addy : felt,
     _gt_addy : felt,
     _if_addy : felt,
-    _controller_addy : felt):
+    _controller_addy : felt,
+    _settings_addy : felt):
     lp_addy.write(_lp_addy)
     pp_addy.write(_pp_addy)
     cb_addy.write(_cb_addy)
@@ -57,6 +63,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     gt_addy.write(_gt_addy)
     if_addy.write(_if_addy)
     controller_addy.write(_controller_addy)
+    settings_addy.write(_settings_addy)
     return ()
 end
 
@@ -106,5 +113,12 @@ end
 @view
 func get_controller_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
     let (addy) = controller_addy.read()
+    return (addy)
+end
+
+# return settings addy
+@view
+func get_settings_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = settings_addy.read()
     return (addy)
 end
