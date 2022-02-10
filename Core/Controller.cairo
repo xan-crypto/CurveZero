@@ -4,6 +4,10 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 
+##################################################################
+# the deployer is effectively the controller, controller can not remove funds
+# controller can only pause and unpause, slash PP and GT and initiate a payout from IF to fund a shortfall
+# controller will also be able to update some of the settings, controller key should be given to community when project matures
 # addy of the deployer
 @storage_var
 func deployer_addy() -> (addy : felt):
@@ -23,6 +27,8 @@ func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return (addy)
 end
 
+##################################################################
+# controller functions
 # paused = 1 unpaused = 0
 @storage_var
 func paused() -> (res : felt):
