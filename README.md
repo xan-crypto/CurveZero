@@ -10,4 +10,4 @@ https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY
 **Abstract**: This litepaper introduces a framework for determining the USD funding rate term structure. The protocol will live on-chain via layer 2 ethereum, either on starknet or zksync. The traditional bootstrap process for curve building is tricky due to the lack of liquid on-chain financial instruments from which rates can be extracted. The various shapes and kinks in term structure are also difficult to capture via a closed form solution, thus we rely on market forces for its expression. Effectively once this curve is known, a user can lock into a fixed rate loan for n months in a trustless and transparent manner (0-24 months initially).
 
 **Protocol Architecture**:
-![image](https://user-images.githubusercontent.com/62293102/153413057-d5bb8acc-f0c2-4e78-8304-41e2492a34aa.png)
+![image](https://user-images.githubusercontent.com/62293102/153413152-6fad8e98-5e6f-4e28-b8a1-9661fc617d1d.png)
