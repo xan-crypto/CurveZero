@@ -126,6 +126,7 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     # Obtain the address of the account contract & czcore
     let (user) = get_caller_address()
     let (_czcore_addy) = czcore_addy.read()
+    let (_usdc_addy) = usdc_addy.read()
 	
     # check for existing lp tokens and capital
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
@@ -139,7 +140,7 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         let new_lp_issuance = depo_USD
 
         # transfer the actual USDC tokens to CZCore reserves
-        ERC20_USDC.ERC20_transferFrom(user, _czcore_addy, depo_USD)
+        ERC20_USDC.ERC20_transferFrom(_usdc_addy, user, _czcore_addy, depo_USD)
 
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
@@ -155,7 +156,7 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 	    let new_lp_issuance = new_lp_total - _lp_total
 
         # transfer the actual USDC tokens to CZCore reserves
-        ERC20_USDC.ERC20_transferFrom(user, _czcore_addy, depo_USD)
+        ERC20_USDC.ERC20_transferFrom(_usdc_addy, user, _czcore_addy, depo_USD)
 
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
@@ -199,6 +200,8 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     # calc new capital total and capital to return
     let (new_capital_total, _) = unsigned_div_rem(new_lp_total*_capital_total,_lp_total)
     let new_capital_redeem = _capital_total - new_capital_total
+
+
 
     # store all new data
     CZCore.set_lp_total(_czcore_addy,new_lp_total)
