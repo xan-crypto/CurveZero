@@ -6,6 +6,8 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from Core.ICZCore import (TrustedAddy,Controller)
 
+##################################################################
+# trusted addy contract holds all the addys for the interface/config contracts, CZCore only response to these addys
 # addy of the trusted addy contract
 @storage_var
 func trusted_addy() -> (addy : felt):
@@ -25,6 +27,57 @@ func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_che
     return (addy)
 end
 
+##################################################################
+# need interface to the ERC-20 USDC contract that lives on starknet, this is for USDC deposits and withdrawals
+# addy of the ERC-20 USDC contract
+@storage_var
+func usdc_addy() -> (addy : felt):
+end
+
+# get the ERC-20 USDC contract addy
+@view
+func get_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = usdc_addy.read()
+    return (addy)
+end
+
+# set the ERC-20 USDC contract addy
+@external
+func set_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
+    let (caller) = get_caller_address()
+    let (deployer) = deployer_addy.read()
+    with_attr error_message("Only deployer can change the ERC-20 USDC addy."):
+        assert caller = deployer
+    end
+    usdc_addy.write(addy)
+    return ()
+end
+
+# interface to ERC-20 USDC contract
+# use the transfer from function to send the USDC from sender to recipient
+@contract_interface
+namespace ERC20_USDC:
+    func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
+    end
+end
+
+##################################################################
+# this is a pass thru function to the ERC-20 USDC contract
+@external
+func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(sender: felt, recipient: felt, amount: Uint256):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (trust_contract) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    let (addy) = usdc_addy.read()
+    ERC20_USDC.ERC20_transferFrom(addy,sender=sender,recipient=recipient,amount=amount)
+    return ()
+end
+
+##################################################################
 # the LP token balances by user
 @storage_var
 func lp_balances(user : felt) -> (res : felt):
