@@ -5,6 +5,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
+from starkware.cairo.common.uint256 import (Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check)
 
 ##################################################################
 # needed so that deployer can point LP contract to CZCore
@@ -26,6 +27,7 @@ func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (addy) = deployer_addy.read()
     return (addy)
 end
+
 ##################################################################
 # CZCore addy and interface, only deployer can point LP contract to CZCore
 # addy of the CZCore contract
@@ -68,6 +70,7 @@ namespace CZCore:
     func set_capital_total(amount : felt):
     end
 end
+
 ##################################################################
 # need interface to the ERC-20 USDC contract that lives on starknet, this is for USDC deposits and withdrawals
 # addy of the ERC-20 USDC contract
@@ -95,28 +98,22 @@ func set_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 end
 
 # interface to ERC-20 USDC contract
+# use the transfer from function to send the USDC from user to CZCore
 @contract_interface
 namespace ERC20_USDC:
-    func ERC20_transfer(user : felt) -> (res : felt):
-    end
-    func set_lp_balance(user : felt, amount : felt):
-    end
-    func get_lp_total() -> (res : felt):
-    end
-    func set_lp_total(amount : felt):
-    end
-    func get_capital_total() -> (res : felt):
-    end
-    func set_capital_total(amount : felt):
+    func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
     end
 end
+
 ##################################################################
 # need to emit LP events so that we can do reporting / dashboard to monitor system
 # events keeping tracks of what happened
 @event
 func lp_token_change(addy : felt, lp_change : felt, capital_change : felt):
 end
+
 ##################################################################
+# LP contract functions
 # Issue LP tokens to user
 @external
 func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(depo_USD : felt) -> (lp : felt):
@@ -141,25 +138,31 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         let new_lp_total = depo_USD
         let new_lp_issuance = depo_USD
 
+        # transfer the actual USDC tokens to CZCore reserves
+        ERC20_USDC.ERC20_transferFrom(user, _czcore_addy, depo_USD)
+
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
         CZCore.set_capital_total(_czcore_addy,new_capital_total)
-
         let (res) = CZCore.get_lp_balance(_czcore_addy,user)
         CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
+
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
         return (new_lp_issuance)
     else:	
         let (new_lp_total, _) = unsigned_div_rem(new_capital_total*_lp_total,_capital_total)
-	let new_lp_issuance = new_lp_total - _lp_total
+	    let new_lp_issuance = new_lp_total - _lp_total
+
+        # transfer the actual USDC tokens to CZCore reserves
+        ERC20_USDC.ERC20_transferFrom(user, _czcore_addy, depo_USD)
 
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
         CZCore.set_capital_total(_czcore_addy,new_capital_total)
-
         let (res) = CZCore.get_lp_balance(_czcore_addy,user)
         CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
+
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
         return (new_lp_issuance)
