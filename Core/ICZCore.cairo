@@ -19,6 +19,8 @@ namespace TrustedAddy:
     end
     func get_controller_addy() -> (addy : felt):
     end
+    func get_settings_addy() -> (addy : felt):
+    end
 end
 
 # interface to controller contract
