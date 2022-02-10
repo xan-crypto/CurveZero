@@ -95,7 +95,7 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (user) = get_caller_address()
     let (_czcore_addy) = czcore_addy.read()
 
-    # check for existing lp tokens and capital
+    # check for existing lp tokens and capital from czcore
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
     let (_capital_total) = CZCore.get_capital_total(_czcore_addy)
     # calc new total capital
@@ -112,7 +112,9 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
         CZCore.set_capital_total(_czcore_addy,new_capital_total)
-        let (res) = CZCore.get_lp_balance(_czcore_addy,user)
+        
+	# mint the lp token
+	let (res) = CZCore.get_lp_balance(_czcore_addy,user)
         CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
 
         # event
@@ -128,6 +130,8 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
         CZCore.set_capital_total(_czcore_addy,new_capital_total)
+	
+	# mint the lp token
         let (res) = CZCore.get_lp_balance(_czcore_addy,user)
         CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
 
@@ -153,7 +157,7 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
         assert_nn_le(with_LP, _lp_total)
     end
 
-    # obtain the address of the account contract.
+    # obtain the address of the account contract and user lp balance.
     let (user) = get_caller_address()
     let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
 
@@ -175,6 +179,8 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     # store all new data
     CZCore.set_lp_total(_czcore_addy,new_lp_total)
     CZCore.set_capital_total(_czcore_addy,new_capital_total)
+    
+    # burn lp tokens
     let (res) = CZCore.get_lp_balance(_czcore_addy,user)
     CZCore.set_lp_balance(_czcore_addy,user, res - with_LP)
     
