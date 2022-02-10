@@ -69,39 +69,7 @@ namespace CZCore:
     end
     func set_capital_total(amount : felt):
     end
-end
-
-##################################################################
-# need interface to the ERC-20 USDC contract that lives on starknet, this is for USDC deposits and withdrawals
-# addy of the ERC-20 USDC contract
-@storage_var
-func usdc_addy() -> (addy : felt):
-end
-
-# get the ERC-20 USDC contract addy
-@view
-func get_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
-    let (addy) = usdc_addy.read()
-    return (addy)
-end
-
-# set the ERC-20 USDC contract addy
-@external
-func set_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
-    let (caller) = get_caller_address()
-    let (deployer) = deployer_addy.read()
-    with_attr error_message("Only deployer can change the ERC-20 USDC addy."):
-        assert caller = deployer
-    end
-    czcore_addy.write(addy)
-    return ()
-end
-
-# interface to ERC-20 USDC contract
-# use the transfer from function to send the USDC from user to CZCore
-@contract_interface
-namespace ERC20_USDC:
-    func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
+    func erc20_transferFrom(sender: felt, recipient: felt, amount: Uint256):
     end
 end
 
@@ -126,8 +94,7 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     # Obtain the address of the account contract & czcore
     let (user) = get_caller_address()
     let (_czcore_addy) = czcore_addy.read()
-    let (_usdc_addy) = usdc_addy.read()
-	
+
     # check for existing lp tokens and capital
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
     let (_capital_total) = CZCore.get_capital_total(_czcore_addy)
@@ -140,7 +107,7 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         let new_lp_issuance = depo_USD
 
         # transfer the actual USDC tokens to CZCore reserves
-        ERC20_USDC.ERC20_transferFrom(_usdc_addy, user, _czcore_addy, depo_USD)
+        CZCore.erc20_transferFrom(_czcore_addy, user, _czcore_addy, depo_USD)
 
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
@@ -153,10 +120,10 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         return (new_lp_issuance)
     else:	
         let (new_lp_total, _) = unsigned_div_rem(new_capital_total*_lp_total,_capital_total)
-	    let new_lp_issuance = new_lp_total - _lp_total
+	let new_lp_issuance = new_lp_total - _lp_total
 
         # transfer the actual USDC tokens to CZCore reserves
-        ERC20_USDC.ERC20_transferFrom(_usdc_addy, user, _czcore_addy, depo_USD)
+        CZCore.erc20_transferFrom(_czcore_addy, user, _czcore_addy, depo_USD)
 
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
@@ -181,15 +148,16 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
     let (_capital_total) = CZCore.get_capital_total(_czcore_addy)
 
-    # Verify that the amount is positive.
+    # verify that the amount is positive.
     with_attr error_message("Amount must be positive and below LP total available."):
         assert_nn_le(with_LP, _lp_total)
     end
 
-    # Obtain the address of the account contract.
+    # obtain the address of the account contract.
     let (user) = get_caller_address()
     let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
 
+    # verify user has sufficient LP tokens to redeem
     with_attr error_message("Insufficent lp tokens to redeem."):
         assert_nn(lp_user-with_LP)
     end
@@ -201,14 +169,15 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     let (new_capital_total, _) = unsigned_div_rem(new_lp_total*_capital_total,_lp_total)
     let new_capital_redeem = _capital_total - new_capital_total
 
-
+    # transfer the actual USDC tokens from CZCore reserves
+    CZCore.erc20_transferFrom(_czcore_addy, _czcore_addy, user, new_capital_redeem)
 
     # store all new data
     CZCore.set_lp_total(_czcore_addy,new_lp_total)
     CZCore.set_capital_total(_czcore_addy,new_capital_total)
-
     let (res) = CZCore.get_lp_balance(_czcore_addy,user)
     CZCore.set_lp_balance(_czcore_addy,user, res - with_LP)
+    
     # event
     lp_token_change.emit(addy=user,lp_change=-with_LP,capital_change=-new_capital_redeem)
     return (new_capital_redeem)
