@@ -1,16 +1,19 @@
 # LP contract
 
+# imports
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
 
+##################################################################
+# needed so that deployer can point LP contract to CZCore
 # addy of the deployer
 @storage_var
 func deployer_addy() -> (addy : felt):
 end
 
-# set the addy of the trusted addy contract on deploy
+# set the addy of the delpoyer on deploy 
 @constructor
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(deployer : felt):
     deployer_addy.write(deployer)
@@ -23,7 +26,8 @@ func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (addy) = deployer_addy.read()
     return (addy)
 end
-
+##################################################################
+# CZCore addy and interface, only deployer can point LP contract to CZCore
 # addy of the CZCore contract
 @storage_var
 func czcore_addy() -> (addy : felt):
@@ -64,12 +68,55 @@ namespace CZCore:
     func set_capital_total(amount : felt):
     end
 end
+##################################################################
+# need interface to the ERC-20 USDC contract that lives on starknet, this is for USDC deposits and withdrawals
+# addy of the ERC-20 USDC contract
+@storage_var
+func usdc_addy() -> (addy : felt):
+end
 
+# get the ERC-20 USDC contract addy
+@view
+func get_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = usdc_addy.read()
+    return (addy)
+end
+
+# set the ERC-20 USDC contract addy
+@external
+func set_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
+    let (caller) = get_caller_address()
+    let (deployer) = deployer_addy.read()
+    with_attr error_message("Only deployer can change the ERC-20 USDC addy."):
+        assert caller = deployer
+    end
+    czcore_addy.write(addy)
+    return ()
+end
+
+# interface to ERC-20 USDC contract
+@contract_interface
+namespace ERC20_USDC:
+    func ERC20_transfer(user : felt) -> (res : felt):
+    end
+    func set_lp_balance(user : felt, amount : felt):
+    end
+    func get_lp_total() -> (res : felt):
+    end
+    func set_lp_total(amount : felt):
+    end
+    func get_capital_total() -> (res : felt):
+    end
+    func set_capital_total(amount : felt):
+    end
+end
+##################################################################
+# need to emit LP events so that we can do reporting / dashboard to monitor system
 # events keeping tracks of what happened
 @event
 func lp_token_change(addy : felt, lp_change : felt, capital_change : felt):
 end
-
+##################################################################
 # Issue LP tokens to user
 @external
 func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(depo_USD : felt) -> (lp : felt):
