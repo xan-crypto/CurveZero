@@ -8,13 +8,12 @@ from InterfaceAll import (TrustedAddy,Settings)
 from Core import DeployAll
 
 ##################################################################
-# the deployer is effectively the controller, controller can not remove funds
 # addy of the deployer
 @storage_var
 func deployer_addy() -> (addy : felt):
 end
 
-# set the addy of the trusted addy contract on deploy
+# set the addy of the delpoyer on deploy 
 @constructor
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(deployer : felt):
     deployer_addy.write(deployer)
@@ -29,7 +28,7 @@ func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 ##################################################################
-# Trusted addy, only deployer can point Controller contract to Trusted Addy contract
+# Trusted addy, only deployer can point contract to Trusted Addy contract
 # addy of the Trusted Addy contract
 @storage_var
 func trusted_addy() -> (addy : felt):
