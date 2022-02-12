@@ -6,7 +6,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check)
-from InterfaceAll import (TrustedAddy)
+from InterfaceAll import (TrustedAddy,CZCore)
 
 ##################################################################
 # needed so that deployer can point LP contract to TrustedAddy contract
