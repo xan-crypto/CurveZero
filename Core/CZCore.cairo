@@ -4,7 +4,7 @@
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
-from Interface.Interface import (TrustedAddy,Controller,ERC20_USDC)
+from InterfaceAll import (TrustedAddy,Controller,ERC20_USDC)
 
 ##################################################################
 # needed so that deployer can point CZCore contract to the TrustedAddy contract
