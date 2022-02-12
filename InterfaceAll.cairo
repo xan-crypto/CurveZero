@@ -54,6 +54,12 @@ namespace CZCore:
     end    
     func erc20_transferFrom(sender: felt, recipient: felt, amount: felt):
     end
+    func get_pp_status(user : felt) -> (res : felt):
+    end
+    func set_pp_promote(user : felt):
+    end
+    func set_pp_demote(user : felt):
+    end
 end
 
 ##################################################################
@@ -61,6 +67,8 @@ end
 @contract_interface
 namespace Controller:
     func is_paused() -> (addy : felt):
+    end
+    func set_pp_token_requirement(lp_require : felt, cz_require : felt):
     end
 end
 
