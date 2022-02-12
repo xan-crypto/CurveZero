@@ -1,4 +1,4 @@
-# all the addys that the protocol accepts
+# the addys of all the contracts in the protocol
 # this prevents anyone from calling CZCore functions for example
 
 %lang starknet
@@ -53,6 +53,7 @@ func settings_addy() -> (addy : felt):
 end
 
 # set the relevant addys on deployment, is there a better way to do this?
+# check with starknet devs
 @constructor
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(
     _lp_addy : felt,
