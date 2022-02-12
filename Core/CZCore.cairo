@@ -55,6 +55,27 @@ end
 ##################################################################
 # this is a pass thru function to the ERC-20 USDC contract
 @external
+func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, sender: felt, recipient: felt, amount: Uint256):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    # check if paused
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.is_paused(_controller_addy)
+    with_attr error_message("System is paused."):
+        assert paused = 0
+    end
+    ERC20.ERC20_transferFrom(erc_addy,sender=sender,recipient=recipient,amount=amount)
+    return ()
+end
+
+##################################################################
+# this is a pass thru function to the ERC-20 CZ contract
+@external
 func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(sender: felt, recipient: felt, amount: Uint256):
     # check authorised caller
     let (caller) = get_caller_address()
@@ -250,7 +271,28 @@ end
 
 # promote user to pp and lock lp and cz tokens
 @external
-func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt):
+func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_require : felt, cz_require : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_pp_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    # check if paused
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.is_paused(_controller_addy)
+    with_attr error_message("System is paused."):
+        assert paused = 0
+    end
+
+    # reduce lp balance of user
+    lp_balances.write(user,lp_user-lp_require)
+
+    # transfert the cz tokens
+    
+    # update the pp status
+    return ()
 end
 
 # demote user from pp and return lp and cz tokens
