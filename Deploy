@@ -14,52 +14,55 @@ starknet-compile Core/InsuranceFund.cairo --output Compiled/InsuranceFund_compil
 starknet-compile Config/Settings.cairo --output Compiled/Settings_compiled.json --abi Compiled/Settings_abi.json
 starknet-compile Config/TrustedAddy.cairo --output Compiled/TrustedAddy_compiled.json --abi Compiled/TrustedAddy_abi.json
 
-starknet deploy --contract Compiled/LiquidityProvider_compiled.json --inputs [deployer addy]
-
-# deploy Controller contract
-starknet-compile Core/Controller.cairo     --output Compiled/Controller_compiled.json     --abi Compiled/Controller_abi.json
-starknet deploy --contract Compiled/Controller_compiled.json --inputs [deployer addy]
-
-# deploy TrustedAddy contract
-starknet-compile Config/TrustedAddy.cairo     --output Compiled/TrustedAddy_compiled.json     --abi Compiled/TrustedAddy_abi.json
-starknet deploy --contract Compiled/TrustedAddy_compiled.json --inputs [lp] [pp] [cb] [ll] [gt] [if] [controller]
-
-# deploy CZCore contract
-starknet-compile Core/CZCore.cairo     --output Compiled/CZCore_compiled.json     --abi Compiled/CZCore_abi.json
-starknet deploy --contract Compiled/CZCore_compiled.json --inputs [trusted contract addy]
-
-# update LP contract addy to point to CZCore
-starknet invoke \
-    --address [lp contract addy] \
-    --abi LiquidityProvider_abi.json \
-    --function set_czcore_addy \
-    --inputs [CZCore contract addy]
-
-starknet invoke \
-    --address 0x073d4397ac2990f96751f939e4c5163660936ec5e4912e3e2917a184dfb8db55 \
-    --abi LiquidityProvider_abi.json \
-    --function set_czcore_addy \
-    --inputs 0x03b0f0eb8152f1e7f6e2186e6ca04399d4891a94fb205e0125762a828e5d66dc
+starknet deploy --contract Compiled/LiquidityProvider_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/PriceProvider_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/CapitalBorrower_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/LoanLiquidator_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/GovenanceToken_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/CZCore_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/Controller_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/InsuranceFund_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/Settings_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/TrustedAddy_compiled.json \
+--inputs \
+    0x01653ffc3bfed9630ed5d02651f8c5695cb671d60266b8ecc39ec02066c0e3a5 \
+    0x072aa985920b121352e4d9e1e5c1044d4a7b9eb4c9689ddfece08a66de61a6c1 \
+    0 \
+    0 \
+    0 \
+    0 \
+    0x0273fb9c74ef7a83af72e5fd9f3b1a6197514f3ce9b89bfdc667cadf45b805c7 \
+    0x04e858e9b8fea34e5d3daefa1eb1dec42a639d8a371c9065ebc033cabedb6862 \
+    0x06a7ed17f1808ff436f5c308bf0c32afdfb101f19d20f965b7f113e34ce59484 \
+    0 \
+    0
 
 Last test
-[deployer addy] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp contract addy] = 0x0714618509cc70b586dd2c29dc66e304c76c34397adeacebb7efdb5bd5a5973a
-[controller contract addy] = 0x015e5e2b9b2094d3faff115e8747e8080be0e3680f996375d554be8912588818
-[trusted contract addy] = 0x069172d254960d9ad805868d7eeb314c40a11d04dc05e0e781390b2c7ee3c83b
-[CZCore contract addy] = 0x05780f7a9cace7e204bbf8d0eeb529c122c517d8e210b55855c446bb46653038
+[deployer] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+[lp] = 0x01653ffc3bfed9630ed5d02651f8c5695cb671d60266b8ecc39ec02066c0e3a5
+[pp] = 0x072aa985920b121352e4d9e1e5c1044d4a7b9eb4c9689ddfece08a66de61a6c1
+[cb] = 
+[ll] = 
+[gt]
+[czcore] = 0x0273fb9c74ef7a83af72e5fd9f3b1a6197514f3ce9b89bfdc667cadf45b805c7
+[controller] = 0x04e858e9b8fea34e5d3daefa1eb1dec42a639d8a371c9065ebc033cabedb6862
+[if] = 
+[setttings] = 0x06a7ed17f1808ff436f5c308bf0c32afdfb101f19d20f965b7f113e34ce59484
+[trusted] = 0x07283fce2d2efc1720fbc9b85a0235d442abc5d98f6fff5beddabd90ac7d6acc
 
 # check transactions / testing
 starknet tx_status --hash [tx_hash]
 starknet get_transaction --hash [tx_hash]
 starknet get_transaction_receipt --hash [tx_hash]
 
+# update contract addy to point to TrustedAddy
+starknet invoke \
+    --address 0x01653ffc3bfed9630ed5d02651f8c5695cb671d60266b8ecc39ec02066c0e3a5 \
+    --abi LiquidityProvider_abi.json \
+    --function set_trusted_addy \
+    --inputs 0x07283fce2d2efc1720fbc9b85a0235d442abc5d98f6fff5beddabd90ac7d6acc
+
 starknet call \
     --address 0x04e0cf7f535e97b871e1273cb57b21169e59bcda32cdc0e156d8bc9056f46013 \
     --abi contract_abi.json \
     --function get_balance 
-
-starknet invoke \
-    --address 0x032ab636834291290c879257561088480f9961fa353e752d268eff97c0120941 \
-    --abi Compiled/LiquidityProvider_abi.json \
-    --function lp_token_worth \
-    --inputs 0x0077113fdcee61d3257d7617d7b01a766a7fcd1dd05e96a91f00e13ea4e77399
