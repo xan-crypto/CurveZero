@@ -55,34 +55,6 @@ func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 ##################################################################
-# interfaces to CZCore contract
-@contract_interface
-namespace CZCore:
-    func get_lp_balance(user : felt) -> (res : felt):
-    end
-    func set_lp_balance(user : felt, amount : felt):
-    end
-    func get_lp_total() -> (res : felt):
-    end
-    func set_lp_total(amount : felt):
-    end
-    func get_capital_total() -> (res : felt):
-    end
-    func set_capital_total(amount : felt):
-    end
-    func erc20_transferFrom(sender: felt, recipient: felt, amount: felt):
-    end
-end
-
-##################################################################
-# interfaces to trusted addy contract
-@contract_interface
-namespace TrustedAddy:
-    func get_czcore_addy() -> (addy : felt):
-    end
-end
-
-##################################################################
 # need to emit LP events so that we can do reporting / dashboard to monitor system
 # dont need to emit total lp and capital since can do that with history of changes
 # events keeping tracks of what happened
