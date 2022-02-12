@@ -5,6 +5,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import (TrustedAddy,Settings)
+import DeployAll
 
 ##################################################################
 # the deployer is effectively the controller, controller can not remove funds
