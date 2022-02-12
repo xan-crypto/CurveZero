@@ -53,7 +53,7 @@ func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 ##################################################################
-# this is a pass thru function to the ERC-20 USDC contract
+# this is a pass thru function to the ERC-20 token contract
 @external
 func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, sender: felt, recipient: felt, amount: Uint256):
     # check authorised caller
