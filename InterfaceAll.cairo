@@ -60,7 +60,7 @@ namespace CZCore:
     end
     func set_pp_promote(user : felt, lp_user : felt, lp_require : felt, cz_require : felt):
     end
-    func set_pp_demote(user : felt, lp_locked : felt):
+    func set_pp_demote(user : felt, lp_user : felt, lp_locked : felt):
     end    
 end
 
