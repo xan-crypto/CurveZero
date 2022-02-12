@@ -1,6 +1,7 @@
 # put all interfaces here
 
 %lang starknet
+from starkware.cairo.common.uint256 import (Uint256)
 
 ##################################################################
 # interface to trusted addy contract
