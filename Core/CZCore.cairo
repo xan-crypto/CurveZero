@@ -266,10 +266,9 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 
     # reduce lp balance of user
     lp_balances.write(user,lp_user-lp_require)
-
-    # transfert the cz tokens
     
     # update the pp status
+    pp_status.write(user=user,lp_token=lp_require,cz_token=cz_require,status=1)
     return ()
 end
 
