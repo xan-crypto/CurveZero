@@ -233,3 +233,27 @@ func set_insolvency_shortfall{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     insolvency_shortfall.write(amount)
     return ()
 end
+
+##################################################################
+# functions to promote and demote and view pp
+# the PP status by user
+@storage_var
+func pp_status(user : felt) -> (lp_token : felt, cz_token : felt, status : felt):
+end
+
+# returns the PP status of the given user
+@view
+func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_token : felt, cz_token : felt, status : felt):
+    let (res) = pp_status.read(user=user)
+    return (res)
+end
+
+# promote user to pp and lock lp and cz tokens
+@external
+func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt):
+end
+
+# demote user from pp and return lp and cz tokens
+@external
+func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt):
+end
