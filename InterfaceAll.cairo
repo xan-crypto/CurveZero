@@ -85,6 +85,8 @@ end
 # interface for the settings contract
 @contract_interface
 namespace Settings:
+    func get_pp_token_requirement() -> (lp_require : felt, cz_require : felt):
+    end    
     func set_pp_token_requirement(lp_require : felt, cz_require : felt):
     end
 end
