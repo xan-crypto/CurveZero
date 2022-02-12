@@ -5,6 +5,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
+from InterfaceAll import (TrustedAddy,CZCore)
 
 ##################################################################
 # addy of the deployer
@@ -63,5 +64,18 @@ end
 ##################################################################
 # PP contract functions
 # view user PP status
+@view
+func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt) -> (lp_token : felt, cz_token : felt, res : felt):
+    
+    # Obtain the address of the czcore contract
+    let (_trusted_addy) = trusted_addy.read()
+    let (_czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    
+    # check pp status and tokens 
+    let (_pp_status) = CZCore.get_pp_status(_czcore_addy,user)
+    return (_pp_status)
+end
+
+
 # promote user to PP
 # demote user from PP
