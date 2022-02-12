@@ -44,6 +44,14 @@ namespace CZCore:
     end
     func set_capital_total(amount : felt):
     end
+    func get_loan_total() -> (res : felt):
+    end
+    func set_loan_total(amount : felt):
+    end
+    func get_insolvency_shortfall() -> (res : felt):
+    end
+    func set_insolvency_shortfall(amount : felt):
+    end    
     func erc20_transferFrom(sender: felt, recipient: felt, amount: felt):
     end
 end
