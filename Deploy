@@ -2,9 +2,18 @@
 # deploy all contracts but TrustedAddy goes last
 # update all contracts to point to TrustedAddy
 
+# compile all
+starknet-compile Interface/LiquidityProvider.cairo --output Compiled/LiquidityProvider_compiled.json --abi Compiled/LiquidityProvider_abi.json
+starknet-compile Interface/PriceProvider.cairo --output Compiled/PriceProvider_compiled.json --abi Compiled/PriceProvider_abi.json
+starknet-compile Interface/CapitalBorrower.cairo --output Compiled/CapitalBorrower_compiled.json --abi Compiled/CapitalBorrower_abi.json
+starknet-compile Interface/LoanLiquidator.cairo --output Compiled/LoanLiquidator_compiled.json --abi Compiled/LoanLiquidator_abi.json
+starknet-compile Interface/GovenanceToken.cairo --output Compiled/GovenanceToken_compiled.json --abi Compiled/GovenanceToken_abi.json
+starknet-compile Core/CZCore.cairo --output Compiled/CZCore_compiled.json --abi Compiled/CZCore_abi.json
+starknet-compile Core/Controller.cairo --output Compiled/Controller_compiled.json --abi Compiled/Controller_abi.json
+starknet-compile Core/InsuranceFund.cairo --output Compiled/InsuranceFund_compiled.json --abi Compiled/InsuranceFund_abi.json
+starknet-compile Config/Settings.cairo --output Compiled/Settings_compiled.json --abi Compiled/Settings_abi.json
+starknet-compile Config/TrustedAddy.cairo --output Compiled/TrustedAddy_compiled.json --abi Compiled/TrustedAddy_abi.json
 
-# deploy LP contract
-starknet-compile Interface/LiquidityProvider.cairo     --output Compiled/LiquidityProvider_compiled.json     --abi Compiled/LiquidityProvider_abi.json
 starknet deploy --contract Compiled/LiquidityProvider_compiled.json --inputs [deployer addy]
 
 # deploy Controller contract
