@@ -1,64 +1,56 @@
-# main contract
+# CZCore contract
 # all interactions with reserves or state should flow through here
 
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
-from Core.ICZCore import (TrustedAddy,Controller)
+from Core.ICZCore import (TrustedAddy,Controller,ERC20_USDC)
 
 ##################################################################
-# trusted addy contract holds all the addys for the interface/config contracts, CZCore only responds to these addys
-# addy of the trusted addy contract
+# needed so that deployer can point CZCore contract to the TrustedAddy contract
+# addy of the deployer
+@storage_var
+func deployer_addy() -> (addy : felt):
+end
+
+# set the addy of the delpoyer on deploy 
+@constructor
+func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(deployer : felt):
+    deployer_addy.write(deployer)
+    return ()
+end
+
+# who is deployer
+@view
+func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
+    let (addy) = deployer_addy.read()
+    return (addy)
+end
+
+##################################################################
+# Trusted addy, only deployer can point CZCore contract to Trusted Addy contract
+# addy of the Trusted Addy contract
 @storage_var
 func trusted_addy() -> (addy : felt):
 end
 
-# set the addy of the trusted addy contract on deploy
-@constructor
-func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(_trusted_addy : felt):
-    trusted_addy.write(_trusted_addy)
-    return ()
-end
-
-# view trusted addy
+# get the trusted contract addy
 @view
 func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
     let (addy) = trusted_addy.read()
     return (addy)
 end
 
-##################################################################
-# need interface to the ERC-20 USDC contract that lives on starknet, this is for USDC deposits and withdrawals
-# addy of the ERC-20 USDC contract
-@storage_var
-func usdc_addy() -> (addy : felt):
-end
-
-# get the ERC-20 USDC contract addy
-@view
-func get_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
-    let (addy) = usdc_addy.read()
-    return (addy)
-end
-
-# set the ERC-20 USDC contract addy
+# set the trusted contract addy
 @external
-func set_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
+func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
     let (caller) = get_caller_address()
     let (deployer) = deployer_addy.read()
-    with_attr error_message("Only deployer can change the ERC-20 USDC addy."):
+    with_attr error_message("Only deployer can change the Trusted addy."):
         assert caller = deployer
     end
-    usdc_addy.write(addy)
+    trusted_addy.write(addy)
     return ()
-end
-
-# interface to ERC-20 USDC contract
-# use the transfer from function to send the USDC from sender to recipient
-@contract_interface
-namespace ERC20_USDC:
-    func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
-    end
 end
 
 ##################################################################
@@ -67,19 +59,19 @@ end
 func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(sender: felt, recipient: felt, amount: Uint256):
     # check authorised caller
     let (caller) = get_caller_address()
-    let (trust_contract) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
     # check if paused
-    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
-    let (paused) = Controller.is_paused(controller)
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.is_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
-    let (addy) = usdc_addy.read()
-    ERC20_USDC.ERC20_transferFrom(addy,sender=sender,recipient=recipient,amount=amount)
+    let (_usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    ERC20_USDC.ERC20_transferFrom(_usdc_addy,sender=sender,recipient=recipient,amount=amount)
     return ()
 end
 
@@ -102,14 +94,14 @@ end
 func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt):
     # check authorised caller
     let (caller) = get_caller_address()
-    let (trust_contract) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
     # check if paused
-    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
-    let (paused) = Controller.is_paused(controller)
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.is_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
@@ -135,14 +127,14 @@ end
 func set_lp_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
     # check authorised caller
     let (caller) = get_caller_address()
-    let (trust_contract) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
      # check if paused
-    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
-    let (paused) = Controller.is_paused(controller)
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.is_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
@@ -168,14 +160,14 @@ end
 func set_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
     # check authorised caller
     let (caller) = get_caller_address()
-    let (trust_contract) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
     # check if paused
-    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
-    let (paused) = Controller.is_paused(controller)
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.is_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
@@ -201,14 +193,14 @@ end
 func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
     # check authorised caller
     let (caller) = get_caller_address()
-    let (trust_contract) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
     # check if paused
-    let (controller) = TrustedAddy.get_controller_addy(trust_contract)
-    let (paused) = Controller.is_paused(controller)
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.is_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
@@ -234,8 +226,8 @@ end
 func set_insolvency_shortfall{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
     # check authorised caller
     let (caller) = get_caller_address()
-    let (trust_contract) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(trust_contract)
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
