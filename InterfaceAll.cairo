@@ -56,11 +56,11 @@ namespace CZCore:
     end    
     func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     end
-    func get_pp_status(user : felt) -> (lp_token : felt, cz_token : felt, status : felt):
+    func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
     end
     func set_pp_promote(user : felt, lp_user : felt, lp_require : felt, cz_require : felt):
     end
-    func set_pp_demote(user : felt):
+    func set_pp_demote(user : felt, lp_locked : felt):
     end    
 end
 
