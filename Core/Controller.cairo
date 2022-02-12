@@ -5,7 +5,6 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import (TrustedAddy,Settings)
-from Core import DeployAll
 
 ##################################################################
 # addy of the deployer
@@ -101,6 +100,6 @@ func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     end
     let (_trusted_addy) = trusted_addy.read()
     let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    Settings.set_pp_token_requirement(lp_require=lp_require,cz_require=cz_require)
+    Settings.set_pp_token_requirement(_settings_addy,lp_require=lp_require,cz_require=cz_require)
     return ()
 end
