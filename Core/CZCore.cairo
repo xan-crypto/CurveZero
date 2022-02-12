@@ -269,7 +269,7 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     lp_balances.write(user,lp_user-lp_require)
     
     # update the pp status
-    pp_status.write(user=user,lp_token=lp_require,cz_token=cz_require,status=1)
+    pp_status.write(user=user,(lp_require,cz_require,1))
     return ()
 end
 
@@ -294,6 +294,6 @@ func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     lp_balances.write(user,lp_user+lp_locked)
     
     # update the pp status
-    pp_status.write(user=user,lp_token=0,cz_token=0,status=0)
+    pp_status.write(user=user,(0,0,0))
     return ()
 end
