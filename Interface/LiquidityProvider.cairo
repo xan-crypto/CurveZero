@@ -9,7 +9,6 @@ from starkware.cairo.common.uint256 import (Uint256, uint256_add, uint256_sub, u
 from InterfaceAll import (TrustedAddy,CZCore)
 
 ##################################################################
-# needed so that deployer can point LP contract to TrustedAddy contract
 # addy of the deployer
 @storage_var
 func deployer_addy() -> (addy : felt):
@@ -30,7 +29,7 @@ func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 ##################################################################
-# Trusted addy, only deployer can point LP contract to Trusted Addy contract
+# Trusted addy, only deployer can point contract to Trusted Addy contract
 # addy of the Trusted Addy contract
 @storage_var
 func trusted_addy() -> (addy : felt):
