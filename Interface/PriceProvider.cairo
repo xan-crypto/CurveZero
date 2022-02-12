@@ -5,7 +5,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
-from InterfaceAll import (TrustedAddy,CZCore,Setttings)
+from InterfaceAll import (TrustedAddy,CZCore,Settings)
 
 ##################################################################
 # addy of the deployer
