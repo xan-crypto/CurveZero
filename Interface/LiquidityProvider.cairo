@@ -90,7 +90,8 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         let new_lp_issuance = depo_USD
 
         # transfer the actual USDC tokens to CZCore reserves
-        CZCore.erc20_transferFrom(_czcore_addy, user, _czcore_addy, depo_USD)
+	let (_usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+        CZCore.erc20_transferFrom(_czcore_addy, _usdc_addy, user, _czcore_addy, depo_USD)
 
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
@@ -108,7 +109,8 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 	let new_lp_issuance = new_lp_total - _lp_total
 
         # transfer the actual USDC tokens to CZCore reserves
-        CZCore.erc20_transferFrom(_czcore_addy, user, _czcore_addy, depo_USD)
+	let (_usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+        CZCore.erc20_transferFrom(_czcore_addy, _usdc_addy, user, _czcore_addy, depo_USD)
 
         # store all new data
         CZCore.set_lp_total(_czcore_addy,new_lp_total)
@@ -158,7 +160,8 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     let new_capital_redeem = _capital_total - new_capital_total
 
     # transfer the actual USDC tokens from CZCore reserves
-    CZCore.erc20_transferFrom(_czcore_addy, _czcore_addy, user, new_capital_redeem)
+    let (_usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    CZCore.erc20_transferFrom(_czcore_addy, _usdc_addy, _czcore_addy, user, new_capital_redeem)
 
     # store all new data
     CZCore.set_lp_total(_czcore_addy,new_lp_total)
