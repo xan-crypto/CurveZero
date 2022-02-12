@@ -52,6 +52,11 @@ end
 func settings_addy() -> (addy : felt):
 end
 
+# addy of the ERC-20 USDC contract
+@storage_var
+func usdc_addy() -> (addy : felt):
+end
+
 # set the relevant addys on deployment, is there a better way to do this?
 # check with starknet devs
 @constructor
@@ -64,7 +69,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     _if_addy : felt,
     _czcore_addy : felt,
     _controller_addy : felt,
-    _settings_addy : felt):
+    _settings_addy : felt,
+    _usdc_addy : felt):
     lp_addy.write(_lp_addy)
     pp_addy.write(_pp_addy)
     cb_addy.write(_cb_addy)
@@ -74,6 +80,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     czcore_addy.write(_czcore_addy)
     controller_addy.write(_controller_addy)
     settings_addy.write(_settings_addy)
+    usdc_addy.write(_usdc_addy)
     return ()
 end
 
@@ -137,5 +144,12 @@ end
 @view
 func get_settings_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
     let (addy) = settings_addy.read()
+    return (addy)
+end
+
+# get the ERC-20 USDC contract addy
+@view
+func get_usdc_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = usdc_addy.read()
     return (addy)
 end
