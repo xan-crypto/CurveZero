@@ -102,8 +102,12 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check
         assert_nn(lp_user-lp_require)
     end
     
+    # transfer the actual CZT tokens to CZCore reserves
+	let (_cztc_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
+    CZCore.erc20_transferFrom(_czcore_addy, _cztc_addy, user, _czcore_addy, cz_require)
+        
     # call czcore to implement LP reduce and CZ transfer
-    CZCore.set_pp_promote(_czcore_addy,user,lp_require,cz_require):
+    CZCore.set_pp_promote(_czcore_addy,user,lp_user,lp_require,cz_require):
     return()
 end
 
