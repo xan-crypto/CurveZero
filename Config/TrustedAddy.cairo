@@ -1,12 +1,12 @@
-# Addys that CZCore accepts
-# this prevents anyone from calling CZCore functions
+# all the addys that the protocol accepts
+# this prevents anyone from calling CZCore functions for example
 
 %lang starknet
 %builtins pedersen range_check
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 ##################################################################
-# all the trusted addys that CZCore will response to
+# all the trusted addys for the protocol
 # addy of the lp contract
 @storage_var
 func lp_addy() -> (addy : felt):
@@ -37,6 +37,11 @@ end
 func if_addy() -> (addy : felt):
 end
 
+# addy of the if contract
+@storage_var
+func cz_addy() -> (addy : felt):
+end
+
 # addy of the controller contract
 @storage_var
 func controller_addy() -> (addy : felt):
@@ -56,6 +61,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     _ll_addy : felt,
     _gt_addy : felt,
     _if_addy : felt,
+    _cz_addy : felt,
     _controller_addy : felt,
     _settings_addy : felt):
     lp_addy.write(_lp_addy)
@@ -64,6 +70,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     ll_addy.write(_ll_addy)
     gt_addy.write(_gt_addy)
     if_addy.write(_if_addy)
+    cz_addy.write(_cz_addy)
     controller_addy.write(_controller_addy)
     settings_addy.write(_settings_addy)
     return ()
@@ -108,6 +115,13 @@ end
 @view
 func get_if_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
     let (addy) = if_addy.read()
+    return (addy)
+end
+
+# return cz addy
+@view
+func get_cz_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = cz_addy.read()
     return (addy)
 end
 
