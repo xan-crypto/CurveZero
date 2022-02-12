@@ -72,3 +72,11 @@ namespace ERC20_USDC:
     func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
     end
 end
+
+##################################################################
+# interface for the settings contract
+@contract_interface
+namespace Settings:
+    func set_pp_token_requirement(lp_require : felt, cz_require : felt):
+    end
+end
