@@ -103,7 +103,7 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check
     end
     
     # transfer the actual CZT tokens to CZCore reserves
-	let (_cztc_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
+    let (_cztc_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
     CZCore.erc20_transferFrom(_czcore_addy, _cztc_addy, user, _czcore_addy, cz_require)
         
     # call czcore to promote and update
@@ -129,7 +129,7 @@ func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_
     end
     
     # transfer the actual CZT tokens to CZCore reserves
-	let (_cztc_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
+    let (_cztc_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
     CZCore.erc20_transferFrom(_czcore_addy, _cztc_addy, _czcore_addy, user, cz_locked)
         
     # get user lp balance
