@@ -43,11 +43,13 @@ Last test
 [pp] = 0x072aa985920b121352e4d9e1e5c1044d4a7b9eb4c9689ddfece08a66de61a6c1
 [cb] = 
 [ll] = 
-[gt]
+[gt] = 
+[if] = 
 [czcore] = 0x0273fb9c74ef7a83af72e5fd9f3b1a6197514f3ce9b89bfdc667cadf45b805c7
 [controller] = 0x04e858e9b8fea34e5d3daefa1eb1dec42a639d8a371c9065ebc033cabedb6862
-[if] = 
 [setttings] = 0x06a7ed17f1808ff436f5c308bf0c32afdfb101f19d20f965b7f113e34ce59484
+[usdc] =
+[czt] =
 [trusted] = 0x07283fce2d2efc1720fbc9b85a0235d442abc5d98f6fff5beddabd90ac7d6acc
 
 # check transactions / testing
