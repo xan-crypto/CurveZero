@@ -18,7 +18,7 @@ end
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(deployer : felt):
     deployer_addy.write(deployer)
     # set initial amounts for becoming pp - NB NB change this later
-    pp_token_requirement.write(5000,5000)
+    pp_token_requirement.write((5000,5000))
     return ()
 end
 
