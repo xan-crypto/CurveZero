@@ -75,6 +75,7 @@ end
 
 ##################################################################
 # need to emit LP events so that we can do reporting / dashboard to monitor system
+# dont need to emit total lp and capital since can do that with history of changes
 # events keeping tracks of what happened
 @event
 func lp_token_change(addy : felt, lp_change : felt, capital_change : felt):
