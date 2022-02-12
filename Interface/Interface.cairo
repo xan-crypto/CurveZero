@@ -55,3 +55,12 @@ namespace Controller:
     func is_paused() -> (addy : felt):
     end
 end
+
+##################################################################
+# need interface to the ERC-20 USDC contract that lives on starknet, this is for USDC deposits and withdrawals
+# use the transfer from function to send the USDC from sender to recipient
+@contract_interface
+namespace ERC20_USDC:
+    func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
+    end
+end
