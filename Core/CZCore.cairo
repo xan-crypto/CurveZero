@@ -237,12 +237,12 @@ end
 # functions to promote and demote and view pp
 # the PP status by user
 @storage_var
-func pp_status(user : felt) -> (lp_token : felt, cz_token : felt, status : felt):
+func pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
 end
 
 # returns the PP status of the given user
 @view
-func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_token : felt, cz_token : felt, status : felt):
+func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
     let (res) = pp_status.read(user=user)
     return (res)
 end
@@ -274,5 +274,25 @@ end
 
 # demote user from pp and return lp and cz tokens
 @external
-func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt):
+func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_locked : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_pp_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    # check if paused
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.is_paused(_controller_addy)
+    with_attr error_message("System is paused."):
+        assert paused = 0
+    end
+
+    # reduce lp balance of user
+    lp_balances.write(user,lp_user+lp_locked)
+    
+    # update the pp status
+    pp_status.write(user=user,lp_token=0,cz_token=0,status=0)
+    return ()
 end
