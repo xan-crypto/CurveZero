@@ -25,32 +25,32 @@ starknet deploy --contract Compiled/InsuranceFund_compiled.json --inputs 0x02e7b
 starknet deploy --contract Compiled/Settings_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 --inputs \
-    0x01653ffc3bfed9630ed5d02651f8c5695cb671d60266b8ecc39ec02066c0e3a5 \
-    0x072aa985920b121352e4d9e1e5c1044d4a7b9eb4c9689ddfece08a66de61a6c1 \
+    0x05158655c252f9493321d40720844f690de8a3051696716d6ba149770f7977d0 \
+    0x05eafd010eb33ae4a38f6c1c1a7eafce9726a7f50db91e937d0f5d8438689b31 \
     0 \
     0 \
     0 \
     0 \
-    0x0273fb9c74ef7a83af72e5fd9f3b1a6197514f3ce9b89bfdc667cadf45b805c7 \
-    0x04e858e9b8fea34e5d3daefa1eb1dec42a639d8a371c9065ebc033cabedb6862 \
-    0x06a7ed17f1808ff436f5c308bf0c32afdfb101f19d20f965b7f113e34ce59484 \
+    0x049037bb641d8b233b5a366198bae273ed2cfa2b346cc239d3f93176d1f9050f \
+    0x01c56e058f9a24c44d136ce86e262b72f80694e8f3c8c085ec67dda1f2ff4469 \
+    0x06b5d434a2a804c6deb713d4fe19583e3201dfb2df7956ba90a983e84c266dce \
     0 \
     0
 
 Last test
 [deployer] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp] = 0x01653ffc3bfed9630ed5d02651f8c5695cb671d60266b8ecc39ec02066c0e3a5
-[pp] = 0x072aa985920b121352e4d9e1e5c1044d4a7b9eb4c9689ddfece08a66de61a6c1
+[lp] = 0x05158655c252f9493321d40720844f690de8a3051696716d6ba149770f7977d0
+[pp] = 0x05eafd010eb33ae4a38f6c1c1a7eafce9726a7f50db91e937d0f5d8438689b31
 [cb] = 
 [ll] = 
 [gt] = 
 [if] = 
-[czcore] = 0x0273fb9c74ef7a83af72e5fd9f3b1a6197514f3ce9b89bfdc667cadf45b805c7
-[controller] = 0x04e858e9b8fea34e5d3daefa1eb1dec42a639d8a371c9065ebc033cabedb6862
-[setttings] = 0x06a7ed17f1808ff436f5c308bf0c32afdfb101f19d20f965b7f113e34ce59484
+[czcore] = 0x049037bb641d8b233b5a366198bae273ed2cfa2b346cc239d3f93176d1f9050f
+[controller] = 0x01c56e058f9a24c44d136ce86e262b72f80694e8f3c8c085ec67dda1f2ff4469
+[setttings] = 0x06b5d434a2a804c6deb713d4fe19583e3201dfb2df7956ba90a983e84c266dce
 [usdc] =
 [czt] =
-[trusted] = 0x07283fce2d2efc1720fbc9b85a0235d442abc5d98f6fff5beddabd90ac7d6acc
+[trusted] = 0x04fd736ed9d94b6677b994d9c0caaf08d964c39221e1826fa4c0eb45d338d2d5
 
 # check transactions / testing
 starknet tx_status --hash [tx_hash]
