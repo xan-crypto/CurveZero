@@ -5,7 +5,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
-from InterfaceAll import (TrustedAddy,CZCore)
+from InterfaceAll import (TrustedAddy,CZCore,Setttings)
 
 ##################################################################
 # addy of the deployer
@@ -78,16 +78,33 @@ end
 
 # promote user to PP
 @external
-func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt):
+func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}():
     
-    # check if status not 1 already
     # Obtain the address of the czcore contract
+    let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
     let (_czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (_pp_status) = CZCore
+    let (_pp_status) = CZCore.get_pp_status(_czcore_addy,user)
     
-# get the current token requirements
-# call czcore to implement LP reduce and CZ transfer
+    # check if status not 1 already - existing pp
+    with_attr error_message("User is already an existing PP."):
+        assert _pp_status[2] = 0
+    end
+    
+    # get the current token requirements
+    let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    let (lp_require,cz_require) = Setttings.get_pp_token_requirement()
+    
+    # check that user has eno LP tokens
+    let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
+    # verify user has sufficient LP tokens 
+    with_attr error_message("Insufficent lp tokens to promote."):
+        assert_nn(lp_user-lp_require)
+    end
+    
+    # call czcore to implement LP reduce and CZ transfer
+    CZCore.set_pp_promote(_czcore_addy,user,lp_require,cz_require):
+    return()
 end
 
 # demote user from PP
