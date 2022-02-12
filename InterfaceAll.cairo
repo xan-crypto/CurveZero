@@ -54,7 +54,7 @@ namespace CZCore:
     end    
     func erc20_transferFrom(sender: felt, recipient: felt, amount: felt):
     end
-    func get_pp_status(user : felt) -> (res : felt):
+    func get_pp_status(user : felt) -> (lp_token : felt, cz_token : felt, res : felt)
     end
     func set_pp_promote(user : felt):
     end
