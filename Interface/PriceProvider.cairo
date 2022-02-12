@@ -93,7 +93,7 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check
     
     # get the current token requirements
     let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    let (lp_require,cz_require) = Setttings.get_pp_token_requirement()
+    let (lp_require,cz_require) = Settings.get_pp_token_requirement()
     
     # check that user has eno LP tokens
     let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
