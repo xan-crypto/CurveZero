@@ -269,7 +269,8 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     lp_balances.write(user,lp_user-lp_require)
     
     # update the pp status
-    pp_status.write(user=user,(lp_require,cz_require,1))
+    let (status) = 1
+    pp_status.write(user=user,(lp_require,cz_require,status))
     return ()
 end
 
