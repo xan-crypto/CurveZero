@@ -5,7 +5,6 @@
 from InterfaceAll import (TrustedAddy)
 
 ##################################################################
-# needed so that deployer can change settings e.g. amount of LP / CZ tokens needed to be a PP
 # addy of the deployer
 @storage_var
 func deployer_addy() -> (addy : felt):
@@ -26,7 +25,7 @@ func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 ##################################################################
-# Trusted addy, only deployer can point Setting contract to Trusted Addy contract
+# Trusted addy, only deployer can point contract to Trusted Addy contract
 # addy of the Trusted Addy contract
 @storage_var
 func trusted_addy() -> (addy : felt):
@@ -53,7 +52,6 @@ end
 
 ##################################################################
 # functions to set the amount of LP CZ tokens needed to become a PP
-# rquired tokens for PP
 @storage_var
 func pp_token_requirement() -> (lp_require : felt, cz_require : felt):
 end
@@ -73,7 +71,7 @@ func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (_trusted_addy) = trusted_addy.read()
     let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
     with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
+        assert caller = _controller_addy
     end
     pp_token_requirement.write(lp_require,cz_require)
     return ()
