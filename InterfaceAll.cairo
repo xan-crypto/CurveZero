@@ -54,7 +54,7 @@ namespace CZCore:
     end
     func set_insolvency_shortfall(amount : felt):
     end    
-    func erc20_transferFrom(sender: felt, recipient: felt, amount: felt):
+    func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     end
     func get_pp_status(user : felt) -> (lp_token : felt, cz_token : felt, status : felt):
     end
