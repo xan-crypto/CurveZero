@@ -74,28 +74,6 @@ func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 end
 
 ##################################################################
-# this is a pass thru function to the ERC-20 CZ contract
-@external
-func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(sender: felt, recipient: felt, amount: Uint256):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    # check if paused
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    let (paused) = Controller.is_paused(_controller_addy)
-    with_attr error_message("System is paused."):
-        assert paused = 0
-    end
-    let (_usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    ERC20_USDC.ERC20_transferFrom(_usdc_addy,sender=sender,recipient=recipient,amount=amount)
-    return ()
-end
-
-##################################################################
 # functions to set and get lp tokens by user
 # the LP token balances by user
 @storage_var
