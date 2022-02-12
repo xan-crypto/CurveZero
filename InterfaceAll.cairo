@@ -56,7 +56,7 @@ namespace CZCore:
     end
     func get_pp_status(user : felt) -> (lp_token : felt, cz_token : felt, status : felt):
     end
-    func set_pp_promote(user : felt):
+    func set_pp_promote(user : felt, lp_require : felt, cz_require : felt):
     end
     func set_pp_demote(user : felt):
     end    
