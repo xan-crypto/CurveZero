@@ -72,8 +72,8 @@ func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_
     let (_czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     
     # check pp status and tokens 
-    let (_pp_status) = CZCore.get_pp_status(_czcore_addy,user)
-    return (_pp_status)
+    let (pp_status) = CZCore.get_pp_status(_czcore_addy,user)
+    return (pp_status)
 end
 
 # promote user to PP
