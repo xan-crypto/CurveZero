@@ -29,32 +29,33 @@ func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 ##################################################################
-# CZCore addy and interface, only deployer can point LP contract to CZCore
-# addy of the CZCore contract
+# Trusted addy, only deployer can point LP contract to Trusted Addy contract
+# addy of the Trusted Addy contract
 @storage_var
-func czcore_addy() -> (addy : felt):
+func trusted_addy() -> (addy : felt):
 end
 
-# get the CZCore contract addy
+# get the trusted contract addy
 @view
-func get_czcore_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
-    let (addy) = czcore_addy.read()
+func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = trusted_addy.read()
     return (addy)
 end
 
-# set the CZCore contract addy
+# set the trusted contract addy
 @external
-func set_czcore_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
+func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
     let (caller) = get_caller_address()
     let (deployer) = deployer_addy.read()
-    with_attr error_message("Only deployer can change the CZCore addy."):
+    with_attr error_message("Only deployer can change the Trusted addy."):
         assert caller = deployer
     end
-    czcore_addy.write(addy)
+    trusted_addy.write(addy)
     return ()
 end
 
-# interface to CZCore contract
+##################################################################
+# interfaces to CZCore contract
 @contract_interface
 namespace CZCore:
     func get_lp_balance(user : felt) -> (res : felt):
@@ -70,6 +71,14 @@ namespace CZCore:
     func set_capital_total(amount : felt):
     end
     func erc20_transferFrom(sender: felt, recipient: felt, amount: Uint256):
+    end
+end
+
+##################################################################
+# interfaces to trusted addy contract
+@contract_interface
+namespace TrustedAddy:
+    func get_czcore_addy() -> (addy : felt):
     end
 end
 
@@ -94,7 +103,8 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 
     # Obtain the address of the account contract & czcore
     let (user) = get_caller_address()
-    let (_czcore_addy) = czcore_addy.read()
+    let (_trusted_addy) = trusted_addy.read()
+    let (_czcore_addy) = TrustedAddy.get_czcore_addy.read(_trusted_addy)
 
     # check for existing lp tokens and capital from czcore
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
@@ -147,7 +157,8 @@ end
 func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(with_LP : felt) -> (usd : felt):
 
     # Obtain the address of the czcore contract
-    let (_czcore_addy) = czcore_addy.read()
+    let (_trusted_addy) = trusted_addy.read()
+    let (_czcore_addy) = TrustedAddy.get_czcore_addy.read(_trusted_addy)
 
     # check for existing lp tokens and capital
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
@@ -195,7 +206,8 @@ end
 func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd : felt):
 
     # Obtain the address of the czcore contract
-    let (_czcore_addy) = czcore_addy.read()
+    let (_trusted_addy) = trusted_addy.read()
+    let (_czcore_addy) = TrustedAddy.get_czcore_addy.read(_trusted_addy)
 
     # check total lp tokens and capital
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
