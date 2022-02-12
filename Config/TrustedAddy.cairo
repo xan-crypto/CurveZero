@@ -37,9 +37,9 @@ end
 func if_addy() -> (addy : felt):
 end
 
-# addy of the if contract
+# addy of the czcore contract
 @storage_var
-func cz_addy() -> (addy : felt):
+func czcore_addy() -> (addy : felt):
 end
 
 # addy of the controller contract
@@ -61,7 +61,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     _ll_addy : felt,
     _gt_addy : felt,
     _if_addy : felt,
-    _cz_addy : felt,
+    _czcore_addy : felt,
     _controller_addy : felt,
     _settings_addy : felt):
     lp_addy.write(_lp_addy)
@@ -70,7 +70,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     ll_addy.write(_ll_addy)
     gt_addy.write(_gt_addy)
     if_addy.write(_if_addy)
-    cz_addy.write(_cz_addy)
+    czcore_addy.write(_czcore_addy)
     controller_addy.write(_controller_addy)
     settings_addy.write(_settings_addy)
     return ()
@@ -118,10 +118,10 @@ func get_if_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     return (addy)
 end
 
-# return cz addy
+# return czcore addy
 @view
-func get_cz_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
-    let (addy) = cz_addy.read()
+func get_czcore_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = czcore_addy.read()
     return (addy)
 end
 
