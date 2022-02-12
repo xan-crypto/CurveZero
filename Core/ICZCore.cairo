@@ -17,9 +17,13 @@ namespace TrustedAddy:
     end
     func get_if_addy() -> (addy : felt):
     end
+    func get_czcore_addy() -> (addy : felt):
+    end
     func get_controller_addy() -> (addy : felt):
     end
     func get_settings_addy() -> (addy : felt):
+    end
+    func get_usdc_addy() -> (addy : felt):
     end
 end
 
