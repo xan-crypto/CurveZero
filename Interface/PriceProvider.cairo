@@ -72,8 +72,8 @@ func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_
     let (_czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     
     # check pp status and tokens 
-    let (pp_status) = CZCore.get_pp_status(_czcore_addy,user)
-    return (pp_status)
+    let (lp_locked,cz_locked,pp_status) = CZCore.get_pp_status(_czcore_addy,user)
+    return (lp_locked,cz_locked,pp_status)
 end
 
 # promote user to PP
@@ -88,12 +88,12 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check
     
     # check if status not 1 already - existing pp
     with_attr error_message("User is already an existing PP."):
-        assert _pp_status = 0
+        assert pp_status = 0
     end
     
     # get the current token requirements
     let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    let (lp_require,cz_require) = Settings.get_pp_token_requirement()
+    let (lp_require,cz_require) = Settings.get_pp_token_requirement(_settings_addy)
     
     # check that user has eno LP tokens
     let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
