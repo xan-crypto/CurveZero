@@ -116,7 +116,7 @@ end
 
 # demote user from PP
 @external
-func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt):
+func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}():
 
     # Obtain the address of the czcore contract
     let (user) = get_caller_address()
