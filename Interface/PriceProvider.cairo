@@ -65,7 +65,7 @@ end
 # PP contract functions
 # view user PP status
 @view
-func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt) -> (lp_token : felt, cz_token : felt, res : felt):
+func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt) -> (lp_token : felt, cz_token : felt, status : felt):
     
     # Obtain the address of the czcore contract
     let (_trusted_addy) = trusted_addy.read()
@@ -76,6 +76,25 @@ func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_
     return (_pp_status)
 end
 
-
 # promote user to PP
+@external
+func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt):
+    
+    # check if status not 1 already
+    # Obtain the address of the czcore contract
+    let (_trusted_addy) = trusted_addy.read()
+    let (_czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (_pp_status) = CZCore
+    
+# get the current token requirements
+# call czcore to implement LP reduce and CZ transfer
+end
+
 # demote user from PP
+func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt):
+
+# check if status not 0 already
+# get the user locked tokens
+# call czcore to implement repay LP and return CZ
+
+end
