@@ -70,7 +70,7 @@ namespace CZCore:
     end
     func set_capital_total(amount : felt):
     end
-    func erc20_transferFrom(sender: felt, recipient: felt, amount: Uint256):
+    func erc20_transferFrom(sender: felt, recipient: felt, amount: felt):
     end
 end
 
@@ -104,7 +104,7 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     # Obtain the address of the account contract & czcore
     let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
-    let (_czcore_addy) = TrustedAddy.get_czcore_addy.read(_trusted_addy)
+    let (_czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
 
     # check for existing lp tokens and capital from czcore
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
@@ -158,7 +158,7 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 
     # Obtain the address of the czcore contract
     let (_trusted_addy) = trusted_addy.read()
-    let (_czcore_addy) = TrustedAddy.get_czcore_addy.read(_trusted_addy)
+    let (_czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
 
     # check for existing lp tokens and capital
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
@@ -207,7 +207,7 @@ func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 
     # Obtain the address of the czcore contract
     let (_trusted_addy) = trusted_addy.read()
-    let (_czcore_addy) = TrustedAddy.get_czcore_addy.read(_trusted_addy)
+    let (_czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
 
     # check total lp tokens and capital
     let (_lp_total) = CZCore.get_lp_total(_czcore_addy)
