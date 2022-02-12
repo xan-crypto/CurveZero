@@ -115,6 +115,7 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check
 end
 
 # demote user from PP
+@external
 func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt):
 
     # Obtain the address of the czcore contract
