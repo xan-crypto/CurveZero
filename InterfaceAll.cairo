@@ -26,7 +26,7 @@ namespace TrustedAddy:
     end
     func get_usdc_addy() -> (addy : felt):
     end
-    func get_cz_addy() -> (addy : felt):
+    func get_czt_addy() -> (addy : felt):
     end
 end
 
