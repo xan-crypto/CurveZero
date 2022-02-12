@@ -8,7 +8,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check)
 
 ##################################################################
-# needed so that deployer can point LP contract to CZCore
+# needed so that deployer can point LP contract to TrustedAddy contract
 # addy of the deployer
 @storage_var
 func deployer_addy() -> (addy : felt):
