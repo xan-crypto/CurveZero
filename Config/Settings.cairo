@@ -55,12 +55,12 @@ end
 ##################################################################
 # functions to set the amount of LP CZ tokens needed to become a PP
 @storage_var
-func pp_token_requirement() -> (lp_require : felt, cz_require : felt):
+func pp_token_requirement() -> (require : (felt, felt)):
 end
 
 # returns the current requirement to become PP
 @view
-func get_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (lp_require : felt, cz_require : felt):
+func get_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (require : (felt, felt)):
     let (res) = pp_token_requirement.read()
     return (res)
 end
@@ -75,6 +75,6 @@ func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     with_attr error_message("Not authorised caller."):
         assert caller = _controller_addy
     end
-    pp_token_requirement.write(lp_require,cz_require)
+    pp_token_requirement.write((lp_require,cz_require))
     return ()
 end
