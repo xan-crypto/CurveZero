@@ -4,7 +4,7 @@
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
-from InterfaceAll import (TrustedAddy,Controller,ERC20_USDC)
+from InterfaceAll import (TrustedAddy,Controller,ERC20)
 
 ##################################################################
 # addy of the deployer
@@ -237,7 +237,7 @@ end
 # functions to promote and demote and view pp
 # the PP status by user
 @storage_var
-func pp_status(user : felt) -> (status : (felt, felt, felt):
+func pp_status(user : felt) -> (status : (felt, felt, felt)):
 end
 
 # returns the PP status of the given user
