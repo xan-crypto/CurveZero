@@ -1,3 +1,8 @@
+# new approach
+# deploy all contracts but TrustedAddy goes last
+# update all contracts to point to TrustedAddy
+
+
 # deploy LP contract
 starknet-compile Interface/LiquidityProvider.cairo     --output Compiled/LiquidityProvider_compiled.json     --abi Compiled/LiquidityProvider_abi.json
 starknet deploy --contract Compiled/LiquidityProvider_compiled.json --inputs [deployer addy]
