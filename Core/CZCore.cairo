@@ -237,12 +237,12 @@ end
 # functions to promote and demote and view pp
 # the PP status by user
 @storage_var
-func pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
+func pp_status(user : felt) -> (status : (felt, felt, felt):
 end
 
 # returns the PP status of the given user
 @view
-func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
+func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (status: (felt, felt, felt)):
     let (res) = pp_status.read(user=user)
     return (res)
 end
