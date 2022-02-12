@@ -110,7 +110,7 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check
     CZCore.set_pp_promote(_czcore_addy,user,lp_user,lp_require,cz_require)
     
     # event
-    lp_token_change.emit(addy=user,pp_status=1,lp_change=lp_require,cz_change=cz_require)  
+    pp_token_change.emit(addy=user,pp_status=1,lp_change=lp_require,cz_change=cz_require)  
     return()
 end
 
@@ -139,6 +139,6 @@ func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_
     CZCore.set_pp_demote(_czcore_addy,user,lp_user,lp_locked)
     
     # event
-    lp_token_change.emit(addy=user,pp_status=0,lp_change=lp_locked,cz_change=cz_locked)  
+    pp_token_change.emit(addy=user,pp_status=0,lp_change=lp_locked,cz_change=cz_locked)  
     return()
 end
