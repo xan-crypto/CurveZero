@@ -83,9 +83,9 @@ end
 
 # returns the balance of the given user
 @view
-func get_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (res : (felt,felt)):
+func get_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_user : felt, lockup: felt):
     let (res) = lp_balances.read(user=user)
-    return (res)
+    return (res[0],res[1])
 end
 
 # set the balance of the given user
@@ -243,9 +243,9 @@ end
 
 # returns the PP status of the given user
 @view
-func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (status: (felt, felt, felt)):
+func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
     let (res) = pp_status.read(user=user)
-    return (res)
+    return (res[0],res[1],res[2])
 end
 
 # promote user to pp and lock lp and cz tokens
@@ -275,7 +275,7 @@ end
 
 # demote user from pp and return lp and cz tokens
 @external
-func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_locked : felt,lockup:felt):
+func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_locked : felt, lockup : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
