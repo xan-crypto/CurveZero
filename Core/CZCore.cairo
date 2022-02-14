@@ -314,7 +314,7 @@ end
 
 # set loan terms
 @external
-func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, refinance : felt):
+func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, has_loan : felt, amount : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, refinance : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -331,6 +331,6 @@ func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
             assert paused = 0
         end
     end
-    get_cb_loan.write(user,(1,amount,collateral,start_ts,end_ts,rate))
+    get_cb_loan.write(user,(has_loan,amount,collateral,start_ts,end_ts,rate))
     return ()
 end
