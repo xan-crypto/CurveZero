@@ -39,22 +39,12 @@ namespace CZCore:
     end
     func set_lp_balance(user : felt, lp_user : felt, lockup : felt):
     end
-    func get_lp_total() -> (res : felt):
+    func get_cz_state() -> (res : (felt, felt, felt, felt)):
     end
     func set_lp_total(amount : felt):
     end
-    func get_capital_total() -> (res : felt):
-    end
     func set_capital_total(amount : felt):
     end
-    func get_loan_total() -> (res : felt):
-    end
-    func set_loan_total(amount : felt):
-    end
-    func get_insolvency_shortfall() -> (res : felt):
-    end
-    func set_insolvency_shortfall(amount : felt):
-    end    
     func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     end
     func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
