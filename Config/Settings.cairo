@@ -65,9 +65,9 @@ end
 
 # returns the current requirement to become PP
 @view
-func get_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (require : (felt, felt)):
+func get_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (lp_require : felt, cz_require : felt):
     let (res) = pp_token_requirement.read()
-    return (res)
+    return (res[0],res[1])
 end
 
 # set new token requirement to become PP
