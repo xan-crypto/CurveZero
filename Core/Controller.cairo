@@ -103,3 +103,17 @@ func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     Settings.set_pp_token_requirement(_settings_addy,lp_require=lp_require,cz_require=cz_require)
     return ()
 end
+
+# set lock up period
+@external
+func set_lockup_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lockup : felt):
+    let (caller) = get_caller_address()
+    let (deployer) = deployer_addy.read()
+    with_attr error_message("Only deployer can pause system."):
+        assert caller = deployer
+    end
+    let (_trusted_addy) = trusted_addy.read()
+    let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    Settings.set_lockup_period(_settings_addy,lockup =lockup)
+    return ()
+end
