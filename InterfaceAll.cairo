@@ -92,4 +92,8 @@ namespace Settings:
     end    
     func set_pp_token_requirement(lp_require : felt, cz_require : felt):
     end
+    func get_lockup_period() -> (lockup : felt):
+    end
+    func set_lockup_period(lockup : felt):
+    end
 end
