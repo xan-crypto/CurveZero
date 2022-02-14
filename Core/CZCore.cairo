@@ -248,9 +248,10 @@ func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     return (res[0],res[1],res[2])
 end
 
-# promote user to pp and lock lp and cz tokens
+# promote / demote pp
 @external
-func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_require : felt, cz_require : felt, lockup:felt):
+func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        user : felt, lp_user : felt, lp_amount : felt, cz_amount : felt, lockup : felt, promote : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -265,36 +266,19 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         assert paused = 0
     end
 
-    # reduce lp balance of user
-    lp_balances.write(user,(lp_user-lp_require,lockup))
-    
-    # update the pp status
-    pp_status.write(user,(lp_require,cz_require,1))
-    return ()
-end
-
-# demote user from pp and return lp and cz tokens
-@external
-func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_locked : felt, lockup : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_pp_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    # check if paused
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    let (paused) = Controller.is_paused(_controller_addy)
-    with_attr error_message("System is paused."):
-        assert paused = 0
-    end
-
-    # reduce lp balance of user
-    lp_balances.write(user,(lp_user+lp_locked,lockup))
-    
-    # update the pp status
-    pp_status.write(user,(0,0,0))
+    if promote == 1:
+        # promote user to pp and lock lp and cz tokens
+        # reduce lp balance of user
+        lp_balances.write(user, (lp_user - lp_amount, lockup))
+        # update the pp status
+        pp_status.write(user, (lp_amount, cz_amount, 1))
+    else:
+        # demote user from pp and return lp and cz tokens
+        # reduce lp balance of user
+        lp_balances.write(user, (lp_user + lp_amount, lockup))
+        # update the pp status
+        pp_status.write(user, (0, 0, 0))    
+    end    
     return ()
 end
 
