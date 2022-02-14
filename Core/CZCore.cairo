@@ -250,7 +250,7 @@ end
 
 # promote user to pp and lock lp and cz tokens
 @external
-func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_require : felt, cz_require : felt):
+func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_require : felt, cz_require : felt, lockup:felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -266,7 +266,7 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     end
 
     # reduce lp balance of user
-    lp_balances.write(user,lp_user-lp_require)
+    lp_balances.write(user,(lp_user-lp_require,lockup))
     
     # update the pp status
     pp_status.write(user,(lp_require,cz_require,1))
@@ -275,7 +275,7 @@ end
 
 # demote user from pp and return lp and cz tokens
 @external
-func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_locked : felt):
+func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, lp_user : felt, lp_locked : felt,lockup:felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -291,7 +291,7 @@ func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     end
 
     # reduce lp balance of user
-    lp_balances.write(user,lp_user+lp_locked)
+    lp_balances.write(user,(lp_user+lp_locked,lockup))
     
     # update the pp status
     pp_status.write(user,(0,0,0))
