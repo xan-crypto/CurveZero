@@ -19,6 +19,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     deployer_addy.write(deployer)
     # set initial amounts for becoming pp - NB NB change this later
     pp_token_requirement.write((5000,5000))
+    # 7 day lockup period
+    lockup_period.write(604800)
     return ()
 end
 
@@ -79,5 +81,32 @@ func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         assert caller = _controller_addy
     end
     pp_token_requirement.write((lp_require,cz_require))
+    return ()
+end
+
+##################################################################
+# lock up period for both LP capital in/out and GT stake/unstake
+@storage_var
+func lockup_period() -> (lockup : felt):
+end
+
+# returns the current requirement to become PP
+@view
+func get_lockup_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (lockup : felt):
+    let (res) = lockup_period.read()
+    return (res)
+end
+
+# set new lockup period
+@external
+func set_lockup_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lockup : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = _controller_addy
+    end
+    lockup_period.write(lockup)
     return ()
 end
