@@ -86,7 +86,7 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let new_capital_total = _capital_total + depo_USD
 
     # lock up
-    let (_setting_addy) = TrustedAddy.get_setting_addy(_trusted_addy)
+    let (_setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (lockup_period) = Settings.get_lockup_period(_setting_addy)
     let (block_ts) = get_block_timestamp()
 
