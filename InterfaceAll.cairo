@@ -35,9 +35,9 @@ end
 # interfaces to CZCore contract
 @contract_interface
 namespace CZCore:
-    func get_lp_balance(user : felt) -> (res : felt):
+    func get_lp_balance(user : felt) -> (res : (felt,felt)):
     end
-    func set_lp_balance(user : felt, amount : felt):
+    func set_lp_balance(user : felt, amount : felt, lockup : felt):
     end
     func get_lp_total() -> (res : felt):
     end
