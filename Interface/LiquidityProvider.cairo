@@ -6,7 +6,8 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check)
-from InterfaceAll import (TrustedAddy,CZCore)
+from starkware.starknet.common.syscalls import get_block_timestamp
+from InterfaceAll import (TrustedAddy,CZCore,Settings)
 
 ##################################################################
 # addy of the deployer
@@ -84,6 +85,11 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     # calc new total capital
     let new_capital_total = _capital_total + depo_USD
 
+    # lock up
+    let (_setting_addy) = TrustedAddy.get_setting_addy(_trusted_addy)
+    let (lockup_period) = Settings.get_lockup_period(_setting_addy)
+    let (block_ts) = get_block_timestamp()
+
     # calc new lp total and new lp issuance
     if _lp_total == 0:
         let new_lp_total = depo_USD
@@ -98,8 +104,8 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         CZCore.set_capital_total(_czcore_addy,new_capital_total)
         
 	# mint the lp token
-	let (res) = CZCore.get_lp_balance(_czcore_addy,user)
-        CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
+	let (lp_user,lockup) = CZCore.get_lp_balance(_czcore_addy,user)
+        CZCore.set_lp_balance(_czcore_addy,user, lp_user + new_lp_issuance,block_ts + lockup_period)
 
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
@@ -117,8 +123,8 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         CZCore.set_capital_total(_czcore_addy,new_capital_total)
 	
 	# mint the lp token
-        let (res) = CZCore.get_lp_balance(_czcore_addy,user)
-        CZCore.set_lp_balance(_czcore_addy,user, res + new_lp_issuance)
+	let (lp_user,lockup) = CZCore.get_lp_balance(_czcore_addy,user)
+        CZCore.set_lp_balance(_czcore_addy,user, lp_user + new_lp_issuance,block_ts + lockup_period)
 
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
@@ -145,7 +151,13 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 
     # obtain the address of the account contract and user lp balance.
     let (user) = get_caller_address()
-    let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
+    let (lp_user,lockup) = CZCore.get_lp_balance(_czcore_addy,user)
+    let (block_ts) = get_block_timestamp()
+    
+    # can only withdraw if not in lock up
+    with_attr error_message("Cant withdraw in lock up period."):
+        assert_nn(block_ts-lockup)
+    end
 
     # verify user has sufficient LP tokens to redeem
     with_attr error_message("Insufficent lp tokens to redeem."):
@@ -189,13 +201,13 @@ func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (_capital_total) = CZCore.get_capital_total(_czcore_addy)
 
     # Obtain the user lp tokens
-    let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
-
+    let (lp_user,lockup) = CZCore.get_lp_balance(_czcore_addy,user)
+	
     # calc user capital to return
     if lp_user == 0:
-    	return (0)
+    	return (0,0)
     else:
         let (capital_user, _) = unsigned_div_rem(lp_user*_capital_total,_lp_total)
-	return (capital_user)
+	return (capital_user,lockup)
     end
 end
