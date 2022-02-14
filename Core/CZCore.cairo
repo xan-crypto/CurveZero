@@ -250,7 +250,7 @@ end
 
 # promote / demote pp
 @external
-func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func set_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         user : felt, lp_user : felt, lp_amount : felt, cz_amount : felt, lockup : felt, promote : felt):
     # check authorised caller
     let (caller) = get_caller_address()
