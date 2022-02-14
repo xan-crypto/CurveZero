@@ -96,7 +96,7 @@ func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check
     let (lp_require,cz_require) = Settings.get_pp_token_requirement(_settings_addy)
     
     # check that user has eno LP tokens
-    let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
+    let (lp_user,lockup) = CZCore.get_lp_balance(_czcore_addy,user)
     # verify user has sufficient LP tokens 
     with_attr error_message("Insufficent lp tokens to promote."):
         assert_nn(lp_user-lp_require)
@@ -134,7 +134,7 @@ func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_
     # CZCore.erc20_transferFrom(_czcore_addy, _cztc_addy, _czcore_addy, user, cz_locked)
         
     # get user lp balance
-    let (lp_user) = CZCore.get_lp_balance(_czcore_addy,user)
+    let (lp_user,lockup) = CZCore.get_lp_balance(_czcore_addy,user)
     
     # call czcore to demote and update
     CZCore.set_pp_demote(_czcore_addy,user,lp_user,lp_locked)
