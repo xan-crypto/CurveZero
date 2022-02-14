@@ -180,7 +180,6 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     CZCore.set_capital_total(_czcore_addy,new_capital_total)
     
     # burn lp tokens
-    let (lp_user,lockup) = CZCore.get_lp_balance(_czcore_addy,user)
     CZCore.set_lp_balance(_czcore_addy,user, lp_user - with_LP,lockup)
     
     # event
