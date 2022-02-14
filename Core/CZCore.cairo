@@ -124,7 +124,7 @@ end
 
 # set the lp total
 @external
-func set_lp_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
+func set_lp_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_amount : felt, capital_amount : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -140,29 +140,7 @@ func set_lp_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     end
     # read old cz state
     let (lp_total,capital_total,loan_total,insolvency_shortfall) = cz_state.read()
-    cz_state.write(amount,capital_total,loan_total,insolvency_shortfall)
-    return ()
-end
-
-# set the capital total
-@external
-func set_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    # check if paused
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    let (paused) = Controller.is_paused(_controller_addy)
-    with_attr error_message("System is paused."):
-        assert paused = 0
-    end
-    # read old cz state
-    let (lp_total,capital_total,loan_total,insolvency_shortfall) = cz_state.read()
-    cz_state.write(lp_total,amount,loan_total,insolvency_shortfall)
+    cz_state.write(lp_amount,capital_amount,loan_total,insolvency_shortfall)
     return ()
 end
 
