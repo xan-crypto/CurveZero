@@ -13,13 +13,8 @@ https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY
 ![image](https://user-images.githubusercontent.com/62293102/153413152-6fad8e98-5e6f-4e28-b8a1-9661fc617d1d.png)
 
 **Progress**:
-
 Protocol (cairo) - 20%
-
 Service (python) - 0%
-
 Website design - 0%
-
 Website integration - 0%
-
 Community building - 0%
