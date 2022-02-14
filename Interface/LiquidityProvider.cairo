@@ -190,7 +190,7 @@ end
 
 # whats my LP tokens worth
 @view
-func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd : felt):
+func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd : felt,lockup:felt):
 
     # Obtain the address of the czcore contract
     let (_trusted_addy) = trusted_addy.read()
