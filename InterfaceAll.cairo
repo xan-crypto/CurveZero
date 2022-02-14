@@ -71,8 +71,6 @@ end
 namespace Controller:
     func is_paused() -> (addy : felt):
     end
-    func set_pp_token_requirement(lp_require : felt, cz_require : felt):
-    end
 end
 
 ##################################################################
