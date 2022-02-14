@@ -104,7 +104,7 @@ func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     with_attr error_message("System is paused."):
         assert paused = 0
     end
-    lp_balances.write(user,amount,lockup)
+    lp_balances.write(user,(amount,lockup))
     return ()
 end
 
