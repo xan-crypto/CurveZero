@@ -78,19 +78,19 @@ end
 # functions to set and get lp tokens by user
 # the LP token balances by user
 @storage_var
-func lp_balances(user : felt) -> (res : felt):
+func lp_balances(user : felt) -> (res : (felt,felt)):
 end
 
 # returns the balance of the given user
 @view
-func get_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (res : felt):
+func get_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (res : (felt,felt)):
     let (res) = lp_balances.read(user=user)
     return (res)
 end
 
 # set the balance of the given user
 @external
-func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt):
+func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt, lockup : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -104,7 +104,7 @@ func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     with_attr error_message("System is paused."):
         assert paused = 0
     end
-    lp_balances.write(user,amount)
+    lp_balances.write(user,amount,lockup)
     return ()
 end
 
