@@ -59,10 +59,8 @@ namespace CZCore:
     end
     func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
     end
-    func set_pp_promote(user : felt, lp_user : felt, lp_require : felt, cz_require : felt, lockup : felt):
-    end
-    func set_pp_demote(user : felt, lp_user : felt, lp_locked : felt, lockup : felt):
-    end    
+    func set_pp_promote(user : felt, lp_user : felt, lp_amount : felt, cz_amount : felt, lockup : felt, promote : felt):
+    end  
 end
 
 ##################################################################
