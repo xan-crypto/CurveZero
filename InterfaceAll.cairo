@@ -41,9 +41,7 @@ namespace CZCore:
     end
     func get_cz_state() -> (res : (felt, felt, felt, felt)):
     end
-    func set_lp_total(amount : felt):
-    end
-    func set_capital_total(amount : felt):
+    func set_lp_capital_total(lp_amount : felt, capital_amount : felt):
     end
     func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     end
