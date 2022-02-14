@@ -37,7 +37,7 @@ end
 namespace CZCore:
     func get_lp_balance(user : felt) -> (lp_user : felt, lockup: felt):
     end
-    func set_lp_balance(user : felt, amount : felt, lockup : felt):
+    func set_lp_balance(user : felt, lp_user : felt, lockup : felt):
     end
     func get_lp_total() -> (res : felt):
     end
