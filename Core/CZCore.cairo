@@ -109,19 +109,20 @@ func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 end
 
 ##################################################################
-# total LP tokens in issue
+# cz state
 @storage_var
-func lp_total() -> (res : felt):
+func cz_state() -> (res : (felt, felt, felt, felt)):
 end
 
-# returns the total LP tokens in issue
+# returns the cz state
 @view
-func get_lp_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
-    let (res) = lp_total.read()
-    return (res)
+func get_cz_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        lp_total : felt, capital_total : felt, loan_total : felt, insolvency_shortfall : felt):
+    let (res) = cz_state.read()
+    return (res[0],res[1],res[2],res[3])
 end
 
-# set the LP total
+# set the lp total
 @external
 func set_lp_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
     # check authorised caller
@@ -131,30 +132,19 @@ func set_lp_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
-     # check if paused
+    # check if paused
     let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
     let (paused) = Controller.is_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
-    lp_total.write(amount)
+    # read old cz state
+    let (lp_total,capital_total,loan_total,insolvency_shortfall) = cz_state.read()
+    cz_state.write(amount,capital_total,loan_total,insolvency_shortfall)
     return ()
 end
 
-##################################################################
-# Total USDC capital
-@storage_var
-func capital_total() -> (res : felt):
-end
-
-# returns the total USDC capital
-@view
-func get_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
-    let (res) = capital_total.read()
-    return (res)
-end
-
-# set the USD capital total
+# set the capital total
 @external
 func set_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
     # check authorised caller
@@ -170,67 +160,9 @@ func set_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     with_attr error_message("System is paused."):
         assert paused = 0
     end
-    capital_total.write(amount)
-    return ()
-end
-
-##################################################################
-# Total USDC loans
-@storage_var
-func loan_total() -> (res : felt):
-end
-
-# returns the total USDC loans
-@view
-func get_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
-    let (res) = loan_total.read()
-    return (res)
-end
-
-# set the USD loan total
-@external
-func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    # check if paused
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    let (paused) = Controller.is_paused(_controller_addy)
-    with_attr error_message("System is paused."):
-        assert paused = 0
-    end
-    loan_total.write(amount)
-    return ()
-end
-
-##################################################################
-# Insolvency shortfall
-@storage_var
-func insolvency_shortfall() -> (res : felt):
-end
-
-# returns the insolvency shortfall
-@view
-func get_insolvency_shortfall{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
-    let (res) = insolvency_shortfall.read()
-    return (res)
-end
-
-# set the insolvency_shortfall
-@external
-func set_insolvency_shortfall{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(amount : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    insolvency_shortfall.write(amount)
+    # read old cz state
+    let (lp_total,capital_total,loan_total,insolvency_shortfall) = cz_state.read()
+    cz_state.write(lp_total,amount,loan_total,insolvency_shortfall)
     return ()
 end
 
