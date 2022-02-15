@@ -160,21 +160,7 @@ func set_min_max_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return ()
 end
 
-# set min and max loan sizes
-@external
-func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(start : felt, stop : felt):
-    let (caller) = get_caller_address()
-    let (deployer) = deployer_addy.read()
-    with_attr error_message("Only deployer can set accrued interest split."):
-        assert caller = deployer
-    end
-    let (_trusted_addy) = trusted_addy.read()
-    let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    Settings.set_utilization(_settings_addy,start=start,stop=stop)
-    return ()
-end
-
-# set min and max loan sizes
+# set level below which we make loans and above which we stop loans
 @external
 func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(start : felt, stop : felt):
     let (caller) = get_caller_address()
