@@ -84,4 +84,20 @@ namespace Settings:
     end
     func set_lockup_period(lockup : felt):
     end
+    func get_origination_fee() -> (fee : felt, pp_split : felt, if_split : felt):
+    end
+    func set_origination_fee(fee : felt, pp_split : felt, if_split : felt):
+    end    
+    func get_accrued_interest_split() -> (lp_split : felt, if_split : felt, gt_split : felt):
+    end
+    func set_accrued_interest_split(lp_split : felt, if_split : felt, gt_split : felt):
+    end     
+    func get_min_max_loan() -> (min_loan : felt, max_loan : felt):
+    end
+    func set_min_max_loan(min_loan : felt, max_loan : felt):
+    end       
+    func get_utilization() -> (start : felt, stop : felt):
+    end
+    func set_utilization(start : felt, stop : felt):
+    end       
 end
