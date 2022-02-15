@@ -131,3 +131,17 @@ func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     Settings.set_origination_fee(_settings_addy,fee=fee,pp_split=pp_split,if_split=if_split)
     return ()
 end
+
+# set accrued interest splits
+@external
+func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_split : felt, if_split : felt, gt_split : felt):
+    let (caller) = get_caller_address()
+    let (deployer) = deployer_addy.read()
+    with_attr error_message("Only deployer can set accrued interest split."):
+        assert caller = deployer
+    end
+    let (_trusted_addy) = trusted_addy.read()
+    let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    Settings.set_accrued_interest_split(_settings_addy,lp_split=lp_split,if_split=if_split,gt_split=gt_split)
+    return ()
+end
