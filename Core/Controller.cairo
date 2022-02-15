@@ -61,7 +61,7 @@ end
 
 # return paused = 1 unpaused = 0
 @view
-func is_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
+func get_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
     let (res) = paused.read()
     return (res)
 end
@@ -115,5 +115,19 @@ func set_lockup_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (_trusted_addy) = trusted_addy.read()
     let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     Settings.set_lockup_period(_settings_addy,lockup =lockup)
+    return ()
+end
+
+# set origination fee and split
+@external
+func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt, pp_split : felt, if_split : felt):
+    let (caller) = get_caller_address()
+    let (deployer) = deployer_addy.read()
+    with_attr error_message("Only deployer can set origination fee and split."):
+        assert caller = deployer
+    end
+    let (_trusted_addy) = trusted_addy.read()
+    let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    Settings.set_origination_fee(_settings_addy,fee=fee,pp_split=pp_split,if_split=if_split)
     return ()
 end
