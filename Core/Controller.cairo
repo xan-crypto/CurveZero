@@ -173,3 +173,31 @@ func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     Settings.set_utilization(_settings_addy,start=start,stop=stop)
     return ()
 end
+
+# set min and max loan sizes
+@external
+func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(start : felt, stop : felt):
+    let (caller) = get_caller_address()
+    let (deployer) = deployer_addy.read()
+    with_attr error_message("Only deployer can set accrued interest split."):
+        assert caller = deployer
+    end
+    let (_trusted_addy) = trusted_addy.read()
+    let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    Settings.set_utilization(_settings_addy,start=start,stop=stop)
+    return ()
+end
+
+# set min PP required for acceptable pricing request
+@external
+func set_min_pp_accepted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_pp : felt):
+    let (caller) = get_caller_address()
+    let (deployer) = deployer_addy.read()
+    with_attr error_message("Only deployer can set min PP accepted."):
+        assert caller = deployer
+    end
+    let (_trusted_addy) = trusted_addy.read()
+    let (_settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    Settings.set_min_pp_accepted(_settings_addy,min_pp=min_pp)
+    return ()
+end
