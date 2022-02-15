@@ -139,8 +139,8 @@ func set_lp_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
         assert paused = 0
     end
     # read old cz state
-    let (lp_total,capital_total,loan_total,insolvency_shortfall) = cz_state.read()
-    cz_state.write(lp_amount,capital_amount,loan_total,insolvency_shortfall)
+    let (res) = cz_state.read()
+    cz_state.write((lp_amount,capital_amount,res[2],res[3]))
     return ()
 end
 
@@ -196,7 +196,7 @@ end
 # functions to create loans, repay laons and refinance loans
 # the CB loans by user
 @storage_var
-func cb_loan(user : felt) -> (loan : (felt, felt, felt, felt, felt, felt)):
+func cb_loan(user : felt) -> (res : (felt, felt, felt, felt, felt, felt)):
 end
 
 # returns the CB loan of the given user
@@ -224,7 +224,10 @@ func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
         with_attr error_message("System is paused."):
             assert paused = 0
         end
-    end
-    get_cb_loan.write(user,(has_loan,amount,collateral,start_ts,end_ts,rate))
-    return ()
+	cb_loan.write(user,(has_loan,amount,collateral,start_ts,end_ts,rate))
+        return()
+    else:
+	cb_loan.write(user,(has_loan,amount,collateral,start_ts,end_ts,rate))
+        return()
+    end		
 end
