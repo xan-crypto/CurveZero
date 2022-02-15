@@ -218,3 +218,30 @@ func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     utilization.write((start,stop))
     return ()
 end
+
+##################################################################
+# min number of PPs for pricing
+@storage_var
+func min_pp_accepted() -> (res : felt):
+end
+
+# return min number of PPs for pricing request
+@view
+func get_min_pp_accepted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (min_pp : felt):
+    let (res) = min_pp.read()
+    return (res)
+end
+
+# set min PP required for acceptable pricing request
+@external
+func set_min_pp_accepted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_pp : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = _controller_addy
+    end
+    min_pp_accepted.write(min_pp)
+    return ()
+end
