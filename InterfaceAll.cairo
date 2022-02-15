@@ -59,7 +59,7 @@ end
 # interface to controller contract
 @contract_interface
 namespace Controller:
-    func is_paused() -> (addy : felt):
+    func get_paused() -> (addy : felt):
     end
 end
 
