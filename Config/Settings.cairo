@@ -228,7 +228,7 @@ end
 # return min number of PPs for pricing request
 @view
 func get_min_pp_accepted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (min_pp : felt):
-    let (res) = min_pp.read()
+    let (res) = min_pp_accepted.read()
     return (res)
 end
 
