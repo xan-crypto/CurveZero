@@ -110,3 +110,30 @@ func set_lockup_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     lockup_period.write(lockup)
     return ()
 end
+
+##################################################################
+# origination fee and split btw PP and IF
+@storage_var
+func origination_fee() -> (res : (felt,felt,felt)):
+end
+
+# return origination fee and split
+@view
+func get_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (fee : felt, pp_split : felt, if_split : felt):
+    let (res) = get_origination_fee.read()
+    return (res[0],res[1],res[2])
+end
+
+# set origination fee and split
+@external
+func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt, pp_split : felt, if_split : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = _controller_addy
+    end
+    origination_fee.write(fee,pp_split,if_split)
+    return ()
+end
