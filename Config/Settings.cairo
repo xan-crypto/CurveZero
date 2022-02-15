@@ -134,7 +134,7 @@ func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     with_attr error_message("Not authorised caller."):
         assert caller = _controller_addy
     end
-    origination_fee.write(fee,pp_split,if_split)
+    origination_fee.write((fee,pp_split,if_split))
     return ()
 end
 
@@ -161,7 +161,7 @@ func set_accrued_interest_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     with_attr error_message("Not authorised caller."):
         assert caller = _controller_addy
     end
-    accrued_interest_split.write(lp_split,if_split,gt_split)
+    accrued_interest_split.write((lp_split,if_split,gt_split))
     return ()
 end
 
@@ -188,7 +188,7 @@ func set_min_max_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     with_attr error_message("Not authorised caller."):
         assert caller = _controller_addy
     end
-    min_max_loan.write(min_loan,max_loan)
+    min_max_loan.write((min_loan,max_loan))
     return ()
 end
 
@@ -215,6 +215,6 @@ func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     with_attr error_message("Not authorised caller."):
         assert caller = _controller_addy
     end
-    utilization.write(start,stop)
+    utilization.write((start,stop))
     return ()
 end
