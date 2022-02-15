@@ -164,3 +164,57 @@ func set_accrued_interest_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     accrued_interest_split.write(lp_split,if_split,gt_split)
     return ()
 end
+
+##################################################################
+# min loan and max loan amounts
+@storage_var
+func min_max_loan() -> (res : (felt,felt)):
+end
+
+# return min and max allowable loan size
+@view
+func get_min_max_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (min_loan : felt, max_loan : felt):
+    let (res) = min_max_loan.read()
+    return (res[0],res[1])
+end
+
+# set min and max loan size
+@external
+func set_min_max_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_loan : felt, max_loan : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = _controller_addy
+    end
+    min_max_loan.write(min_loan,max_loan)
+    return ()
+end
+
+##################################################################
+# utilization start and stop levels
+@storage_var
+func utilization() -> (res : (felt,felt)):
+end
+
+# return start and stop utilization levels
+@view
+func get_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (start : felt, stop : felt):
+    let (res) = utilization.read()
+    return (res[0],res[1])
+end
+
+# set start and stop utilization levels for loan provision
+@external
+func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(start : felt, stop : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = _controller_addy
+    end
+    utilization.write(start,stop)
+    return ()
+end
