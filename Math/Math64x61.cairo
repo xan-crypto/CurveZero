@@ -126,7 +126,6 @@ func Math64x61_pow_frac {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     let (ln_x) = Math64x61_ln(x)
     let (y_ln_x) = Math64x61_mul(y,ln_x)
     let (res) = Math64x61_exp(y_ln_x)
-    Math64x61_assert64x61(res)
     return (res)
 end
 
