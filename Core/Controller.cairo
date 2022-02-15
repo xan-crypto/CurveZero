@@ -134,7 +134,7 @@ end
 
 # set accrued interest splits
 @external
-func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_split : felt, if_split : felt, gt_split : felt):
+func set_accrued_interest_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_split : felt, if_split : felt, gt_split : felt):
     let (caller) = get_caller_address()
     let (deployer) = deployer_addy.read()
     with_attr error_message("Only deployer can set accrued interest split."):
