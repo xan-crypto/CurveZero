@@ -8,6 +8,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check)
 from starkware.starknet.common.syscalls import get_block_timestamp
 from InterfaceAll import (TrustedAddy,CZCore,Settings)
+from Math.Math64x61 import (Math64x61_mul,Math64x61_div,Math64x61_pow,Math64x61_sqrt,Math64x61_exp,Math64x61_ln)
 
 ##################################################################
 # addy of the deployer
