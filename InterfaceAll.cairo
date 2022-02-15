@@ -100,4 +100,8 @@ namespace Settings:
     end
     func set_utilization(start : felt, stop : felt):
     end       
+    func get_min_pp_accepted() -> (min_pp : felt):
+    end
+    func set_min_pp_accepted(min_pp : felt):
+    end       
 end
