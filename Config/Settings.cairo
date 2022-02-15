@@ -120,7 +120,7 @@ end
 # return origination fee and split
 @view
 func get_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (fee : felt, pp_split : felt, if_split : felt):
-    let (res) = get_origination_fee.read()
+    let (res) = origination_fee.read()
     return (res[0],res[1],res[2])
 end
 
