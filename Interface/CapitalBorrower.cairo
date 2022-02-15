@@ -78,5 +78,8 @@ end
 # repay a loan
 # refinance a loan
 
-
+@view
+func test{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    return(Math64x61_FRACT_PART)
+end
 
