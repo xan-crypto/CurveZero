@@ -201,14 +201,14 @@ end
 
 # returns the CB loan of the given user
 @view
-func get_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (has_loan : felt, amount : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt):
+func get_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt):
     let (res) = cb_loan.read(user=user)
     return (res[0], res[1], res[2], res[3], res[4], res[5])
 end
 
 # set loan terms
 @external
-func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, has_loan : felt, amount : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, refinance : felt):
+func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, refinance : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -224,10 +224,10 @@ func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
         with_attr error_message("System is paused."):
             assert paused = 0
         end
-	cb_loan.write(user,(has_loan,amount,collateral,start_ts,end_ts,rate))
+	cb_loan.write(user,(has_loan,notional,collateral,start_ts,end_ts,rate))
         return()
     else:
-	cb_loan.write(user,(has_loan,amount,collateral,start_ts,end_ts,rate))
+	cb_loan.write(user,(has_loan,notional,collateral,start_ts,end_ts,rate))
         return()
     end		
 end
