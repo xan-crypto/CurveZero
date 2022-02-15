@@ -66,7 +66,7 @@ func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     end
     # check if paused
     let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    let (paused) = Controller.is_paused(_controller_addy)
+    let (paused) = Controller.get_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
@@ -100,7 +100,7 @@ func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     end
     # check if paused
     let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    let (paused) = Controller.is_paused(_controller_addy)
+    let (paused) = Controller.get_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
@@ -134,7 +134,7 @@ func set_lp_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     end
     # check if paused
     let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    let (paused) = Controller.is_paused(_controller_addy)
+    let (paused) = Controller.get_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
@@ -171,7 +171,7 @@ func set_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     end
     # check if paused
     let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    let (paused) = Controller.is_paused(_controller_addy)
+    let (paused) = Controller.get_paused(_controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
@@ -220,7 +220,7 @@ func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     if refinance != 1:
         # check if paused
         let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-        let (paused) = Controller.is_paused(_controller_addy)
+        let (paused) = Controller.get_paused(_controller_addy)
         with_attr error_message("System is paused."):
             assert paused = 0
         end
