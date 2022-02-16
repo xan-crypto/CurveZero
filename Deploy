@@ -25,32 +25,32 @@ starknet deploy --contract Compiled/InsuranceFund_compiled.json --inputs 0x02e7b
 starknet deploy --contract Compiled/Settings_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 --inputs \
-    0x05158655c252f9493321d40720844f690de8a3051696716d6ba149770f7977d0 \
-    0x05eafd010eb33ae4a38f6c1c1a7eafce9726a7f50db91e937d0f5d8438689b31 \
+    0x02f99c3fbf0ffb049a9dc071be7d9dc8453e59056a204612cac9dcf59449bd0e \
+    0x07508493dcd53c08e8eb81adfb3484369f6a40e25a4c66cfdc66f05fafcfa1a7 \
+    0x03aed6d7a15f0fe3bd3112ac122e9f0ae422b1a9023e5b60934fb0a6a011239a \
     0 \
     0 \
     0 \
-    0 \
-    0x049037bb641d8b233b5a366198bae273ed2cfa2b346cc239d3f93176d1f9050f \
-    0x01c56e058f9a24c44d136ce86e262b72f80694e8f3c8c085ec67dda1f2ff4469 \
-    0x06b5d434a2a804c6deb713d4fe19583e3201dfb2df7956ba90a983e84c266dce \
+    0x054b2737217b81feb08dd2a486f0c3c61653ee0d1451328493ed574583258c10 \
+    0x020391de5a10303988f04c1856e0e393a7856a47f423d5161cb75d07e10067ad \
+    0x064fcfd3c3f7ff106e17251fe7bd0daa3cf3efafd05384bc64199a1a05e49927 \
     0 \
     0
 
 Last test
 [deployer] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp] = 0x05158655c252f9493321d40720844f690de8a3051696716d6ba149770f7977d0
-[pp] = 0x05eafd010eb33ae4a38f6c1c1a7eafce9726a7f50db91e937d0f5d8438689b31
-[cb] = 
+[lp] = 0x02f99c3fbf0ffb049a9dc071be7d9dc8453e59056a204612cac9dcf59449bd0e
+[pp] = 0x07508493dcd53c08e8eb81adfb3484369f6a40e25a4c66cfdc66f05fafcfa1a7
+[cb] = 0x03aed6d7a15f0fe3bd3112ac122e9f0ae422b1a9023e5b60934fb0a6a011239a
 [ll] = 
 [gt] = 
 [if] = 
-[czcore] = 0x049037bb641d8b233b5a366198bae273ed2cfa2b346cc239d3f93176d1f9050f
-[controller] = 0x01c56e058f9a24c44d136ce86e262b72f80694e8f3c8c085ec67dda1f2ff4469
-[setttings] = 0x06b5d434a2a804c6deb713d4fe19583e3201dfb2df7956ba90a983e84c266dce
+[czcore] = 0x054b2737217b81feb08dd2a486f0c3c61653ee0d1451328493ed574583258c10
+[controller] = 0x020391de5a10303988f04c1856e0e393a7856a47f423d5161cb75d07e10067ad
+[setttings] = 0x064fcfd3c3f7ff106e17251fe7bd0daa3cf3efafd05384bc64199a1a05e49927
 [usdc] =
 [czt] =
-[trusted] = 0x04fd736ed9d94b6677b994d9c0caaf08d964c39221e1826fa4c0eb45d338d2d5
+[trusted] = 0x031bc31adc1335c0ed8544fbfdf03c1720d53c5209a17ab1fe7c5ad3ad8dc724
 
 # check transactions / testing
 starknet tx_status --hash [tx_hash]
@@ -65,6 +65,8 @@ starknet invoke \
     --inputs 0x07283fce2d2efc1720fbc9b85a0235d442abc5d98f6fff5beddabd90ac7d6acc
 
 starknet call \
-    --address 0x04e0cf7f535e97b871e1273cb57b21169e59bcda32cdc0e156d8bc9056f46013 \
-    --abi contract_abi.json \
-    --function get_balance 
+    --address 0x03aed6d7a15f0fe3bd3112ac122e9f0ae422b1a9023e5b60934fb0a6a011239a \
+    --abi Compiled/CapitalBorrower_abi.json \
+    --function get_loan_accured_interest \
+    --inputs 0x0077113fdcee61d3257d7617d7b01a766a7fcd1dd05e96a91f00e13ea4e77399
+
