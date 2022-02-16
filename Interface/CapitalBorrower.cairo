@@ -120,6 +120,7 @@ func get_loan_accured_interest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     end
 end
 
+
 # accecpt a loan
 # set loan terms
 @external
@@ -127,13 +128,51 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
         loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*):
     
     # pp data should be passed as follows
-    # [ signed_loanID , signed_rate , rate , pp_pub , ..... ]
+    # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
     
+    let (loanID_hash) = hash2{hash_ptr=pedersen_ptr}(loanID, 0)
     let (rate_array : felt*) = alloc()
     let (pp_pub_array : felt*) = alloc()
     
     
+    # iterate thru pp data
+    # Verify the pp's signature.
     
+    # verify_all_pp(pp_data,pp_data_len)
+    
+    # pp 1
+    let signed_loanID_r = pp_data[0] 
+    let signed_loanID_s = pp_data[1] 
+    let signed_rate_r = pp_data[2] 
+    let signed_rate_s = pp_data[3] 
+    let rate = pp_data[4]     
+    let pp_pub = pp_data[5]
+    
+    verify_ecdsa_signature(message=loanID_hash,public_key=pp_pub,signature_r=signed_loanID_r,signature_s=signed_loanID_s)
+    let (rate_hash) = hash2{hash_ptr=pedersen_ptr}(rate, 0)
+    verify_ecdsa_signature(message=rate_hash,public_key=pp_pub,signature_r=signed_rate_r,signature_s=signed_rate_s)
+    
+    assert [rate_array] = rate
+    assert [pp_pub_array] = pp_pub
+
+    # pp 2
+    let signed_loanID_r = pp_data[6] 
+    let signed_loanID_s = pp_data[7] 
+    let signed_rate_r = pp_data[8] 
+    let signed_rate_s = pp_data[9] 
+    let rate = pp_data[10]     
+    let pp_pub = pp_data[11]
+    
+    verify_ecdsa_signature(message=loanID_hash,public_key=pp_pub,signature_r=signed_loanID_r,signature_s=signed_loanID_s)
+    let (rate_hash) = hash2{hash_ptr=pedersen_ptr}(rate, 0)
+    verify_ecdsa_signature(message=rate_hash,public_key=pp_pub,signature_r=signed_rate_r,signature_s=signed_rate_s)
+    
+    assert [rate_array + 1] = rate
+    assert [pp_pub_array + 1] = pp_pub
+
+
+    
+        
     # call oracle price for collateral
     let (_trusted_addy) = trusted_addy.read()
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
@@ -158,19 +197,35 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    CZCore.set_cb_loan(
-        czcore_addy, user, has_loan, notional, collateral, start_ts, end_ts, rate, refinance)
+    CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, collateral, start_ts, end_ts, rate, refinance)
     return ()
 end
 
 # check pp pricing
-func check_pricing(array : felt*, length : felt) -> (sum : felt):
+func check_pricing(array : felt*, length : felt, loanID_hash : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
+       
     if length == 0:
-        # Start with sum=0.
-        return (sum=0)
+        let (r_array : felt*) = alloc()
+        let (p_array : felt*) = alloc()        
+        return (0,r_array,0,p_array)
     end
 
-    let (current_sum) = get_sum(array=array + 1, length=length - 1)
+    let (r_array_len,r_array,p_array_len,p_array) = check_pricing(array=array + 6, length=length - 6, loanID_hash)
+    
+    let signed_loanID_r = array[0] 
+    let signed_loanID_s = array[1] 
+    let signed_rate_r = array[2] 
+    let signed_rate_s = array[3] 
+    let rate = array[4]     
+    let pp_pub = array[5]
+    
+    verify_ecdsa_signature(message=loanID_hash,public_key=pp_pub,signature_r=signed_loanID_r,signature_s=signed_loanID_s)
+    let (rate_hash) = hash2{hash_ptr=pedersen_ptr}(rate, 0)
+    verify_ecdsa_signature(message=rate_hash,public_key=pp_pub,signature_r=signed_rate_r,signature_s=signed_rate_s)
+    
+    assert [rate_array + 1] = rate
+    assert [pp_pub_array + 1] = pp_pub
+    
     # This part of the function is first reached when length=0.
     # The sum begins. This is the sequence: 1, 1+23 then 24+2
     let sum = [array] + current_sum
@@ -179,5 +234,3 @@ func check_pricing(array : felt*, length : felt) -> (sum : felt):
     return (sum)
 end
 
-# repay a loan
-# refinance a loan
