@@ -20,5 +20,5 @@ Website integration - 0%<br>
 Community building - 0%<br>
 
 **Key Dates**:<br>
-4 Feb 2022 - First contract deployed on StarkNet Goerli Test net<br>
+4 Feb 2022 - First contract deployed on StarkNet Goerli test net<br>
 16 Feb 2022 - First loan created and accrued interest correctly valued<br>
