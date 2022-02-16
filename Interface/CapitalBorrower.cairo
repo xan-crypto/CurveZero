@@ -11,7 +11,7 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 from InterfaceAll import TrustedAddy, CZCore, Settings
 from Math.Math64x61 import (
     Math64x61_mul, Math64x61_div, Math64x61_pow, Math64x61_pow_frac, Math64x61_sqrt, Math64x61_exp,
-    Math64x61_ln)
+    Math64x61_ln,Math64x61_sub,Math64x61_add)
 
 ##################################################################
 # constants 
@@ -88,12 +88,13 @@ end
 ##################################################################
 # CB contract functions
 # query a users loan
-@external
+@view
 func get_loan_accured_interest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         user : felt) -> (
         has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt,
         rate : felt, accrued_interest : felt):
     
+    alloc_locals
     # Obtain the address of the czcore contract
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
@@ -109,16 +110,29 @@ func get_loan_accured_interest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     if has_loan == 0:
         return (has_loan,notional,collateral,start_ts,end_ts,rate,0)
     else:
-        tempvar (ts_diff) = Math64x61_sub(block_ts_64x61,start_ts)
-        tempvar (year_frac) = Math64x61_div(ts_diff,year_secs)
-        tempvar (accrual_factor) = Math64x61_add(Math64x61_ONE,rate)
-        tempvar (actual_accrual) = Math64x61_pow_frac(accrual_factor,year_frac)
-        tempvar (notional_accrual) = Math64x61_mul(notional,actual_accrual)
+        let (ts_diff) = Math64x61_sub(block_ts_64x61,start_ts)
+        let (year_frac) = Math64x61_div(ts_diff,year_secs)
+        let (accrual_factor) = Math64x61_add(Math64x61_ONE,rate)
+        let (actual_accrual) = Math64x61_pow_frac(accrual_factor,year_frac)
+        let (notional_accrual) = Math64x61_mul(notional,actual_accrual)
         let (accrued_interest) = Math64x61_sub(notional_accrual,notional)
         return (has_loan,notional,collateral,start_ts,end_ts,rate,accrued_interest)
     end
 end
 
 # accecpt a loan
+# set loan terms
+@external
+func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, refinance : felt):
+    
+    # check authorised caller
+    let (user) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    CZCore.set_cb_loan(czcore_addy,user,has_loan,notional,collateral,start_ts,end_ts,rate,refinance)
+    return()
+end
+
+
 # repay a loan
 # refinance a loan
