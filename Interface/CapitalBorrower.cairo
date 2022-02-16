@@ -2,7 +2,10 @@
 
 # imports
 %lang starknet
-from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
+from starkware.cairo.common.hash import hash2
+from starkware.cairo.common.signature import verify_ecdsa_signature
 from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (
@@ -123,10 +126,10 @@ end
 
 # accecpt a loan
 # set loan terms
+#func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*):
 @external
-func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*):
-    
+func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loanID : felt, pp_data_len : felt, pp_data : felt*):
+
     # pp data should be passed as follows
     # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
     
@@ -134,49 +137,14 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (rate_array : felt*) = alloc()
     let (pp_pub_array : felt*) = alloc()
     
-    
     # iterate thru pp data
     # Verify the pp's signature.
-    
-    # verify_all_pp(pp_data,pp_data_len)
-    
-    # pp 1
-    let signed_loanID_r = pp_data[0] 
-    let signed_loanID_s = pp_data[1] 
-    let signed_rate_r = pp_data[2] 
-    let signed_rate_s = pp_data[3] 
-    let rate = pp_data[4]     
-    let pp_pub = pp_data[5]
-    
-    verify_ecdsa_signature(message=loanID_hash,public_key=pp_pub,signature_r=signed_loanID_r,signature_s=signed_loanID_s)
-    let (rate_hash) = hash2{hash_ptr=pedersen_ptr}(rate, 0)
-    verify_ecdsa_signature(message=rate_hash,public_key=pp_pub,signature_r=signed_rate_r,signature_s=signed_rate_s)
-    
-    assert [rate_array] = rate
-    assert [pp_pub_array] = pp_pub
-
-    # pp 2
-    let signed_loanID_r = pp_data[6] 
-    let signed_loanID_s = pp_data[7] 
-    let signed_rate_r = pp_data[8] 
-    let signed_rate_s = pp_data[9] 
-    let rate = pp_data[10]     
-    let pp_pub = pp_data[11]
-    
-    verify_ecdsa_signature(message=loanID_hash,public_key=pp_pub,signature_r=signed_loanID_r,signature_s=signed_loanID_s)
-    let (rate_hash) = hash2{hash_ptr=pedersen_ptr}(rate, 0)
-    verify_ecdsa_signature(message=rate_hash,public_key=pp_pub,signature_r=signed_rate_r,signature_s=signed_rate_s)
-    
-    assert [rate_array + 1] = rate
-    assert [pp_pub_array + 1] = pp_pub
-
-
-    
+    let (rate_array_len,rate_array,pp_pub_array_len,pp_pub_array) = check_pricing(pp_data,pp_data_len,loanID_hash)
         
     # call oracle price for collateral
-    let (_trusted_addy) = trusted_addy.read()
-    let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
-    Oracle.update_weth_price(oracle_addy)
+    # let (_trusted_addy) = trusted_addy.read()
+    # let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
+    # Oracle.update_weth_price(oracle_addy)
 
     # get ltv from setting
 
@@ -194,43 +162,47 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 
     # check authorised caller
 
-    let (user) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, collateral, start_ts, end_ts, rate, refinance)
-    return ()
+    # let (user) = get_caller_address()
+    # let (_trusted_addy) = trusted_addy.read()
+    # let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    # CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, collateral, start_ts, end_ts, rate, refinance)
+    return (123)
 end
 
 # check pp pricing
-func check_pricing(array : felt*, length : felt, loanID_hash : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
-       
+func check_pricing{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
+        ecdsa_ptr : SignatureBuiltin*}(array : felt*, length : felt, loanID_hash : felt) -> (
+        r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
     if length == 0:
         let (r_array : felt*) = alloc()
-        let (p_array : felt*) = alloc()        
-        return (0,r_array,0,p_array)
+        let (p_array : felt*) = alloc()
+        return (0, r_array, 0, p_array)
     end
 
-    let (r_array_len,r_array,p_array_len,p_array) = check_pricing(array=array + 6, length=length - 6, loanID_hash)
-    
-    let signed_loanID_r = array[0] 
-    let signed_loanID_s = array[1] 
-    let signed_rate_r = array[2] 
-    let signed_rate_s = array[3] 
-    let rate = array[4]     
+    let (r_array_len, r_array, p_array_len, p_array) = check_pricing(array + 6, length - 6, loanID_hash)
+
+    let signed_loanID_r = array[0]
+    let signed_loanID_s = array[1]
+    let signed_rate_r = array[2]
+    let signed_rate_s = array[3]
+    let rate = array[4]
     let pp_pub = array[5]
-    
-    verify_ecdsa_signature(message=loanID_hash,public_key=pp_pub,signature_r=signed_loanID_r,signature_s=signed_loanID_s)
+
+    verify_ecdsa_signature(
+        message=loanID_hash,
+        public_key=pp_pub,
+        signature_r=signed_loanID_r,
+        signature_s=signed_loanID_s)
     let (rate_hash) = hash2{hash_ptr=pedersen_ptr}(rate, 0)
-    verify_ecdsa_signature(message=rate_hash,public_key=pp_pub,signature_r=signed_rate_r,signature_s=signed_rate_s)
-    
-    assert [rate_array + 1] = rate
-    assert [pp_pub_array + 1] = pp_pub
-    
-    # This part of the function is first reached when length=0.
-    # The sum begins. This is the sequence: 1, 1+23 then 24+2
-    let sum = [array] + current_sum
-    # The return function targets the body of this function
-    # 3 times before returning to the body of read_sum().
-    return (sum)
+    verify_ecdsa_signature(
+        message=rate_hash, 
+        public_key=pp_pub, 
+        signature_r=signed_rate_r, 
+        signature_s=signed_rate_s)
+
+    assert [r_array + r_array_len] = rate
+    assert [p_array + p_array_len] = pp_pub
+    return (r_array_len + 1, r_array, p_array_len + 1, p_array)
 end
 
