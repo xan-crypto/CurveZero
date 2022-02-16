@@ -123,16 +123,61 @@ end
 # accecpt a loan
 # set loan terms
 @external
-func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, refinance : felt):
+func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*):
     
+    # pp data should be passed as follows
+    # [ signed_loanID , signed_rate , rate , pp_pub , ..... ]
+    
+    let (rate_array : felt*) = alloc()
+    let (pp_pub_array : felt*) = alloc()
+    
+    
+    
+    # call oracle price for collateral
+    let (_trusted_addy) = trusted_addy.read()
+    let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
+    Oracle.update_weth_price(oracle_addy)
+
+    # get ltv from setting
+
+    # test sufficient collateral to proceed vs notional of loan
+
+    # get blockstamp time for start time
+
+    # check end time less than setting max loan time
+
+    # iterate to pp and create list of valid
+
+    # check eno pp for pricing settings has min_pp
+
+    # set rate to median pp price
+
     # check authorised caller
+
     let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    CZCore.set_cb_loan(czcore_addy,user,has_loan,notional,collateral,start_ts,end_ts,rate,refinance)
-    return()
+    CZCore.set_cb_loan(
+        czcore_addy, user, has_loan, notional, collateral, start_ts, end_ts, rate, refinance)
+    return ()
 end
 
+# check pp pricing
+func check_pricing(array : felt*, length : felt) -> (sum : felt):
+    if length == 0:
+        # Start with sum=0.
+        return (sum=0)
+    end
+
+    let (current_sum) = get_sum(array=array + 1, length=length - 1)
+    # This part of the function is first reached when length=0.
+    # The sum begins. This is the sequence: 1, 1+23 then 24+2
+    let sum = [array] + current_sum
+    # The return function targets the body of this function
+    # 3 times before returning to the body of read_sum().
+    return (sum)
+end
 
 # repay a loan
 # refinance a loan
