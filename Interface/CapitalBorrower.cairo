@@ -141,7 +141,16 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # iterate thru pp data
     # Verify the pp's signature.
     let (rate_array_len,rate_array,pp_pub_array_len,pp_pub_array) = check_pricing(pp_data,pp_data_len,loanID_hash)
-        
+    # order the rates and find the median
+    let (len_ordered_array,ordered_array,len_index,index) = sort_index(rate_array_len,rate_array,rate_array_len,rate_array)
+    let (median,_) = unsigned_div_rem(len_ordered_array, 2)
+    
+    # later randomly select 75% of the PPs, also deal with median when even number of PP
+    let (median_rate) = ordered_array[median]
+    # get index of rate to find winning PP
+    let (winning_pp) = pp_pub_array[index[median]]
+
+
     # call oracle price for collateral
     # let (_trusted_addy) = trusted_addy.read()
     # let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
