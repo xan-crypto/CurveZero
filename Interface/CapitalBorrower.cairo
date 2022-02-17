@@ -148,7 +148,8 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # later randomly select 75% of the PPs, also deal with median when even number of PP
     let (median_rate) = ordered_array[median]
     # get index of rate to find winning PP
-    let (winning_pp) = pp_pub_array[index[median]]
+    let (winning_position) = index[median]
+    let (winning_pp) = pp_pub_array[winning_position]
 
 
     # call oracle price for collateral
