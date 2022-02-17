@@ -3,6 +3,7 @@
 # imports
 %lang starknet
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.math_cmp import (is_nn, is_le, is_not_zero)
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.signature import verify_ecdsa_signature
