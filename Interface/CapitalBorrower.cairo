@@ -243,19 +243,22 @@ end
 # this function sorts an array of size n from high to low
 # need this for the median calc for PPs
 func sort_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        x_len : felt, x : felt*, y_len : felt, y : felt*) -> (z_len : felt, z : felt*):
+        x_len : felt, x : felt*, y_len : felt, y : felt*) -> (z_len : felt, z : felt*, i_len : felt, i : felt*):
     
     alloc_locals
     if y_len == 1:
         let (z : felt*) = alloc()
+        let (i : felt*) = alloc()
         let (min,index) = get_min_value_above(0, x_len, x)
         assert [z] = min 
-        return (1, z)
+        assert [i] = index
+        return (1, z, 1, i)
     end
 
-    let (z_len, z) = sort_index(x_len, x, y_len - 1, y + 1)
+    let (z_len, z, i_len, i) = sort_index(x_len, x, y_len - 1, y + 1)
     
     let (min,index) = get_min_value_above(z[z_len-1], x_len, x)
     assert [z + z_len] = min 
-    return (z_len + 1, z)    
+    assert [i + i_len] = index
+    return (z_len + 1, z, i_len + 1, i)    
 end
