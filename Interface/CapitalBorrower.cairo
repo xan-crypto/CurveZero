@@ -212,3 +212,28 @@ func check_pricing{
     return (r_array_len + 1, r_array, p_array_len + 1, p_array)
 end
 
+func get_min_value_above{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(x : felt, array_len : felt, array : felt*) -> (y : felt, index : felt):
+    #alloc()
+    alloc_locals 
+    if array_len == 1:
+        return (array[0],0)
+    end
+
+    let (y,index) = get_min_value_above(x,array_len - 1, array + 1)
+    
+    let (test1) = is_le(array[0],y)    
+    if  test1 == 1:
+        let (test2) = is_le(array[0],x)   
+        if test2 == 0:
+            let y = array[0]
+            let index = 0
+            return (y,index)
+        else:
+            let index = index + 1
+            return (y,index)        
+        end
+    else:
+        let index = index + 1
+        return (y,index)
+    end
+end
