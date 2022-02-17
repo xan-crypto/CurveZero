@@ -171,6 +171,7 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 end
 
 # check all PPs are valid
+# check sigs vs. signed loanID and sigs vs. signed rate provided
 func check_pricing{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,ecdsa_ptr : SignatureBuiltin*}(
         length : felt, array : felt*, loanID_hash : felt) -> (
@@ -212,6 +213,7 @@ func check_pricing{
     return (r_array_len + 1, r_array, p_array_len + 1, p_array)
 end
 
+# this function returns to min value of an array and the index thereof
 func get_min_value_above{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(x : felt, array_len : felt, array : felt*) -> (y : felt, index : felt):
     #alloc()
     alloc_locals 
@@ -236,4 +238,24 @@ func get_min_value_above{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_c
         let index = index + 1
         return (y,index)
     end
+end
+
+# this function sorts an array of size n from high to low
+# need this for the median calc for PPs
+func sort_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        x_len : felt, x : felt*, y_len : felt, y : felt*) -> (z_len : felt, z : felt*):
+    
+    alloc_locals
+    if y_len == 1:
+        let (z : felt*) = alloc()
+        let (min,index) = get_min_value_above(0, x_len, x)
+        assert [z] = min 
+        return (1, z)
+    end
+
+    let (z_len, z) = sort_index(x_len, x, y_len - 1, y + 1)
+    
+    let (min,index) = get_min_value_above(z[z_len-1], x_len, x)
+    assert [z + z_len] = min 
+    return (z_len + 1, z)    
 end
