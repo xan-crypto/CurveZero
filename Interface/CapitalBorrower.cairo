@@ -169,19 +169,23 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return (123)
 end
 
-# check pp pricing
+# check all PPs are valid
 func check_pricing{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        ecdsa_ptr : SignatureBuiltin*}(array : felt*, length : felt, loanID_hash : felt) -> (
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,ecdsa_ptr : SignatureBuiltin*}(
+        length : felt, array : felt*, loanID_hash : felt) -> (
         r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
+    
+    # create arrays at last step
     if length == 0:
         let (r_array : felt*) = alloc()
         let (p_array : felt*) = alloc()
         return (0, r_array, 0, p_array)
     end
 
-    let (r_array_len, r_array, p_array_len, p_array) = check_pricing(array + 6, length - 6, loanID_hash)
+    # recursive call
+    let (r_array_len, r_array, p_array_len, p_array) = check_pricing(length - 6, array + 6, loanID_hash)
 
+    # validate that the PP signed both loanID and rate correctly
     let signed_loanID_r = array[0]
     let signed_loanID_s = array[1]
     let signed_rate_r = array[2]
@@ -201,6 +205,7 @@ func check_pricing{
         signature_r=signed_rate_r, 
         signature_s=signed_rate_s)
 
+    # add to new arrays
     assert [r_array + r_array_len] = rate
     assert [p_array + p_array_len] = pp_pub
     return (r_array_len + 1, r_array, p_array_len + 1, p_array)
