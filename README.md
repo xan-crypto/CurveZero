@@ -23,7 +23,7 @@ Community building - 0%<br>
 4 Feb 2022 - First contract deployed on StarkNet Goerli test net<br>
 16 Feb 2022 - First loan created and accrued compound interest correctly valued<br>
 
-**Our Mantras**:
-- Make the protocol better
-- Keep the protocol secure
-- Work together as a community
+**Our Mantras**:<br>
+Make the protocol better<br>
+Keep the protocol secure<br>
+Work together as a community<br>
