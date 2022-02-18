@@ -24,6 +24,6 @@ Community building - 0%<br>
 16 Feb 2022 - First loan created and accrued compound interest correctly valued<br>
 
 **Our Mantras**:<br>
-1) Make the protocol better
-2) Keep the protocol secure
-3) Work together as a community
+- Make the protocol better
+- Keep the protocol secure
+- Work together as a community
