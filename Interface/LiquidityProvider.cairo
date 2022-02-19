@@ -1,4 +1,5 @@
 # LP contract
+# all numbers passed into contract must be Math64x61 type
 
 # imports
 %lang starknet
@@ -6,8 +7,14 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_nn_le
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.starknet.common.syscalls import get_block_timestamp
-from InterfaceAll import (TrustedAddy,CZCore,Settings)
-from Math.Math64x61 import (Math64x61_mul, Math64x61_div, Math64x61_sub,Math64x61_add)
+from InterfaceAll import (TrustedAddy, CZCore, Settings)
+from Math.Math64x61 import (Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_pow)
+
+##################################################################
+# constants 
+const Math64x61_FRACT_PART = 2 ** 61
+const Math64x61_ONE = 1 * Math64x61_FRACT_PART
+const Math64x61_TEN = 10 * Math64x61_FRACT_PART
 
 ##################################################################
 # addy of the deployer
@@ -69,7 +76,7 @@ end
 @external
 func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(depo_USD : felt) -> (lp : felt):
 
-    # Verify that the amount is positive.
+    # Verify that the amount is positive, depo_USD is a Math64x61 type
     with_attr error_message("Amount must be positive."):
         assert_nn(depo_USD)
     end
@@ -82,46 +89,65 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     # check for existing lp tokens and capital from czcore
     let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
     # calc new total capital
-    let new_capital_total = capital_total + depo_USD
+    let new_capital_total = Math64x61_add(capital_total,depo_USD)
 
     # lock up
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (lockup_period) = Settings.get_lockup_period(settings_addy)
     let (block_ts) = get_block_timestamp()
+    # all numbers are 64x61 type
+    tempvar block_ts_64x61 = block_ts * Math64x61_ONE
+
+    # transfer the actual USDC tokens to CZCore reserves
+    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    # get user USDC balance
+    let (usd_user) = CZCore.erc20_balanceOf(czcore_addy, usdc_addy, user)
+    let (decimals) = CZCore.erc20_decimals(czcore_addy, usdc_addy)
+    # do decimal conversion so comparing like with like
+    let (decimals_pow) = Math64x61_pow(Math64x61_TEN,decimals)
+    let (depo_USD_mlt) = Math64x61_mul(depo_USD,decimals_pow)
+    let (depo_USD_std) = Math64x61_div(depo_USD_mlt,Math64x61_ONE) 
+    # Verify that the user has sufficient funds before call
+    with_attr error_message("User does not have sufficient funds."):
+       assert_nn_le(depo_USD_std, usd_user)
+    end
 
     # calc new lp total and new lp issuance
     if lp_total == 0:
         let new_lp_total = depo_USD
         let new_lp_issuance = depo_USD
-
+      
         # transfer the actual USDC tokens to CZCore reserves
-	let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-        # CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD)
+        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD_std)
 
         # store all new data
         CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
         
-	# mint the lp token
-	let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
-        CZCore.set_lp_balance(czcore_addy,user, lp_user + new_lp_issuance,block_ts + lockup_period)
+	    # mint the lp token
+	    let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
+        tempvar x = Math64x61_add(lp_user,new_lp_issuance)
+        tempvar y = Math64x61_add(block_ts_64x61,lockup_period)
+        CZCore.set_lp_balance(czcore_addy,user, x, y)
 
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
         return (new_lp_issuance)
     else:	
-        let (new_lp_total, _) = unsigned_div_rem(new_capital_total * lp_total, capital_total)
-	let new_lp_issuance = new_lp_total - lp_total
+        let (new_lp_total_mlt) = Math64x61_mul(new_capital_total,lp_total)
+        let (new_lp_total) = Math64x61_div(new_lp_total_mlt, capital_total)
+	    let new_lp_issuance = Math64x61_sub(new_lp_total, lp_total)
 
         # transfer the actual USDC tokens to CZCore reserves
-	let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-        # CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD)
+        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD_std)
 
         # store all new data
-	CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
+	    CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
 	
-	# mint the lp token
-	let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
-        CZCore.set_lp_balance(czcore_addy,user, lp_user + new_lp_issuance,block_ts + lockup_period)
+	    # mint the lp token
+	    let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
+        tempvar x = Math64x61_add(lp_user,new_lp_issuance)
+        tempvar y = Math64x61_add(block_ts_64x61,lockup_period)
+        CZCore.set_lp_balance(czcore_addy,user, x, y)
 
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
@@ -204,3 +230,4 @@ func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 	return (capital_user,lockup)
     end
 end
+
