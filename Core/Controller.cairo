@@ -1,5 +1,6 @@
 # controller can only pause and unpause, slash PP and GT and initiate a payout from IF to fund a shortfall
 # controller will also be able to update some of the settings, controller key should be given to community when project matures
+# when launch on mainnet ensure that controller is multisig
 
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
