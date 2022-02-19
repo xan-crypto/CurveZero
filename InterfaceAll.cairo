@@ -96,6 +96,10 @@ namespace Settings:
     end
     func set_min_max_loan(min_loan : felt, max_loan : felt):
     end       
+    func get_min_max_capital() -> min_capital : felt, max_capital : felt):
+    end
+    func set_min_max_capital(min_capital : felt, max_capital : felt):
+    end    
     func get_utilization() -> (start : felt, stop : felt):
     end
     func set_utilization(start : felt, stop : felt):
@@ -104,4 +108,8 @@ namespace Settings:
     end
     func set_min_pp_accepted(min_pp : felt):
     end       
+    func get_insurance_shortfall_ratio() -> insurance_shortfall_ratio : felt):
+    end
+    func set_insurance_shortfall_ratio(insurance_shortfall_ratio : felt):
+    end    
 end
