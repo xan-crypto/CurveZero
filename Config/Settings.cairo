@@ -39,7 +39,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     # min number of PPs for pricing
     min_pp_accepted.write(5*Math64x61_ONE)
     # insurance shortfall ratio to lp capital
-    insurance_shortfall_ratio.write(Math64x61_ONE*5/100)    
+    insurance_shortfall_ratio.write(Math64x61_ONE*1/100)    
     return ()
 end
 
