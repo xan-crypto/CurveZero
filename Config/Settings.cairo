@@ -31,9 +31,9 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     # accrued interest split between LP IF and GT - 95/3/2
     accrued_interest_split.write((Math64x61_ONE*95/100, Math64x61_ONE*3/100, Math64x61_ONE*2/100))
     # min loan and max loan amounts
-    min_max_loan.write((10**2*Math64x61_ONE, 10**4*Math64x61_ONE))
+    min_max_loan.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
     # min capital and max capital from lps accepted
-    min_max_capital.write((10**2*Math64x61_ONE, 10**4*Math64x61_ONE))
+    min_max_capital.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
     # utilization start and stop levels
     utilization.write((Math64x61_ONE*80/100, Math64x61_ONE*90/100))
     # min number of PPs for pricing
