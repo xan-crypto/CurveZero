@@ -250,6 +250,6 @@ func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     else:
         tempvar temp1 = Math64x61_mul(lp_user, capital_total)
         let (capital_user) = Math64x61_div(temp1, lp_total)
-	    return (capital_user,lockup)
+	return (capital_user,lockup)
     end
 end
