@@ -131,8 +131,8 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         # store all new data
         CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
         
-	    # mint the lp token
-	    let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
+    	# mint the lp token
+    	let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
         tempvar temp3 = Math64x61_add(lp_user,new_lp_issuance)
         tempvar temp4 = Math64x61_add(block_ts_64x61,lockup_period)
         CZCore.set_lp_balance(czcore_addy,user, temp3, temp4)
@@ -143,16 +143,16 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     else:	
         tempvar temp5 = Math64x61_mul(new_capital_total,lp_total)
         tempvar temp6 = Math64x61_div(temp5, capital_total)
-	    let new_lp_issuance = Math64x61_sub(temp6, lp_total)
+    	let new_lp_issuance = Math64x61_sub(temp6, lp_total)
 
         # transfer the actual USDC tokens to CZCore reserves - ERC decimal version
         CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD_erc)
 
         # store all new data
-	    CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
+    	CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
 	
-	    # mint the lp token
-	    let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
+    	# mint the lp token
+    	let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
         tempvar temp7 = Math64x61_add(lp_user,new_lp_issuance)
         tempvar temp8 = Math64x61_add(block_ts_64x61,lockup_period)
         CZCore.set_lp_balance(czcore_addy,user, temp7, temp8)
