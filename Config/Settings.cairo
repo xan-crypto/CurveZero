@@ -1,4 +1,5 @@
 # Settings contract
+# all numbers stored / passed into contract must be Math64x61 type
 
 # imports
 %lang starknet
