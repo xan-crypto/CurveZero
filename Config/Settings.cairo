@@ -264,15 +264,15 @@ end
 
 # return insurance shortfall ratio to lp capital
 @view
-func get_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (insurance_shortfall_ratio : felt):
+func get_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (is_ratio : felt):
     let (res) = insurance_shortfall_ratio.read()
     return (res)
 end
 
 # set insurance shortfall ratio to lp capital
 @external
-func set_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(insurance_shortfall_ratio : felt):
+func set_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(is_ratio : felt):
     check_caller_is_controller()
-    insurance_shortfall_ratio.write(insurance_shortfall_ratio)
+    insurance_shortfall_ratio.write(is_ratio)
     return ()
 end
