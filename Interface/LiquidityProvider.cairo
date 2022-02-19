@@ -72,12 +72,12 @@ end
 
 ##################################################################
 # LP contract functions
-# Issue LP tokens to user
+# issue LP tokens to user
 @external
 func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(depo_USD : felt) -> (lp : felt):
 
     alloc_locals
-    # Verify that the amount is positive, depo_USD is a Math64x61 type
+    # verify that the amount is positive, depo_USD is a Math64x61 type
     with_attr error_message("Amount must be positive."):
         assert_nn(depo_USD)
     end
@@ -96,6 +96,14 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 
     # check for existing lp tokens and capital from czcore
     let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
+    
+    # check insurance shortfall ratio acceptable
+    let (is_ratio) = Settings.get_insurance_shortfall_ratio(settings_addy)
+    let (current_ratio) = Math64x61_div(insolvency_shortfall,capital_total)
+    with_attr error_message("Insurance shortfall ratio too high."):
+        assert_le(current_ratio,is_ratio)
+    end
+    
     # calc new total capital
     let (new_capital_total) = Math64x61_add(capital_total,depo_USD)
 
@@ -172,9 +180,17 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     # Obtain the address of the czcore contract
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
 
     # check for existing lp tokens and capital
     let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
+
+    # check insurance shortfall ratio acceptable
+    let (is_ratio) = Settings.get_insurance_shortfall_ratio(settings_addy)
+    let (current_ratio) = Math64x61_div(insolvency_shortfall,capital_total)
+    with_attr error_message("Insurance shortfall ratio too high."):
+        assert_le(current_ratio,is_ratio)
+    end
 
     # verify that the amount is positive and below total.
     with_attr error_message("Amount must be positive and below LP total available."):
