@@ -8,6 +8,11 @@ from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import (TrustedAddy)
 
 ##################################################################
+# constants 
+const Math64x61_FRACT_PART = 2 ** 61
+const Math64x61_ONE = 1 * Math64x61_FRACT_PART
+
+##################################################################
 # addy of the deployer
 @storage_var
 func deployer_addy() -> (addy : felt):
@@ -18,9 +23,23 @@ end
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(deployer : felt):
     deployer_addy.write(deployer)
     # set initial amounts for becoming pp - NB NB change this later
-    pp_token_requirement.write((5000,5000))
+    pp_token_requirement.write((10000 * Math64x61_ONE, 10000 * Math64x61_ONE))
     # 7 day lockup period
-    lockup_period.write(604800)
+    lockup_period.write(604800 * Math64x61_ONE)
+    # origination fee and split 10bps and 50/50 PP IF
+    origination_fee.write((Math64x61_ONE/1000, Math64x61_ONE*50/100, Math64x61_ONE*50/100))
+    # accrued interest split between LP IF and GT - 95/3/2
+    accrued_interest_split.write((Math64x61_ONE*95/100, Math64x61_ONE*3/100, Math64x61_ONE*2/100))
+    # min loan and max loan amounts
+    min_max_loan.write((10**2*Math64x61_ONE, 10**4*Math64x61_ONE))
+    # min capital and max capital from lps accepted
+    min_max_capital.write((10**2*Math64x61_ONE, 10**4*Math64x61_ONE))
+    # utilization start and stop levels
+    utilization.write((Math64x61_ONE*80/100, Math64x61_ONE*90/100))
+    # min number of PPs for pricing
+    min_pp_accepted.write(5*Math64x61_ONE)
+    # insurance shortfall ratio to lp capital
+    insurance_shortfall_ratio.write(Math64x61_ONE*5/100)    
     return ()
 end
 
@@ -171,6 +190,27 @@ end
 func set_min_max_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_loan : felt, max_loan : felt):
     check_caller_is_controller()
     min_max_loan.write((min_loan,max_loan))
+    return ()
+end
+
+##################################################################
+# min capital and max capital from lps accepted
+@storage_var
+func min_max_capital() -> (res : (felt,felt)):
+end
+
+# return min capital and max capital from lps accepted
+@view
+func get_min_max_capital{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (min_capital : felt, max_capital : felt):
+    let (res) = min_max_capital.read()
+    return (res[0],res[1])
+end
+
+# set min capital and max capital from lps accepted
+@external
+func set_min_max_capital{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_capital : felt, max_capital : felt):
+    check_caller_is_controller()
+    min_max_capital.write((min_capital,max_capital))
     return ()
 end
 
