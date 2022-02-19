@@ -273,6 +273,6 @@ end
 @external
 func set_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(insurance_shortfall_ratio : felt):
     check_caller_is_controller()
-    insurance_shortfall_ratio.write(min_pp)
+    insurance_shortfall_ratio.write(insurance_shortfall_ratio)
     return ()
 end
