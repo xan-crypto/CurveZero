@@ -3,7 +3,6 @@
 
 # imports
 %lang starknet
-%builtins pedersen range_check
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import (TrustedAddy)
