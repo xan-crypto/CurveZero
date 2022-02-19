@@ -58,6 +58,18 @@ func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 ##################################################################
+# check caller is controller
+func check_caller_is_controller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = _controller_addy
+    end
+    return ()
+end
+
+##################################################################
 # functions to set the amount of LP CZ tokens needed to become a PP
 @storage_var
 func pp_token_requirement() -> (require : (felt, felt)):
@@ -73,13 +85,7 @@ end
 # set new token requirement to become PP
 @external
 func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_require : felt, cz_require : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = _controller_addy
-    end
+    check_caller_is_controller()
     pp_token_requirement.write((lp_require,cz_require))
     return ()
 end
@@ -100,13 +106,7 @@ end
 # set new lockup period
 @external
 func set_lockup_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lockup : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = _controller_addy
-    end
+    check_caller_is_controller()
     lockup_period.write(lockup)
     return ()
 end
@@ -127,13 +127,7 @@ end
 # set origination fee and split
 @external
 func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt, pp_split : felt, if_split : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = _controller_addy
-    end
+    check_caller_is_controller()
     origination_fee.write((fee,pp_split,if_split))
     return ()
 end
@@ -154,13 +148,7 @@ end
 # set accrued interest splits
 @external
 func set_accrued_interest_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_split : felt, if_split : felt, gt_split : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = _controller_addy
-    end
+    check_caller_is_controller()
     accrued_interest_split.write((lp_split,if_split,gt_split))
     return ()
 end
@@ -181,13 +169,7 @@ end
 # set min and max loan size
 @external
 func set_min_max_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_loan : felt, max_loan : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = _controller_addy
-    end
+    check_caller_is_controller()
     min_max_loan.write((min_loan,max_loan))
     return ()
 end
@@ -208,13 +190,7 @@ end
 # set start and stop utilization levels for loan provision
 @external
 func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(start : felt, stop : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = _controller_addy
-    end
+    check_caller_is_controller()
     utilization.write((start,stop))
     return ()
 end
@@ -235,13 +211,28 @@ end
 # set min PP required for acceptable pricing request
 @external
 func set_min_pp_accepted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_pp : felt):
-    # check authorised caller
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = _controller_addy
-    end
+    check_caller_is_controller()
     min_pp_accepted.write(min_pp)
+    return ()
+end
+
+##################################################################
+# insurance shortfall ratio to lp capital
+@storage_var
+func insurance_shortfall_ratio() -> (res : felt):
+end
+
+# return insurance shortfall ratio to lp capital
+@view
+func get_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (insurance_shortfall_ratio : felt):
+    let (res) = insurance_shortfall_ratio.read()
+    return (res)
+end
+
+# set insurance shortfall ratio to lp capital
+@external
+func set_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(insurance_shortfall_ratio : felt):
+    check_caller_is_controller()
+    insurance_shortfall_ratio.write(min_pp)
     return ()
 end
