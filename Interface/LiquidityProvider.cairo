@@ -4,7 +4,7 @@
 # imports
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.math import assert_nn, assert_nn_le, assert_le
+from starkware.cairo.common.math import assert_nn, assert_nn_le, assert_le, assert_in_range
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.starknet.common.syscalls import get_block_timestamp
 from InterfaceAll import (TrustedAddy, CZCore, Settings)
@@ -81,9 +81,16 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         assert_nn(depo_USD)
     end
 
+    # check that LP capital deposit within restricted range
+    let (_trusted_addy) = trusted_addy.read()
+    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    let (min_capital,max_capital) = Settings.get_min_max_capital(settings_addy)
+    with_attr error_message("LP deposit not in required range."):
+        assert_in_range(depo_USD,min_capital,max_capital)
+    end
+
     # Obtain the address of the account contract & czcore
     let (user) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
 
     # check for existing lp tokens and capital from czcore
@@ -92,7 +99,6 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let new_capital_total = Math64x61_add(capital_total,depo_USD)
 
     # lock up
-    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (lockup_period) = Settings.get_lockup_period(settings_addy)
     let (block_ts) = get_block_timestamp()
     # all numbers are 64x61 type
@@ -101,17 +107,17 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     # transfer the actual USDC tokens to CZCore reserves
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     # get user USDC balance - not Math64x61 types
-    let (usd_user) = CZCore.erc20_balanceOf(czcore_addy, usdc_addy, user)
+    let (USD_user) = CZCore.erc20_balanceOf(czcore_addy, usdc_addy, user)
     let (decimals) = CZCore.erc20_decimals(czcore_addy, usdc_addy)
     
     # do decimal conversion so comparing like with like
-    let (decimals_pow) = Math64x61_pow(Math64x61_TEN,decimals)
-    let (depo_USD_mlt) = Math64x61_mul(depo_USD,decimals_pow)
-    let (depo_USD_std) = Math64x61_div(depo_USD_mlt,Math64x61_ONE) 
+    tempvar temp1 = Math64x61_pow(Math64x61_TEN,decimals)
+    tempvar temp2 = Math64x61_mul(depo_USD,temp1)
+    let (depo_USD_erc) = Math64x61_div(temp2,Math64x61_ONE) 
     
     # Verify that the user has sufficient funds before call
     with_attr error_message("User does not have sufficient funds."):
-       assert_le(depo_USD_std, usd_user)
+       assert_le(depo_USD_erc, USD_user)
     end
 
     # calc new lp total and new lp issuance
@@ -119,37 +125,37 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         let new_lp_total = depo_USD
         let new_lp_issuance = depo_USD
       
-        # transfer the actual USDC tokens to CZCore reserves
-        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD_std)
+        # transfer the actual USDC tokens to CZCore reserves - ERC decimal version
+        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD_erc)
 
         # store all new data
         CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
         
 	    # mint the lp token
 	    let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
-        tempvar x = Math64x61_add(lp_user,new_lp_issuance)
-        tempvar y = Math64x61_add(block_ts_64x61,lockup_period)
-        CZCore.set_lp_balance(czcore_addy,user, x, y)
+        tempvar temp3 = Math64x61_add(lp_user,new_lp_issuance)
+        tempvar temp4 = Math64x61_add(block_ts_64x61,lockup_period)
+        CZCore.set_lp_balance(czcore_addy,user, temp3, temp4)
 
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
         return (new_lp_issuance)
     else:	
-        let (new_lp_total_mlt) = Math64x61_mul(new_capital_total,lp_total)
-        let (new_lp_total) = Math64x61_div(new_lp_total_mlt, capital_total)
-	    let new_lp_issuance = Math64x61_sub(new_lp_total, lp_total)
+        tempvar temp5 = Math64x61_mul(new_capital_total,lp_total)
+        tempvar temp6 = Math64x61_div(temp5, capital_total)
+	    let new_lp_issuance = Math64x61_sub(temp6, lp_total)
 
-        # transfer the actual USDC tokens to CZCore reserves
-        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD_std)
+        # transfer the actual USDC tokens to CZCore reserves - ERC decimal version
+        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD_erc)
 
         # store all new data
 	    CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
 	
 	    # mint the lp token
 	    let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
-        tempvar x = Math64x61_add(lp_user,new_lp_issuance)
-        tempvar y = Math64x61_add(block_ts_64x61,lockup_period)
-        CZCore.set_lp_balance(czcore_addy,user, x, y)
+        tempvar temp7 = Math64x61_add(lp_user,new_lp_issuance)
+        tempvar temp8 = Math64x61_add(block_ts_64x61,lockup_period)
+        CZCore.set_lp_balance(czcore_addy,user, temp7, temp8)
 
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
@@ -181,23 +187,23 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     tempvar block_ts_64x61 = block_ts * Math64x61_ONE
     
     # can only withdraw if not in lock up
-    tempvar x = Math64x61_sub(block_ts_64x61,lockup)
+    tempvar temp1 = Math64x61_sub(block_ts_64x61,lockup)
     with_attr error_message("Cant withdraw in lock up period."):
-        assert_nn(x)
+        assert_nn(temp1)
     end
 
     # verify user has sufficient LP tokens to redeem
-    tempvar y = Math64x61_sub(lp_user,with_LP)
-    with_attr error_message("Insufficent lp tokens to redeem."):
-        assert_nn(y)
+    tempvar temp2 = Math64x61_sub(lp_user,with_LP)
+    with_attr error_message("Insufficent LP tokens to redeem."):
+        assert_nn(temp2)
     end
 	
     # calc new lp total
     let new_lp_total = Math64x61_sub(lp_total, with_LP)
     
     # calc new capital total and capital to return
-    let (new_capital_total_mlt) = Math64x61_mul(new_lp_total, capital_total)
-    let (new_capital_total) = Math64x61_div(new_capital_total_mlt, lp_total)
+    tempvar temp3 = Math64x61_mul(new_lp_total, capital_total)
+    let (new_capital_total) = Math64x61_div(temp3, lp_total)
     let (new_capital_redeem) = Math64x61_sub(capital_total, new_capital_total)
     
     # transfer the actual USDC tokens from CZCore reserves
@@ -207,17 +213,17 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     let (decimals) = CZCore.erc20_decimals(czcore_addy, usdc_addy)
     
     # do decimal conversion so comparing like with like
-    let (decimals_pow) = Math64x61_pow(Math64x61_TEN,decimals)
-    let (new_capital_redeem_mlt) = Math64x61_mul(new_capital_redeem,decimals_pow)
-    let (new_capital_redeem_std) = Math64x61_div(new_capital_redeem_mlt,Math64x61_ONE) 
-    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, new_capital_redeem_std)
+    tempvar temp4 = Math64x61_pow(Math64x61_TEN,decimals)
+    tempvar temp5 = Math64x61_mul(new_capital_redeem,temp4)
+    let (new_capital_redeem_erc) = Math64x61_div(temp5,Math64x61_ONE) 
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, new_capital_redeem_erc)
 
     # store all new data
     CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
     
     # burn lp tokens
-    tempvar z = Math64x61_sub(lp_user,with_LP)
-    CZCore.set_lp_balance(czcore_addy,user, z, lockup)
+    tempvar temp6 = Math64x61_sub(lp_user,with_LP)
+    CZCore.set_lp_balance(czcore_addy,user, temp6, lockup)
     
     # event
     lp_token_change.emit(addy=user,lp_change=-with_LP,capital_change=-new_capital_redeem)
@@ -242,8 +248,8 @@ func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     if lp_user == 0:
     	return (0,0)
     else:
-        let (capital_user_mlt) = Math64x61_mul(lp_user, capital_total)
-        let (capital_user) = Math64x61_div(capital_user_mlt, lp_total)
+        tempvar temp1 = Math64x61_mul(lp_user, capital_total)
+        let (capital_user) = Math64x61_div(temp1, lp_total)
 	    return (capital_user,lockup)
     end
 end
