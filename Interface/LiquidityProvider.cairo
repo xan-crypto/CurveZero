@@ -76,6 +76,7 @@ end
 @external
 func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(depo_USD : felt) -> (lp : felt):
 
+    alloc_locals
     # Verify that the amount is positive, depo_USD is a Math64x61 type
     with_attr error_message("Amount must be positive."):
         assert_nn(depo_USD)
@@ -96,7 +97,7 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     # check for existing lp tokens and capital from czcore
     let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
     # calc new total capital
-    let new_capital_total = Math64x61_add(capital_total,depo_USD)
+    let (new_capital_total) = Math64x61_add(capital_total,depo_USD)
 
     # lock up
     let (lockup_period) = Settings.get_lockup_period(settings_addy)
@@ -111,8 +112,8 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (decimals) = CZCore.erc20_decimals(czcore_addy, usdc_addy)
     
     # do decimal conversion so comparing like with like
-    tempvar temp1 = Math64x61_pow(Math64x61_TEN,decimals)
-    tempvar temp2 = Math64x61_mul(depo_USD,temp1)
+    let (temp1) = Math64x61_pow(Math64x61_TEN,decimals)
+    let (temp2) = Math64x61_mul(depo_USD,temp1)
     let (depo_USD_erc) = Math64x61_div(temp2,Math64x61_ONE) 
     
     # Verify that the user has sufficient funds before call
@@ -133,17 +134,17 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         
     	# mint the lp token
     	let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
-        tempvar temp3 = Math64x61_add(lp_user,new_lp_issuance)
-        tempvar temp4 = Math64x61_add(block_ts_64x61,lockup_period)
+        let (temp3) = Math64x61_add(lp_user,new_lp_issuance)
+        let (temp4) = Math64x61_add(block_ts_64x61,lockup_period)
         CZCore.set_lp_balance(czcore_addy,user, temp3, temp4)
 
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
         return (new_lp_issuance)
     else:	
-        tempvar temp5 = Math64x61_mul(new_capital_total,lp_total)
-        tempvar temp6 = Math64x61_div(temp5, capital_total)
-    	let new_lp_issuance = Math64x61_sub(temp6, lp_total)
+        let (temp5) = Math64x61_mul(new_capital_total,lp_total)
+        let (new_lp_total) = Math64x61_div(temp5, capital_total)
+    	let (new_lp_issuance) = Math64x61_sub(new_lp_total, lp_total)
 
         # transfer the actual USDC tokens to CZCore reserves - ERC decimal version
         CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, depo_USD_erc)
@@ -153,9 +154,9 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 	
     	# mint the lp token
     	let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
-        tempvar temp7 = Math64x61_add(lp_user,new_lp_issuance)
-        tempvar temp8 = Math64x61_add(block_ts_64x61,lockup_period)
-        CZCore.set_lp_balance(czcore_addy,user, temp7, temp8)
+        let (temp6) = Math64x61_add(lp_user,new_lp_issuance)
+        let (temp7) = Math64x61_add(block_ts_64x61,lockup_period)
+        CZCore.set_lp_balance(czcore_addy,user, temp6, temp7)
 
         # event
         lp_token_change.emit(addy=user,lp_change=new_lp_issuance,capital_change=depo_USD)
@@ -167,6 +168,7 @@ end
 @external
 func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(with_LP : felt) -> (usd : felt):
 
+    alloc_locals
     # Obtain the address of the czcore contract
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
@@ -187,22 +189,22 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     tempvar block_ts_64x61 = block_ts * Math64x61_ONE
     
     # can only withdraw if not in lock up
-    tempvar temp1 = Math64x61_sub(block_ts_64x61,lockup)
+    let (temp1) = Math64x61_sub(block_ts_64x61,lockup)
     with_attr error_message("Cant withdraw in lock up period."):
         assert_nn(temp1)
     end
 
     # verify user has sufficient LP tokens to redeem
-    tempvar temp2 = Math64x61_sub(lp_user,with_LP)
+    let (temp2) = Math64x61_sub(lp_user,with_LP)
     with_attr error_message("Insufficent LP tokens to redeem."):
         assert_nn(temp2)
     end
 	
     # calc new lp total
-    let new_lp_total = Math64x61_sub(lp_total, with_LP)
+    let (new_lp_total) = Math64x61_sub(lp_total, with_LP)
     
     # calc new capital total and capital to return
-    tempvar temp3 = Math64x61_mul(new_lp_total, capital_total)
+    let (temp3) = Math64x61_mul(new_lp_total, capital_total)
     let (new_capital_total) = Math64x61_div(temp3, lp_total)
     let (new_capital_redeem) = Math64x61_sub(capital_total, new_capital_total)
     
@@ -213,8 +215,8 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     let (decimals) = CZCore.erc20_decimals(czcore_addy, usdc_addy)
     
     # do decimal conversion so comparing like with like
-    tempvar temp4 = Math64x61_pow(Math64x61_TEN,decimals)
-    tempvar temp5 = Math64x61_mul(new_capital_redeem,temp4)
+    let (temp4) = Math64x61_pow(Math64x61_TEN,decimals)
+    let (temp5) = Math64x61_mul(new_capital_redeem,temp4)
     let (new_capital_redeem_erc) = Math64x61_div(temp5,Math64x61_ONE) 
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, new_capital_redeem_erc)
 
@@ -222,7 +224,7 @@ func withdraw_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     CZCore.set_lp_capital_total(czcore_addy,new_lp_total,new_capital_total)
     
     # burn lp tokens
-    tempvar temp6 = Math64x61_sub(lp_user,with_LP)
+    let (temp6) = Math64x61_sub(lp_user,with_LP)
     CZCore.set_lp_balance(czcore_addy,user, temp6, lockup)
     
     # event
@@ -234,6 +236,7 @@ end
 @view
 func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd : felt, lockup:felt):
 
+    alloc_locals
     # Obtain the address of the czcore contract
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
@@ -248,7 +251,7 @@ func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     if lp_user == 0:
     	return (0,0)
     else:
-        tempvar temp1 = Math64x61_mul(lp_user, capital_total)
+        let (temp1) = Math64x61_mul(lp_user, capital_total)
         let (capital_user) = Math64x61_div(temp1, lp_total)
 	return (capital_user,lockup)
     end
