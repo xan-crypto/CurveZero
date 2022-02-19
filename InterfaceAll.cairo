@@ -45,6 +45,10 @@ namespace CZCore:
     end
     func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     end
+    func erc20_balanceOf(erc_addy : felt, sender: felt) -> (balance : felt):
+    end
+    func erc20_decimals(erc_addy : felt) -> (decimals : felt):
+    end
     func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
     end
     func set_pp_status(user : felt, lp_user : felt, lp_amount : felt, cz_amount : felt, lockup : felt, promote : felt):
@@ -96,7 +100,7 @@ namespace Settings:
     end
     func set_min_max_loan(min_loan : felt, max_loan : felt):
     end       
-    func get_min_max_capital() -> min_capital : felt, max_capital : felt):
+    func get_min_max_capital() -> (min_capital : felt, max_capital : felt):
     end
     func set_min_max_capital(min_capital : felt, max_capital : felt):
     end    
@@ -108,7 +112,7 @@ namespace Settings:
     end
     func set_min_pp_accepted(min_pp : felt):
     end       
-    func get_insurance_shortfall_ratio() -> insurance_shortfall_ratio : felt):
+    func get_insurance_shortfall_ratio() -> (insurance_shortfall_ratio : felt):
     end
     func set_insurance_shortfall_ratio(insurance_shortfall_ratio : felt):
     end    
