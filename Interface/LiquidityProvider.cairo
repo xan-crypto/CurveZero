@@ -103,10 +103,12 @@ func deposit_USDC_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     # get user USDC balance
     let (usd_user) = CZCore.erc20_balanceOf(czcore_addy, usdc_addy, user)
     let (decimals) = CZCore.erc20_decimals(czcore_addy, usdc_addy)
+    
     # do decimal conversion so comparing like with like
     let (decimals_pow) = Math64x61_pow(Math64x61_TEN,decimals)
     let (depo_USD_mlt) = Math64x61_mul(depo_USD,decimals_pow)
     let (depo_USD_std) = Math64x61_div(depo_USD_mlt,Math64x61_ONE) 
+    
     # Verify that the user has sufficient funds before call
     with_attr error_message("User does not have sufficient funds."):
        assert_nn_le(depo_USD_std, usd_user)
