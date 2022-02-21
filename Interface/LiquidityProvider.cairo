@@ -153,11 +153,6 @@ func usdc_withdraw_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
         assert_le(current_ratio, is_ratio)
     end
 
-    # verify that the amount is lp withdraw is positive and below total.
-    with_attr error_message("Amount must be positive and below LP total available."):
-        assert_nn_le(lp_withdraw, lp_total)
-    end
-
     # can only withdraw if not in lock up
     let (user) = get_caller_address()
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
@@ -166,6 +161,10 @@ func usdc_withdraw_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
         assert_le(lockup, block_ts)
     end
 
+    # verify that the amount is lp withdraw is positive and below total.
+    with_attr error_message("Amount must be positive and below LP total available."):
+        assert_nn_le(lp_withdraw, lp_total)
+    end
     # verify user has sufficient LP tokens to redeem
     with_attr error_message("Insufficent LP tokens to redeem."):
         assert_le(lp_withdraw, lp_user)
