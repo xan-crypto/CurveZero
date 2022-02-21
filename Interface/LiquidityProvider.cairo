@@ -186,27 +186,22 @@ func usdc_withdraw_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     # store all new data
     CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
     # burn lp tokens
-    let (temp6) = Math64x61_sub(lp_user, with_LP)
+    let (temp6) = Math64x61_sub(lp_user, lp_withdraw)
     CZCore.set_lp_balance(czcore_addy, user, temp6, lockup)
     # event
-    lp_token_change.emit(addy=user, lp_change=-with_LP, capital_change=-new_capital_redeem)
+    lp_token_change.emit(addy=user, lp_change=-lp_withdraw, capital_change=-new_capital_redeem)
     return (new_capital_redeem)
 end
 
 # whats my LP tokens worth
 @view
-func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        user : felt) -> (usd : felt, lockup : felt):
+func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd : felt, lockup : felt):
+    
     alloc_locals
-    # Obtain the address of the czcore contract
+    # get variables
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-
-    # check total lp tokens and capital
-    let (lp_total, capital_total, loan_total, insolvency_shortfall) = CZCore.get_cz_state(
-        czcore_addy)
-
-    # Obtain the user lp tokens
+    let (lp_total, capital_total, loan_total, insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
 
     # calc user capital to return
