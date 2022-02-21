@@ -112,15 +112,15 @@ func usdc_deposit_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
         # mint the lp token
         let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
-        let (temp3) = Math64x61_add(lp_user, new_lp_issuance)
-        let (temp4) = Math64x61_add(block_ts, lockup_period)
-        CZCore.set_lp_balance(czcore_addy, user, temp3, temp4)
+        let (temp1) = Math64x61_add(lp_user, new_lp_issuance)
+        let (temp2) = Math64x61_add(block_ts, lockup_period)
+        CZCore.set_lp_balance(czcore_addy, user, temp1, temp2)
         # event
         lp_token_change.emit(addy=user, lp_change=new_lp_issuance, capital_change=usdc_deposit)
         return (new_lp_issuance)
     else:
-        let (temp5) = Math64x61_mul(new_capital_total, lp_total)
-        let (new_lp_total) = Math64x61_div(temp5, capital_total)
+        let (temp3) = Math64x61_mul(new_capital_total, lp_total)
+        let (new_lp_total) = Math64x61_div(temp3, capital_total)
         let (new_lp_issuance) = Math64x61_sub(new_lp_total, lp_total)
         # transfer the actual USDC tokens to CZCore reserves - ERC decimal version
         CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, usdc_deposit_erc)
@@ -128,9 +128,9 @@ func usdc_deposit_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
         # mint the lp token
         let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
-        let (temp6) = Math64x61_add(lp_user, new_lp_issuance)
-        let (temp7) = Math64x61_add(block_ts, lockup_period)
-        CZCore.set_lp_balance(czcore_addy, user, temp6, temp7)
+        let (temp4) = Math64x61_add(lp_user, new_lp_issuance)
+        let (temp5) = Math64x61_add(block_ts, lockup_period)
+        CZCore.set_lp_balance(czcore_addy, user, temp4, temp5)
         # event
         lp_token_change.emit(addy=user, lp_change=new_lp_issuance, capital_change=usdc_deposit_erc)
         return (new_lp_issuance)
@@ -172,8 +172,8 @@ func usdc_withdraw_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 
     # other variables and calcs
     let (new_lp_total) = Math64x61_sub(lp_total, lp_withdraw)
-    let (temp3) = Math64x61_mul(new_lp_total, capital_total)
-    let (new_capital_total) = Math64x61_div(temp3, lp_total)
+    let (temp1) = Math64x61_mul(new_lp_total, capital_total)
+    let (new_capital_total) = Math64x61_div(temp1, lp_total)
     let (new_capital_redeem) = Math64x61_sub(capital_total, new_capital_total)
 
     # transfer the actual USDC tokens from CZCore reserves
@@ -186,8 +186,8 @@ func usdc_withdraw_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     # store all new data
     CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
     # burn lp tokens
-    let (temp6) = Math64x61_sub(lp_user, lp_withdraw)
-    CZCore.set_lp_balance(czcore_addy, user, temp6, lockup)
+    let (temp2) = Math64x61_sub(lp_user, lp_withdraw)
+    CZCore.set_lp_balance(czcore_addy, user, temp2, lockup)
     # event
     lp_token_change.emit(addy=user, lp_change=-lp_withdraw, capital_change=-new_capital_redeem)
     return (new_capital_redeem)
