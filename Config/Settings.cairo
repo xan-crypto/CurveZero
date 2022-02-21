@@ -41,6 +41,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     min_pp_accepted.write(5*Math64x61_ONE)
     # insurance shortfall ratio to lp capital
     insurance_shortfall_ratio.write(Math64x61_ONE*1/100)    
+    # max loan term - 1 year initially
+    max_loan_term.write(366 * 86400 * Math64x61_ONE)   
     return ()
 end
 
@@ -284,5 +286,26 @@ end
 func set_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(is_ratio : felt):
     check_caller_is_controller()
     insurance_shortfall_ratio.write(is_ratio)
+    return ()
+end
+
+##################################################################
+# max loan term
+@storage_var
+func max_loan_term() -> (res : felt):
+end
+
+# return max loan term
+@view
+func get_max_loan_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (max_term : felt):
+    let (res) = max_loan_term.read()
+    return (res)
+end
+
+# set max loan term
+@external
+func set_max_loan_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(max_term : felt):
+    check_caller_is_controller()
+    max_loan_term.write(max_term)
     return ()
 end
