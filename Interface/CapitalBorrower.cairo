@@ -193,6 +193,12 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
        assert_in_range(end_ts, block_ts, temp6)
     enn
 
+    # check loan amount within correct ranges
+    let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
+    with_attr error_message("Notional be within min max loan range."):
+       assert_in_range(notional, min_loan, max_loan)
+    enn
+
     # add origination fee
     let (fee, pp_split, if_split) = Settings.get_origination_fee(settings_addy)
     let (temp7) = Math64x61_add(fee,Math64x61_ONE)
@@ -201,7 +207,6 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # transfer collateral to CZCore and transfer USDC to user
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
-    
     let (notional_erc) = Math64x61_convert_from(notional,usdc_decimals) 
     let (origination_fee) = Math64x61_sub(notional_with_fee,notional)
     let (temp8) = Math64x61_mul(origination_fee,pp_split)
