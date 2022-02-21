@@ -69,11 +69,6 @@ end
 func usdc_deposit_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(usdc_deposit : felt) -> (lp_token : felt):
     
     alloc_locals
-    # verify that the usdc depo is positive, Math64x61 type
-    with_attr error_message("Amount must be positive."):
-        assert_nn(usdc_deposit)
-    end
-
     # check that usdc depo within restricted deposit range
     let (_trusted_addy) = trusted_addy.read()
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
