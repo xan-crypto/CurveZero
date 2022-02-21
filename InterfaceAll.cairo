@@ -74,9 +74,9 @@ end
 namespace ERC20:
     func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
     end
-    func balanceOf(account: felt) -> (balance: Uint256):
+    func ERC20_balanceOf(account: felt) -> (balance: Uint256):
     end
-    func decimals() -> (decimals: felt):
+    func ERC20_decimals() -> (decimals: felt):
     end    
 end
 
