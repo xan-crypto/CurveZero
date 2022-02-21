@@ -18,6 +18,7 @@ const Math64x61_INT_PART = 2 ** 64
 const Math64x61_FRACT_PART = 2 ** 61
 const Math64x61_BOUND = 2 ** 125
 const Math64x61_ONE = 1 * Math64x61_FRACT_PART
+const Math64x61_TEN = 10 * Math64x61_FRACT_PART
 const Math64x61_E = 6267931151224907085
 
 func Math64x61_assert64x61 {range_check_ptr} (x: felt):
@@ -49,6 +50,13 @@ end
 func Math64x61_fromUint256 {range_check_ptr} (x: Uint256) -> (res: felt):
     assert x.high = 0
     let (res) = Math64x61_fromFelt(x.low)
+    return (res)
+end
+
+# Converts 64.61 number to token number for transactions
+func Math64x61_convert_from {range_check_ptr} (x: felt, y: felt) -> (res: felt):
+    let multiplier = 10 ** y
+    let res = Math64x61_mul(x, multiplier)
     return (res)
 end
 
