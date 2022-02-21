@@ -62,6 +62,11 @@ end
 func czt_addy() -> (addy : felt):
 end
 
+# addy of the ERC-20 WETH contract
+@storage_var
+func weth_addy() -> (addy : felt):
+end
+
 # set the relevant addys on deployment, is there a better way to do this?
 # check with starknet devs
 @constructor
@@ -76,7 +81,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     _controller_addy : felt,
     _settings_addy : felt,
     _usdc_addy : felt,
-    _czt_addy : felt):
+    _czt_addy : felt,
+    _weth_addy : felt):
     lp_addy.write(_lp_addy)
     pp_addy.write(_pp_addy)
     cb_addy.write(_cb_addy)
@@ -88,6 +94,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     settings_addy.write(_settings_addy)
     usdc_addy.write(_usdc_addy)
     czt_addy.write(_czt_addy)
+    weth_addy.write(_weth_addy)
     return ()
 end
 
@@ -165,5 +172,12 @@ end
 @view
 func get_czt_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
     let (addy) = czt_addy.read()
+    return (addy)
+end
+
+# get the ERC-20 WETH contract addy
+@view
+func get_weth_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = weth_addy.read()
     return (addy)
 end
