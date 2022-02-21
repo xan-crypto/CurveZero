@@ -4,24 +4,20 @@
 # imports
 %lang starknet
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.math_cmp import is_nn, is_le, is_not_zero
+from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.signature import verify_ecdsa_signature
-from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem, assert_in_range
+from starkware.cairo.common.math import unsigned_div_rem, assert_in_range
 from starkware.starknet.common.syscalls import get_caller_address
-from starkware.starknet.common.syscalls import get_block_timestamp
-from InterfaceAll import TrustedAddy, CZCore, Settings
-from Math.Math64x61 import (
-    Math64x61_mul, Math64x61_div, Math64x61_pow, Math64x61_pow_frac, Math64x61_sqrt, Math64x61_exp,
-    Math64x61_ln, Math64x61_sub, Math64x61_add)
+from InterfaceAll import TrustedAddy, CZCore, Settings, ERC20
+from Math.Math64x61 import (Math64x61_mul, Math64x61_div, Math64x61_pow_frac, Math64x61_sub, Math64x61_add, Math64x61_ts)
 
 ##################################################################
 # constants
-const Math64x61_FRACT_PART = 2 ** 61
-const Math64x61_ONE = 1 * Math64x61_FRACT_PART
 # 24*60*60*365.25
-const year_secs = 31557600 * Math64x61_ONE
+Math64x61_ONE = 2 ** 61
+const year_secs = 31557600 * 2 ** 61
 
 ##################################################################
 # addy of the deployer
@@ -31,16 +27,14 @@ end
 
 # set the addy of the delpoyer on deploy
 @constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        deployer : felt):
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(deployer : felt):
     deployer_addy.write(deployer)
     return ()
 end
 
 # who is deployer
 @view
-func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        addy : felt):
+func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
     let (addy) = deployer_addy.read()
     return (addy)
 end
@@ -54,16 +48,14 @@ end
 
 # get the trusted contract addy
 @view
-func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        addy : felt):
+func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
     let (addy) = trusted_addy.read()
     return (addy)
 end
 
 # set the trusted contract addy
 @external
-func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        addy : felt):
+func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
     let (caller) = get_caller_address()
     let (deployer) = deployer_addy.read()
     with_attr error_message("Only deployer can change the Trusted addy."):
@@ -92,27 +84,21 @@ end
 # CB contract functions
 # query a users loan
 @view
-func get_loan_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        user : felt) -> (
-        has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt,
-        rate : felt, accrued_interest : felt):
+func get_loan_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (
+        has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, accrued_interest : felt):
+    
     alloc_locals
-    # Obtain the address of the czcore contract
+    # calc accrued interest and return loan details
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-
-    # get user loan
     let (has_loan, notional, collateral, start_ts, end_ts, rate) = CZCore.get_cb_loan(czcore_addy, user)
-
-    # calc accrued interest
-    let (block_ts) = get_block_timestamp()
-    tempvar block_ts_64x61 = block_ts * Math64x61_ONE
+    let (block_ts) = Math64x61_ts()
 
     # if no loan
     if has_loan == 0:
         return (has_loan, notional, collateral, start_ts, end_ts, rate, 0)
     else:
-        let (temp1) = Math64x61_sub(block_ts_64x61, start_ts)
+        let (temp1) = Math64x61_sub(block_ts, start_ts)
         let (temp2) = Math64x61_div(temp1, year_secs)
         let (temp3) = Math64x61_add(Math64x61_ONE, rate)
         let (temp4) = Math64x61_pow_frac(temp3, temp2)
@@ -124,30 +110,24 @@ end
 
 # accecpt a loan / set loan terms
 @external
-func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt,
-        pp_data : felt*) - > (res : felt):
+func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt,pp_data : felt*) - > (res : felt):
     
     # addys and check if existing loan
     let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (has_loan, _) = CZCore.get_cb_loan(czcore_addy, user)
-    
-    # check if already has a loan
     with_attr error_message("User already has an existing loan, refinance instead."):
         assert has_loan = 0
     end
     
     # pp data should be passed as follows
     # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
-
     let (loanID_hash) = hash2{hash_ptr=pedersen_ptr}(loanID, 0)
     let (rate_array : felt*) = alloc()
     let (pp_pub_array : felt*) = alloc()
 
-    # iterate thru pp data
-    # Verify the pp's signature.
+    # iterate thru pp data - verify the pp's signature.
     let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loanID_hash)
     
     # check eno pp for pricing, settings has min_pp
@@ -162,8 +142,7 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (median, _) = unsigned_div_rem(len_ordered, 2)
 
     # later randomly select 75% of the PPs, also deal with median when even number of PP
-    let (median_rate) = ordered[median]
-    
+    let (median_rate) = ordered[median]    
     # get index of rate to find winning PP
     let (winning_position) = index[median]
     let (winning_pp) = pp_pub_array[winning_position]
