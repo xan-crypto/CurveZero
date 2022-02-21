@@ -151,7 +151,7 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loanID_hash)
     
     # check eno pp for pricing, settings has min_pp
-    let (setting_addy) = Trusted.get_settings_addy.read()
+    let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (min_pp) = Settings.get_min_pp(setting_addy)
     with_attr error_message("Not enough PPs for valid pricing."):
         assert_le(min_pp,rate_array_len)
@@ -170,24 +170,25 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 
     # call oracle price for collateral
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
-    Oracle.update_weth_price(oracle_addy)
-    let (WETH_price) = Oracle.get_weth_price(oracle_addy)
+    CZcore.update_weth_price(czcore_addy,oracle_addy)
+    let (WETH_price) = CZcore.get_weth_price(czcore_addy,oracle_addy)
 
     # get ltv from setting
+    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
     let (WETH_ltv) = Settings.get_weth_ltv(settings_addy)
     # test sufficient collateral to proceed vs notional of loan
-    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
-    let (decimals) = CZCore.erc20_decimals(czcore_addy,weth_addy)
-    let (temp1) = Math64x61_convert_to(WETH_price,decimals)
+    let (weth_decimals) = CZCore.erc20_decimals(czcore_addy,weth_addy)
+    let (temp1) = Math64x61_convert_to(WETH_price,weth_decimals)
     let (temp2) = Math64x61_mul(temp1,collateral)
+    let (temp3) = Math64x61_mul(temp2,WETH_ltv)
     with_attr error_message("Not sufficient collateral for loan"):
-        assert_le(temp2,notional)
+        assert_le(notional,temp3)
     end
     
     # get user weth balance - not Math64x61 types
     let (WETH_user) = CZCore.erc20_balanceOf(czcore_addy, weth_addy, user)   
     # do decimal conversion so comparing like with like
-    let (collateral_erc) = Math64x61_convert_from(collateral,decimals) 
+    let (collateral_erc) = Math64x61_convert_from(collateral,weth_decimals) 
     
     # Verify that the user has sufficient funds before call
     with_attr error_message("User does not have sufficient funds."):
@@ -222,12 +223,15 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (notional_with_fee) = Math64x61_mul(temp6,notional)
 
     # transfer collateral to CZCore and transfer USDC to user
-    let (notional_erc) = Math64x61_convert_from(notional,decimals) 
+    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    let (usdc_decimals) = CZCore.erc20_decimals(czcore_addy,usdc_addy)
+    
+    let (notional_erc) = Math64x61_convert_from(notional,usdc_decimals) 
     let (origination_fee) = Math64x61_sub(notional_with_fee,notional)
     let (temp8) = Math64x61_mul(origination_fee,pp_split)
-    let(fee_erc_pp) = Math64x61_convert_from(temp8,decimals)
+    let(fee_erc_pp) = Math64x61_convert_from(temp8,usdc_decimals)
     let (temp9) =  Math64x61_mul(origination_fee,if_split)
-    let (fee_erc_if) = Math64x61_convert_from(temp9,decimals)
+    let (fee_erc_if) = Math64x61_convert_from(temp9,usdc_decimals)
     let(if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
 
     # transfer the actual USDC tokens to user - ERC decimal version
