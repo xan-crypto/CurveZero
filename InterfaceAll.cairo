@@ -71,7 +71,7 @@ end
 # need interface to the ERC-20 USDC/CZ contract that lives/will live on starknet, this is for USDC/CZ deposits and withdrawals
 # use the transfer from function to send the token from sender to recipient
 @contract_interface
-namespace ERC20:
+namespace Erc20:
     func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
     end
     func ERC20_balanceOf(account: felt) -> (balance: Uint256):
