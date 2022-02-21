@@ -6,6 +6,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import (TrustedAddy)
+from Math.Math64x61 import (Math64x61_add)
 
 ##################################################################
 # constants 
@@ -147,6 +148,10 @@ end
 @external
 func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt, pp_split : felt, if_split : felt):
     check_caller_is_controller()
+    let (temp1) = Math64x61_add(pp_split,if_split)
+    with_attr error_message("PP split and IF split should sum to 1"):
+        assert temp1 = Math64x61_ONE
+    end
     origination_fee.write((fee,pp_split,if_split))
     return ()
 end
@@ -168,6 +173,11 @@ end
 @external
 func set_accrued_interest_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_split : felt, if_split : felt, gt_split : felt):
     check_caller_is_controller()
+    let (temp1) = Math64x61_add(lp_split,if_split)
+    let (temp2) = Math64x61_add(temp1,gt_split)
+    with_attr error_message("LP split and IF split and GT split should sum to 1"):
+        assert temp2 = Math64x61_ONE
+    end
     accrued_interest_split.write((lp_split,if_split,gt_split))
     return ()
 end
