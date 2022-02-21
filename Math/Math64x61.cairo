@@ -54,6 +54,7 @@ func Math64x61_fromUint256 {range_check_ptr} (x: Uint256) -> (res: felt):
 end
 
 # Converts 64.61 number to token number for transactions
+# x is 64x61 fixed point number and y is a positive integer
 func Math64x61_convert_from {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     let (multiplier) = Math64x61_pow(Math64x61_TEN, y)
     let (product) = Math64x61_mul(x, multiplier)
