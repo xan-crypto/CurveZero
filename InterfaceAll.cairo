@@ -108,9 +108,9 @@ namespace Settings:
     end
     func set_min_max_capital(min_capital : felt, max_capital : felt):
     end    
-    func get_utilization() -> (start : felt, stop : felt):
+    func get_utilization() -> (stop : felt):
     end
-    func set_utilization(start : felt, stop : felt):
+    func set_utilization(stop : felt):
     end       
     func get_min_pp_accepted() -> (min_pp : felt):
     end
