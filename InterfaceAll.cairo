@@ -120,4 +120,8 @@ namespace Settings:
     end
     func set_insurance_shortfall_ratio(insurance_shortfall_ratio : felt):
     end    
+    func get_max_loan_term() -> (max_term : felt):
+    end
+    func set_max_loan_term(max_term : felt):
+    end  
 end
