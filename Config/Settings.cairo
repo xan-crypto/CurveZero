@@ -227,21 +227,21 @@ end
 ##################################################################
 # utilization start and stop levels
 @storage_var
-func utilization() -> (res : (felt,felt)):
+func utilization() -> (res : felt):
 end
 
-# return start and stop utilization levels
+# return stop utilization level
 @view
-func get_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (start : felt, stop : felt):
+func get_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (stop : felt):
     let (res) = utilization.read()
-    return (res[0],res[1])
+    return (res)
 end
 
-# set start and stop utilization levels for loan provision
+# set stop utilization level for loan provision
 @external
-func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(start : felt, stop : felt):
+func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(stop : felt):
     check_caller_is_controller()
-    utilization.write((start,stop))
+    utilization.write(stop)
     return ()
 end
 
