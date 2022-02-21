@@ -3,6 +3,7 @@
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.pow import pow
+from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.math import (
     assert_le,
     assert_lt,
@@ -283,4 +284,11 @@ func Math64x61_log10 {range_check_ptr} (x: felt) -> (res: felt):
     let (log10_x) = Math64x61_log2(x)
     let (product) = Math64x61_mul(log10_x, log10_2)
     return (product)
+end
+
+# Returns block ts in 64.61 format
+func Math64x61_ts {syscall_ptr : felt*,range_check_ptr} () -> (res: felt):
+    let (block_ts) = get_block_timestamp()
+    tempvar res = block_ts * Math64x61_ONE
+    return (res)
 end
