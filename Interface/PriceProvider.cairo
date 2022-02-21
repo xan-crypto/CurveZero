@@ -4,16 +4,10 @@
 # imports
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.math import assert_nn, assert_nn_le
+from starkware.cairo.common.math import assert_nn_le
 from starkware.starknet.common.syscalls import get_caller_address
-from InterfaceAll import (TrustedAddy, CZCore, Settings)
-from Math.Math64x61 import (Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_pow)
-
-##################################################################
-# constants 
-const Math64x61_FRACT_PART = 2 ** 61
-const Math64x61_ONE = 1 * Math64x61_FRACT_PART
-const Math64x61_TEN = 10 * Math64x61_FRACT_PART
+from InterfaceAll import TrustedAddy, CZCore, Settings, ERC20
+from Math.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_convert_from, Math64x61_ts
 
 ##################################################################
 # addy of the deployer
@@ -64,7 +58,6 @@ end
 ##################################################################
 # need to emit PP events so that we can do reporting / dashboard to monitor system
 # need to emit amount of lp and cz change, to recon vs. total lp cz holdings for pp
-# events keeping tracks of what happened
 @event
 func pp_token_change(addy : felt, pp_status : felt, lp_change : felt, cz_change : felt):
 end
@@ -74,12 +67,8 @@ end
 # view user PP status
 @view
 func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt) -> (lp_token : felt, cz_token : felt, status : felt):
-    
-    # Obtain the address of the czcore contract
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    
-    # check pp status and tokens 
     let (lp_locked,cz_locked,pp_status) = CZCore.get_pp_status(czcore_addy,user)
     return (lp_locked,cz_locked,pp_status)
 end
@@ -88,52 +77,37 @@ end
 @external
 func set_pp_promote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}():
     
-    # Obtain the address of the czcore contract
+    # check if status not 1 already - existing pp
     let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (lp_locked,cz_locked,pp_status) = CZCore.get_pp_status(czcore_addy,user)
-    
-    # check if status not 1 already - existing pp
     with_attr error_message("User is already an existing PP."):
         assert pp_status = 0
     end
     
-    # get the current token requirements
-    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    let (lp_require,cz_require) = Settings.get_pp_token_requirement(settings_addy)
-    
     # check that user has eno LP tokens
+    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    let (lp_require,cz_require) = Settings.get_pp_token_requirement(settings_addy)    
     let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
-    # verify user has sufficient LP tokens 
-    let (temp1) = Math64x61_sub(lp_user, lp_require)
     with_attr error_message("Insufficent lp tokens to promote."):
-        assert_nn(temp1)
+        assert_nn_le(lp_require,lp_user)
     end
     
-    # transfer the actual CZT tokens to CZCore reserves
-    let (cztc_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
-    
-    # get user CZT balance - not Math64x61 types
-    let (CZT_user) = CZCore.erc20_balanceOf(czcore_addy, cztc_addy, user)
-    let (decimals) = CZCore.erc20_decimals(czcore_addy, cztc_addy)
-    
-    # do decimal conversion so comparing like with like
-    let (temp1) = Math64x61_pow(Math64x61_TEN,decimals)
-    let (temp2) = Math64x61_mul(cz_require,temp1)
-    let (cz_require_erc) = Math64x61_div(temp2,Math64x61_ONE) 
-    
     # Verify that the user has sufficient funds before call
+    let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
+    let (czt_user) = ERC20.ERC20_balanceOf(czt_addy, user)
+    let (czt_decimals) = ERC20.ERC20_decimals(czt_addy)
+    # do decimal conversion so comparing like with like
+    let (cz_require_erc) = Math64x61_convert_from(czt_require, czt_decimals)
     with_attr error_message("User does not have sufficient funds."):
-       assert_le(cz_require_erc, CZT_user)
+       assert_le(cz_require_erc, czt_user)
     enn
     
     # transfer the actual CZT tokens to CZCore reserves - ERC decimal version
-    CZCore.erc20_transferFrom(czcore_addy, cztc_addy, user, czcore_addy, cz_require_erc)
-        
+    CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, cz_require_erc)
     # call czcore to promote and update
     CZCore.set_pp_status(czcore_addy,user,lp_user,lp_require,cz_require,lockup,1)
-    
     # event
     pp_token_change.emit(addy=user,pp_status=1,lp_change=lp_require,cz_change=cz_require)  
     return()
@@ -143,37 +117,27 @@ end
 @external
 func set_pp_demote{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}():
 
-    # Obtain the address of the czcore contract
+    # check if status not 0 already - not a pp
     let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (lp_locked,cz_locked,pp_status) = CZCore.get_pp_status(czcore_addy,user)
-    
-    # check if status not 0 already - not a pp
     with_attr error_message("User is not an existing PP."):
         assert pp_status = 1
     end
     
     # transfer the actual CZT tokens to CZCore reserves
-    let (cztc_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
-    
-    # cz_locked - is a Math64x61 type
-    let (decimals) = CZCore.erc20_decimals(czcore_addy, cztc_addy)
-    
+    let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
+    let (czt_decimals) = ERC20.ERC20_decimals(czt_addy)
     # do decimal conversion so comparing like with like
-    let (temp1) = Math64x61_pow(Math64x61_TEN,decimals)
-    let (temp2) = Math64x61_mul(cz_locked,temp1)
-    let (cz_locked_erc) = Math64x61_div(temp2,Math64x61_ONE) 
+    let (cz_locked_erc) = Math64x61_convert_from(cz_locked, czt_decimals)
     
     # transfer the actual CZT tokens from CZCore reserves - ERC decimal version
     CZCore.erc20_transferFrom(czcore_addy, cztc_addy, czcore_addy, user, cz_locked_erc)
-        
     # get user lp balance
     let (lp_user,lockup) = CZCore.get_lp_balance(czcore_addy,user)
-    
     # call czcore to demote and update
     CZCore.set_pp_status(czcore_addy,user,lp_user,lp_locked,cz_locked,lockup,0)
-    
     # event
     pp_token_change.emit(addy=user,pp_status=0,lp_change=lp_locked,cz_change=cz_locked)  
     return()
