@@ -70,7 +70,7 @@ end
 # need to emit CB events so that we can build the loan book for liquidation/monitoring/dashboard
 # events keeping tracks of what happened
 @event
-func new_loan():
+func new_loan.emit(addy : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt)
 end
 
 @event
@@ -195,12 +195,12 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 
     # add origination fee
     let (fee, pp_split, if_split) = Settings.get_origination_fee(settings_addy)
-    let (temp6) = Math64x61_add(fee,Math64x61_ONE)
-    let (notional_with_fee) = Math64x61_mul(temp6,notional)
+    let (temp7) = Math64x61_add(fee,Math64x61_ONE)
+    let (notional_with_fee) = Math64x61_mul(temp7,notional)
 
     # transfer collateral to CZCore and transfer USDC to user
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    let (usdc_decimals) = CZCore.erc20_decimals(czcore_addy,usdc_addy)
+    let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
     
     let (notional_erc) = Math64x61_convert_from(notional,usdc_decimals) 
     let (origination_fee) = Math64x61_sub(notional_with_fee,notional)
@@ -211,16 +211,18 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let(if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
 
     # transfer the actual USDC tokens to user - ERC decimal version
-    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
     # transfer pp and if
-    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, fee_erc_pp)
-    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, fee_erc_if)
-
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, fee_erc_pp)
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, fee_erc_if)
     # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
 
     #update CZCore
-    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts_64x61, end_ts, median_rate, 0)
+    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts, end_ts, median_rate, 0)
+    
+    #event
+    new_loan.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
     return (1)
 end
 
