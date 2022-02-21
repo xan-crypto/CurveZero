@@ -184,7 +184,7 @@ func usdc_withdraw_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 
     # transfer the actual USDC tokens from CZCore reserves
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    let (usdc_decimals) = CZCore.erc20_decimals(czcore_addy, usdc_addy)
+    let (usdc_decimals) = ERC20.ERC20_decimals(usdc_addy)
     # do decimal conversion so comparing like with like
     let (new_capital_redeem_erc) = Math64x61_convert_from(new_capital_redeem, usdc_decimals)
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, new_capital_redeem_erc)
