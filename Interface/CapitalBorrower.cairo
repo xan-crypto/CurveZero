@@ -1,4 +1,6 @@
+   
 # CB contract
+# all numbers passed into contract must be Math64x61 type
 
 # imports
 %lang starknet
@@ -7,15 +9,11 @@ from starkware.cairo.common.math_cmp import (is_nn, is_le, is_not_zero)
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.signature import verify_ecdsa_signature
-from starkware.cairo.common.math import assert_nn, assert_nn_le, unsigned_div_rem
+from starkware.cairo.common.math import assert_nn, assert_nn_le
 from starkware.starknet.common.syscalls import get_caller_address
-from starkware.cairo.common.uint256 import (
-    Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check)
 from starkware.starknet.common.syscalls import get_block_timestamp
-from InterfaceAll import TrustedAddy, CZCore, Settings
-from Math.Math64x61 import (
-    Math64x61_mul, Math64x61_div, Math64x61_pow, Math64x61_pow_frac, Math64x61_sqrt, Math64x61_exp,
-    Math64x61_ln,Math64x61_sub,Math64x61_add)
+from InterfaceAll import (TrustedAddy, CZCore, Settings)
+from Math.Math64x61 import (Math64x61_mul, Math64x61_div, Math64x61_pow, Math64x61_pow_frac, Math64x61_sqrt, Math64x61_exp,Math64x61_ln,Math64x61_sub,Math64x61_add)
 
 ##################################################################
 # constants 
@@ -32,16 +30,14 @@ end
 
 # set the addy of the delpoyer on deploy
 @constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        deployer : felt):
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(deployer : felt):
     deployer_addy.write(deployer)
     return ()
 end
 
 # who is deployer
 @view
-func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        addy : felt):
+func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
     let (addy) = deployer_addy.read()
     return (addy)
 end
@@ -55,16 +51,14 @@ end
 
 # get the trusted contract addy
 @view
-func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        addy : felt):
+func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
     let (addy) = trusted_addy.read()
     return (addy)
 end
 
 # set the trusted contract addy
 @external
-func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        addy : felt):
+func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
     let (caller) = get_caller_address()
     let (deployer) = deployer_addy.read()
     with_attr error_message("Only deployer can change the Trusted addy."):
@@ -114,12 +108,12 @@ func get_loan_accured_interest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     if has_loan == 0:
         return (has_loan,notional,collateral,start_ts,end_ts,rate,0)
     else:
-        let (ts_diff) = Math64x61_sub(block_ts_64x61,start_ts)
-        let (year_frac) = Math64x61_div(ts_diff,year_secs)
-        let (accrual_factor) = Math64x61_add(Math64x61_ONE,rate)
-        let (actual_accrual) = Math64x61_pow_frac(accrual_factor,year_frac)
-        let (notional_accrual) = Math64x61_mul(notional,actual_accrual)
-        let (accrued_interest) = Math64x61_sub(notional_accrual,notional)
+        let (temp1) = Math64x61_sub(block_ts_64x61,start_ts)
+        let (temp2) = Math64x61_div(temp1,year_secs)
+        let (temp3) = Math64x61_add(Math64x61_ONE,rate)
+        let (temp4) = Math64x61_pow_frac(temp3,temp2)
+        let (temp5) = Math64x61_mul(notional,temp4)
+        let (accrued_interest) = Math64x61_sub(temp5,notional)
         return (has_loan,notional,collateral,start_ts,end_ts,rate,accrued_interest)
     end
 end
