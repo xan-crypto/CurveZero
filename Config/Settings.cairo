@@ -33,8 +33,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     accrued_interest_split.write((Math64x61_ONE*95/100, Math64x61_ONE*3/100, Math64x61_ONE*2/100))
     # min loan and max loan amounts
     min_max_loan.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
-    # min capital and max capital from lps accepted
-    min_max_capital.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
+    # min deposit and max deposit from LPs accepted
+    min_max_deposit.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
     # utilization start and stop levels
     utilization.write((Math64x61_ONE*80/100, Math64x61_ONE*90/100))
     # min number of PPs for pricing
@@ -204,23 +204,23 @@ func set_min_max_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 ##################################################################
-# min capital and max capital from lps accepted
+# min deposit and max deposit from LPs accepted
 @storage_var
-func min_max_capital() -> (res : (felt,felt)):
+func min_max_deposit() -> (res : (felt,felt)):
 end
 
-# return min capital and max capital from lps accepted
+# return min deposit and max deposit from LPs accepted
 @view
-func get_min_max_capital{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (min_capital : felt, max_capital : felt):
-    let (res) = min_max_capital.read()
+func get_min_max_deposit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (min_deposit : felt, max_deposit : felt):
+    let (res) = min_max_deposit.read()
     return (res[0],res[1])
 end
 
-# set min capital and max capital from lps accepted
+# set min deposit and max deposit from LPs accepted
 @external
-func set_min_max_capital{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_capital : felt, max_capital : felt):
+func set_min_max_deposit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_deposit : felt, max_deposit : felt):
     check_caller_is_controller()
-    min_max_capital.write((min_capital,max_capital))
+    min_max_deposit.write((min_deposit,max_deposit))
     return ()
 end
 
