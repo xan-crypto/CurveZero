@@ -59,7 +59,7 @@ end
 # need to emit LP events so that we can do reporting / dashboard to monitor system
 # dont need to emit total lp and total capital since can do that with history of changes
 @event
-func gt_stake_unstake():
+func gt_stake_unstake(addy : felt, stake : felt):
 end
 
 @event
@@ -70,26 +70,80 @@ end
 # GT contract functions
 # stake GT tokens to earn staking time which aportions to rewards
 @external
-func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}:
+func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt):
+    
+    # check stake is positve amount
+    with_attr error_message("GT stake should be positive amount."):
+        assert_nn(gt_token)
+    end
+    
+    # check user have the coins to stake
+    let (_trusted_addy) = trusted_addy.read()
+    let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
+    let (user) = get_caller_address()
+    let (czt_user) = ERC20.ERC20_balanceOf(czt_addy, user)
+    let (czt_decimals) = ERC20.ERC20_decimals(czt_addy)
+    let (gt_token_erc) = Math64x61_convert_from(gt_token, czt_decimals)
+    with_attr error_message("User does not have sufficient funds."):
+        assert_le(gt_token_erc, czt_user)
+    end
+    
+    # get current user staking time
+    let (gt_user, avg_time_user) = get_staking_time_user(user)
+    # get aggregate staking time
+    let (gt_total, avg_time_total) = get_staking_time_total()
+    let (block_ts) = Math64x61_ts()
+    
+    # cal new user / total staking time
+    let (new_gt_user, new_avg_time_user) = update_staking(gt_user, avg_time_user, gt_token, block_ts)
+    let (new_gt_total, new_avg_time_total) = update_staking(gt_total, avg_time_total, gt_token, block_ts)    
+       
+    # transfer tokens
+    CZCore.erc20_transferFrom(czcore_addy, czt_user, user, czcore_addy, gt_token_erc)            
+    # update user
+    CZCore.set_staking_time_user(czcore_addy, new_gt_user, new_avg_time_user)
+    # update aggregate
+    CZCore.set_staking_time_total(czcore_addy, new_gt_total, new_avg_time_total)
+    # event
+    gt_stake_unstake(addy=user,stake=gt_token)
+    return(1)
+end
+
+# update staking function
+func update_staking{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(old_gt:felt,old_time:felt,new_gt:felt,new_time:felt) -> (updated_gt:felt,updated_time:felt):
+    if old_gt == 0:
+        return(new_gt,new_time)
+    else:
+        let (temp1) = Math64x61_add(old_gt, new_gt)
+        let (temp2) = Math64x61_mul(old_gt, old_time)
+        let (temp3) = Math64x61_mul(new_gt, new_time)
+        let (temp4) = Math64x61_add(temp2, temp3)
+        let (temp5) = Math64x61_div(temp4, temp1)
+        return(temp1,temp5)    
+    end
 end
 
 # unstake GT tokens, call claim before if unstaking all
 @external
-func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}:
+func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt):
+    # check user has coins to unstake
+    # get current user staking time
+    # get aggregate staking time
+    
+    # if no more coins post unstake => call claim for user
+    # cal new user staking time
+    # cal aggregate staking time
+    
+    # transfer tokens
+    # update user
+    # update aggregate
 end
 
 # claim rewards in portion to GT staked time
 @external
 func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}:
+    # get user staking time
+    # get aggregate staking time
+    # aportion reward for user
+    # pay to user account
 end
-
-
-
-
-
-
-
-
-
-
-
