@@ -152,7 +152,11 @@ func usdc_withdraw_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (lp_total, capital_total, loan_total, insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
     let (is_ratio) = Settings.get_insurance_shortfall_ratio(settings_addy)
-    let (current_ratio) = Math64x61_div(insolvency_shortfall, capital_total)
+    if capital_total == 0:  
+        let (current_is_ratio) = 0
+    else:
+        let (current_is_ratio) = Math64x61_div(insolvency_shortfall, capital_total)
+    end    
     with_attr error_message("Insurance shortfall ratio too high."):
         assert_le(current_ratio, is_ratio)
     end
