@@ -36,7 +36,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     # min deposit and max deposit from LPs accepted
     min_max_deposit.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
     # utilization start and stop levels
-    utilization.write((Math64x61_ONE*80/100, Math64x61_ONE*90/100))
+    utilization.write(Math64x61_ONE*90/100)
     # min number of PPs for pricing
     min_pp_accepted.write(5*Math64x61_ONE)
     # insurance shortfall ratio to lp capital
