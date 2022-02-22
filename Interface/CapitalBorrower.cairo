@@ -225,6 +225,7 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
     #update CZCore
     CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts, end_ts, median_rate, 0)
+    
     #event
     new_loan.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
     return (1)
@@ -254,9 +255,11 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (block_ts) = Math64x61_ts()
     
     # test sufficient funds to repay
+    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (usdc_user) = Erc20.ERC20_balanceOf(usdc_addy, user)   
     let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)   
+    let (weth_decimals) = Erc20.ERC20_decimals(weth_addy)   
     let (repay_erc) = Math64x61_convert_from(repay,usdc_decimals)
     with_attr error_message("Not sufficient funds to repay."):
         assert_le(repay_erc,usdc_user)
@@ -264,13 +267,46 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     
     # ai split
     let (lp_split, if_split, gt_split) = Settings.get_accrued_interest_split(settings_addy)  
+    let(if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
     
     # deal with full or partial repayment
     let (temp1) = is_le(acrrued_notional,repay)
     if temp1 == 1:
-        # set cb loan to 0
-        # transfer funds
-        # user to czcore czcore to if czcore, gt is storage on czcore
+        # user to czcore usdc czcore to user weth, czcore to if czcore, gt is storage on czcore
+        let (acrrued_notional_erc) = Math64x61_convert_from(acrrued_notional,usdc_decimals) 
+        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, acrrued_notional_erc)
+        
+        let (collateral_erc) = Math64x61_convert_from(collateral,weth_decimals) 
+        CZCore.ERC20_transferFrom(czcore_addy, weth_addy, czcore_addy, user, collateral_erc)
+        
+            # Verify that the user has sufficient funds before call
+            let (weth_user) = Erc20.ERC20_balanceOf(weth_addy, user)   
+    let (weth_quant_decimals) = Erc20.ERC20_decimals(weth_addy)   
+    let (collateral_erc) = Math64x61_convert_from(collateral,weth_quant_decimals) 
+    with_attr error_message("User does not have sufficient funds."):
+       assert_le(collateral_erc, weth_user)
+    enn
+        
+        
+        let (origination_fee) = Math64x61_sub(notional_with_fee,notional)
+        let (temp8) = Math64x61_mul(origination_fee,pp_split)
+        let(fee_erc_pp) = Math64x61_convert_from(temp8,usdc_decimals)
+        let (temp9) =  Math64x61_mul(origination_fee,if_split)
+        let (fee_erc_if) = Math64x61_convert_from(temp9,usdc_decimals)
+
+
+        # transfer the actual USDC tokens to user - ERC decimal version
+
+        # transfer pp and if
+        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, fee_erc_pp)
+        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, fee_erc_if)
+        # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
+        CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
+    
+        #update CZCore
+        CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0)
+        #event
+        repay_loan.emit(addy=user, notional=0, collateral=0,start_ts=0,end_ts=0,rate=0)
     
     else:
         let (new_notional) = Math64x61_sub(acrrued_notional,repay)
@@ -295,13 +331,7 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
         assert_le(notional,temp3)
     end
     
-    # Verify that the user has sufficient funds before call
-    let (weth_user) = Erc20.ERC20_balanceOf(weth_addy, user)   
-    let (weth_quant_decimals) = Erc20.ERC20_decimals(weth_addy)   
-    let (collateral_erc) = Math64x61_convert_from(collateral,weth_quant_decimals) 
-    with_attr error_message("User does not have sufficient funds."):
-       assert_le(collateral_erc, weth_user)
-    enn
+
     
     # check below utilization level post loan
     let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
@@ -331,30 +361,13 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (temp7) = Math64x61_add(fee,Math64x61_ONE)
     let (notional_with_fee) = Math64x61_mul(temp7,notional)
 
-    # transfer collateral to CZCore and transfer USDC to user
-    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
-    let (notional_erc) = Math64x61_convert_from(notional,usdc_decimals) 
-    let (origination_fee) = Math64x61_sub(notional_with_fee,notional)
-    let (temp8) = Math64x61_mul(origination_fee,pp_split)
-    let(fee_erc_pp) = Math64x61_convert_from(temp8,usdc_decimals)
-    let (temp9) =  Math64x61_mul(origination_fee,if_split)
-    let (fee_erc_if) = Math64x61_convert_from(temp9,usdc_decimals)
-    let(if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
 
-    # transfer the actual USDC tokens to user - ERC decimal version
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
-    # transfer pp and if
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, fee_erc_pp)
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, fee_erc_if)
-    # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
-    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
 
     #update CZCore
     CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts, end_ts, median_rate, 0)
     
     #event
-    new_loan.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
+    repay_loan.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
     return (1)
 end
 
