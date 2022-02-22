@@ -63,7 +63,7 @@ func gt_stake_unstake(addy : felt, stake : felt):
 end
 
 @event
-func gt_claim(addy : felt, lp_change : felt, capital_change : felt):
+func gt_claim(addy : felt, reward : felt):
 end
 
 ##################################################################
@@ -192,11 +192,21 @@ func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)    
     
     # aportion reward for user
-    let (ts_diff) = Math64x61_sub()
-    let (temp1) = Math64x61_mul(gt_user,avg_time_user)
-    let (temp2) = Math64x61_mul(gt_total,avg_time_total)
+    let (temp1) = Math64x61_sub(block_ts-avg_time_user)
+    let (temp2) = Math64x61_mul(gt_user,temp1)
+    let (temp3) = Math64x61_sub(block_ts-avg_time_total)
+    let (temp4) = Math64x61_mul(gt_total,temp3)
+    let (temp5) = Math64x61_div(temp2,temp4)
+    let (reward) = Math64x61_mul(temp5,reward_total)
     
+    # transfer tokens
+    let (usdc_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
+    let (usdc_decimals) = ERC20.ERC20_decimals(czt_addy)
+    let (reward_erc) = Math64x61_convert_from(reward, usdc_decimals)
     
-    # pay to user account
+    # transfer tokens
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, reward_erc)            
+    # event
+    gt_claim(addy=user,reward=reward)
+    return(1)
 end
-
