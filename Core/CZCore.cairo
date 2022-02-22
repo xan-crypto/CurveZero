@@ -146,7 +146,7 @@ end
 
 # set the loan total
 @external
-func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loan_amount : felt):
+func set_captal_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(capital_amount : felt, loan_amount : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -162,7 +162,7 @@ func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     end
     # read old cz state
     let (res) = cz_state.read()
-    cz_state.write((res[0],res[1],loan_amount,res[3]))
+    cz_state.write((res[0],capital_amount,loan_amount,res[3]))
     return ()
 end
 
