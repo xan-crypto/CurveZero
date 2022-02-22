@@ -162,7 +162,7 @@ func set_captal_loan_reward_total{syscall_ptr : felt*, pedersen_ptr : HashBuilti
     end
     # read old cz state
     let (res) = cz_state.read()
-    cz_state.write((res[0],capital_amount,loan_amount,res[3],res[4],reward_amount))
+    cz_state.write((res[0],capital_amount,loan_amount,res[3],reward_amount))
     return ()
 end
 
