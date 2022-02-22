@@ -5,7 +5,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256)
-from InterfaceAll import (TrustedAddy,Controller,ERC20)
+from InterfaceAll import (TrustedAddy,Controller,Erc20)
 
 ##################################################################
 # addy of the deployer
@@ -70,7 +70,7 @@ func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     with_attr error_message("System is paused."):
         assert paused = 0
     end
-    ERC20.ERC20_transferFrom(erc_addy,sender=sender,recipient=recipient,amount=amount)
+    Erc20.ERC20_transferFrom(erc_addy,sender=sender,recipient=recipient,amount=amount)
     return ()
 end
 
@@ -316,6 +316,6 @@ func set_staking_time_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     with_attr error_message("System is paused."):
         assert paused = 0
     end
-    set_staking_time_total.write(gt_amount,time))
+    staking_time_total.write((gt_amount,time))
     return ()
 end
