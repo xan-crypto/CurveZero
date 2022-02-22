@@ -253,3 +253,69 @@ func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
         return()
     end		
 end
+
+##################################################################
+# functions to record user and aggregate staking time 
+# the user staking time
+@storage_var
+func staking_time_user(user : felt) -> (res : (felt,felt)):
+end
+
+# returns the user stake and wt avg staking time
+@view
+func get_staking_time_user{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (gt_user : felt, avg_time: felt):
+    let (res) = staking_time_user.read(user=user)
+    return (res[0],res[1])
+end
+
+# set the user stake and wt avg staking time
+@external
+func set_staking_time_user{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt, time : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_gt_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    # check if paused
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.get_paused(_controller_addy)
+    with_attr error_message("System is paused."):
+        assert paused = 0
+    end
+    staking_time_user.write(user,(amount,time))
+    return ()
+end
+
+# the aggregate staking time 
+@storage_var
+func staking_time_total() -> (res : (felt,felt)):
+end
+
+# returns the aggregate stake and staking time 
+@view
+func get_staking_time_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (gt_total : felt, avg_time: felt):
+    let (res) = staking_time_total.read()
+    return (res[0],res[1])
+end
+
+# set the aggregate stake and staking time 
+@external
+func set_staking_time_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_amount : felt, time : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_gt_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    # check if paused
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.get_paused(_controller_addy)
+    with_attr error_message("System is paused."):
+        assert paused = 0
+    end
+    set_staking_time_total.write(gt_amount,time))
+    return ()
+end
