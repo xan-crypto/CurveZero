@@ -178,9 +178,25 @@ end
 
 # claim rewards in portion to GT staked time
 @external
-func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}:
-    # get user staking time
+func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+
+    let (_trusted_addy) = trusted_addy.read()
+    let (user) = get_caller_address()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    
+    # get current user staking time
+    let (gt_user, avg_time_user) = CZCore.get_staking_time_user(user)
     # get aggregate staking time
+    let (gt_total, avg_time_total) = CZCore.get_staking_time_total()
+    let (block_ts) = Math64x61_ts()    
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)    
+    
     # aportion reward for user
+    let (ts_diff) = Math64x61_sub()
+    let (temp1) = Math64x61_mul(gt_user,avg_time_user)
+    let (temp2) = Math64x61_mul(gt_total,avg_time_total)
+    
+    
     # pay to user account
 end
+
