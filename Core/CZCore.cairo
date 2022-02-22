@@ -56,7 +56,7 @@ end
 ##################################################################
 # this is a pass thru function to the ERC-20 token contract
 @external
-func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, sender: felt, recipient: felt, amount: Uint256):
+func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
