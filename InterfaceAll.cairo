@@ -39,15 +39,13 @@ namespace CZCore:
     end
     func set_lp_balance(user : felt, lp_user : felt, lockup : felt):
     end
-    func get_cz_state() -> (lp_total : felt, capital_total : felt, loan_total : felt, insolvency_shortfall : felt):
+    func get_cz_state() -> (lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
     end
     func set_lp_capital_total(lp_amount : felt, capital_amount : felt):
     end
+    func set_captal_loan_reward_total(capital_amount : felt, loan_amount : felt, reward_amount : felt):
+    end    
     func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
-    end
-    func erc20_balanceOf(erc_addy : felt, sender: felt) -> (balance : felt):
-    end
-    func erc20_decimals(erc_addy : felt) -> (decimals : felt):
     end
     func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
     end
@@ -56,6 +54,14 @@ namespace CZCore:
     func get_cb_loan(user : felt) -> (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt):
     end  
     func set_cb_loan(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, refinance : felt):
+    end  
+    func get_staking_time_user(user : felt) -> (gt_user : felt, avg_time: felt):
+    end  
+    func set_staking_time_user(user : felt, amount : felt, time : felt):
+    end  
+    func get_staking_time_total() -> (gt_total : felt, avg_time: felt):
+    end  
+    func set_staking_time_total(gt_amount : felt, time : felt):
     end  
 end
 
@@ -72,9 +78,9 @@ end
 # use the transfer from function to send the token from sender to recipient
 @contract_interface
 namespace Erc20:
-    func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
+    func ERC20_transferFrom(sender: felt, recipient: felt, amount: felt) -> ():
     end
-    func ERC20_balanceOf(account: felt) -> (balance: Uint256):
+    func ERC20_balanceOf(account: felt) -> (balance: felt):
     end
     func ERC20_decimals() -> (decimals: felt):
     end    
