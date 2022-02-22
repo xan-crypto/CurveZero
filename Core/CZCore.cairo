@@ -144,6 +144,28 @@ func set_lp_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     return ()
 end
 
+# set the loan total
+@external
+func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loan_amount : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_cb_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    # check if paused
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.get_paused(_controller_addy)
+    with_attr error_message("System is paused."):
+        assert paused = 0
+    end
+    # read old cz state
+    let (res) = cz_state.read()
+    cz_state.write((res[0],res[1],loan_amount,res[3]))
+    return ()
+end
+
 ##################################################################
 # functions to promote and demote and view pp
 # the PP status by user
