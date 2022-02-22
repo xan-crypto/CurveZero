@@ -111,13 +111,13 @@ end
 ##################################################################
 # cz state
 @storage_var
-func cz_state() -> (res : (felt, felt, felt, felt)):
+func cz_state() -> (res : (felt, felt, felt, felt, felt, felt)):
 end
 
 # returns the cz state
 @view
 func get_cz_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        lp_total : felt, capital_total : felt, loan_total : felt, insolvency_shortfall : felt):
+        lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, gt_total : felt, reward_total : felt):
     let (res) = cz_state.read()
     return (res[0],res[1],res[2],res[3])
 end
@@ -146,7 +146,7 @@ end
 
 # set the loan total
 @external
-func set_captal_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(capital_amount : felt, loan_amount : felt):
+func set_captal_loan_reward_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(capital_amount : felt, loan_amount : felt, reward_amount : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -162,7 +162,7 @@ func set_captal_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     end
     # read old cz state
     let (res) = cz_state.read()
-    cz_state.write((res[0],capital_amount,loan_amount,res[3]))
+    cz_state.write((res[0],capital_amount,loan_amount,res[3],res[4],reward_amount))
     return ()
 end
 
