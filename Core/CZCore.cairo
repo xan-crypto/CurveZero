@@ -111,15 +111,15 @@ end
 ##################################################################
 # cz state
 @storage_var
-func cz_state() -> (res : (felt, felt, felt, felt, felt, felt)):
+func cz_state() -> (res : (felt, felt, felt, felt, felt)):
 end
 
 # returns the cz state
 @view
 func get_cz_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, gt_total : felt, reward_total : felt):
+        lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
     let (res) = cz_state.read()
-    return (res[0],res[1],res[2],res[3])
+    return (res[0],res[1],res[2],res[3],res[4])
 end
 
 # set the lp total
@@ -140,7 +140,7 @@ func set_lp_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     end
     # read old cz state
     let (res) = cz_state.read()
-    cz_state.write((lp_amount,capital_amount,res[2],res[3]))
+    cz_state.write((lp_amount,capital_amount,res[2],res[3],res[4]))
     return ()
 end
 
