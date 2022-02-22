@@ -221,9 +221,13 @@ func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
     let (reward_erc) = Math64x61_convert_from(reward, usdc_decimals)
-    
+        
     # transfer tokens
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, reward_erc)            
+    # update reward_total
+    let (new_reward_total) = Math64x61_sub(reward_total,reward)
+    CZCore.set_reward_total(czcore_addy, new_reward_total)      
+    
     # event
     gt_claim.emit(addy=user,reward=reward)
     return(1)
