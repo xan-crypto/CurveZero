@@ -225,6 +225,9 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
     #update CZCore
     CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts, end_ts, median_rate, 0)
+    let (lp_total, capital_total, loan_total, insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
+    let (new_loan_total) = Math64x61_add(loan_total,notional_with_fee)
+    CZCore.set_loan_total(czcore_addy, new_loan_total)
     
     #event
     new_loan.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
@@ -233,7 +236,7 @@ end
 
 # repay loan in partial or full
 @external
-func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt) - > (res : felt):
+func repay_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt) - > (res : felt):
     
     # addys and check if existing loan
     let (user) = get_caller_address()
@@ -272,39 +275,26 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # deal with full or partial repayment
     let (temp1) = is_le(acrrued_notional,repay)
     if temp1 == 1:
-        # user to czcore usdc czcore to user weth, czcore to if czcore, gt is storage on czcore
+        # user to czcore usdc czcore to user weth
         let (acrrued_notional_erc) = Math64x61_convert_from(acrrued_notional,usdc_decimals) 
-        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, acrrued_notional_erc)
-        
+        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, acrrued_notional_erc)        
         let (collateral_erc) = Math64x61_convert_from(collateral,weth_decimals) 
         CZCore.ERC20_transferFrom(czcore_addy, weth_addy, czcore_addy, user, collateral_erc)
         
-            # Verify that the user has sufficient funds before call
-            let (weth_user) = Erc20.ERC20_balanceOf(weth_addy, user)   
-    let (weth_quant_decimals) = Erc20.ERC20_decimals(weth_addy)   
-    let (collateral_erc) = Math64x61_convert_from(collateral,weth_quant_decimals) 
-    with_attr error_message("User does not have sufficient funds."):
-       assert_le(collateral_erc, weth_user)
-    enn
-        
-        
-        let (origination_fee) = Math64x61_sub(notional_with_fee,notional)
-        let (temp8) = Math64x61_mul(origination_fee,pp_split)
-        let(fee_erc_pp) = Math64x61_convert_from(temp8,usdc_decimals)
-        let (temp9) =  Math64x61_mul(origination_fee,if_split)
-        let (fee_erc_if) = Math64x61_convert_from(temp9,usdc_decimals)
+        # work out splits for AI
+        let (accrued_interest_lp) = Math64x61_mul(lp_split, accrued_interest)
+        let (accrued_interest_if) = Math64x61_mul(if_split, accrued_interest)
+        let (accrued_interest_gt) = Math64x61_mul(gt_split, accrued_interest)
+        let (accrued_interest_if_erc) = Math64x61_convert_from(accrued_interest_if,usdc_decimals) 
+        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, accrued_interest_if_erc)
 
-
-        # transfer the actual USDC tokens to user - ERC decimal version
-
-        # transfer pp and if
-        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, fee_erc_pp)
-        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, fee_erc_if)
-        # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
-        CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
-    
         #update CZCore
         CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0)
+        let (lp_total, capital_total, loan_total, insolvency_total, gt_total, reward_total) = CZCore.get_cz_state(czcore_addy)
+        let (new_loan_total) = Math64x61_sub(loan_total,notional)
+        let (new_capital_total) = Math64x61_add(capital_total,accrued_interest_lp)
+        let (new_reward_total) = Math64x61_add(reward_total,accrued_interest_gt)
+        CZCore.set_loan_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
         #event
         repay_loan.emit(addy=user, notional=0, collateral=0,start_ts=0,end_ts=0,rate=0)
     
@@ -314,60 +304,6 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     end
     
 
-
-    # call oracle price for collateral
-    let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
-    let (weth_price) = Oracle.get_weth_price(oracle_addy)
-    let (weth_price_decimals) = Oracle.get_weth_decimals(oracle_addy)
-
-    # get ltv from setting
-    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
-    let (weth_ltv) = Settings.get_weth_ltv(settings_addy)
-    # test sufficient collateral to proceed vs notional of loan
-    let (temp1) = Math64x61_convert_to(weth_price,weth_price_decimals)
-    let (temp2) = Math64x61_mul(temp1,collateral)
-    let (temp3) = Math64x61_mul(temp2,WETH_ltv)
-    with_attr error_message("Not sufficient collateral for loan"):
-        assert_le(notional,temp3)
-    end
-    
-
-    
-    # check below utilization level post loan
-    let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
-    let (stop) = Settings.get_utilization(settings_addy)
-    let (temp4) = Math64x61_add(notional,loan_total)
-    let (temp5) = Math64x61_div(temp4,capital_total)
-    with_attr error_message("Utilization to high, cannot issue loan."):
-       assert_le(temp5, stop)
-    enn
-    
-    # check end time less than setting max loan time
-    let (block_ts) = Math64x61_ts()
-    let (max_term) = Settings.get_max_loan_term(settings_addy)
-    let (temp6) = Math64x61_add(block_ts,max_term)
-    with_attr error_message("Loan term should be within term range."):
-       assert_in_range(end_ts, block_ts, temp6)
-    enn
-
-    # check loan amount within correct ranges
-    let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
-    with_attr error_message("Notional should be within min max loan range."):
-       assert_in_range(notional, min_loan, max_loan)
-    enn
-
-    # add origination fee
-    let (fee, pp_split, if_split) = Settings.get_origination_fee(settings_addy)
-    let (temp7) = Math64x61_add(fee,Math64x61_ONE)
-    let (notional_with_fee) = Math64x61_mul(temp7,notional)
-
-
-
-    #update CZCore
-    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts, end_ts, median_rate, 0)
-    
-    #event
-    repay_loan.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
     return (1)
 end
 
