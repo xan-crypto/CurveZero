@@ -4,6 +4,7 @@
 # imports
 %lang starknet
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.math import assert_nn
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.cairo.common.hash import hash2
@@ -195,7 +196,133 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 
     # check loan amount within correct ranges
     let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
-    with_attr error_message("Notional be within min max loan range."):
+    with_attr error_message("Notional should be within min max loan range."):
+       assert_in_range(notional, min_loan, max_loan)
+    enn
+
+    # add origination fee
+    let (fee, pp_split, if_split) = Settings.get_origination_fee(settings_addy)
+    let (temp7) = Math64x61_add(fee,Math64x61_ONE)
+    let (notional_with_fee) = Math64x61_mul(temp7,notional)
+
+    # transfer collateral to CZCore and transfer USDC to user
+    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
+    let (notional_erc) = Math64x61_convert_from(notional,usdc_decimals) 
+    let (origination_fee) = Math64x61_sub(notional_with_fee,notional)
+    let (temp8) = Math64x61_mul(origination_fee,pp_split)
+    let(fee_erc_pp) = Math64x61_convert_from(temp8,usdc_decimals)
+    let (temp9) =  Math64x61_mul(origination_fee,if_split)
+    let (fee_erc_if) = Math64x61_convert_from(temp9,usdc_decimals)
+    let(if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
+
+    # transfer the actual USDC tokens to user - ERC decimal version
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
+    # transfer pp and if
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, fee_erc_pp)
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, fee_erc_if)
+    # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
+    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
+    #update CZCore
+    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts, end_ts, median_rate, 0)
+    #event
+    new_loan.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
+    return (1)
+end
+
+# repay loan in partial or full
+@external
+func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt) - > (res : felt):
+    
+    # addys and check if existing loan
+    let (user) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
+    with_attr error_message("User does not have an existing loan to repay."):
+        assert has_loan = 1
+    end
+   
+    # check that repay positive
+    with_attr error_message("Repayment amount should be positive."):
+        assert assert_nn(repay)
+    end
+        
+    # new notional = old notional + ai -repay
+    # start_ts in block_ts
+    let (acrrued_notional) = Math64x61_add(notional,accrued_interest)
+    let (block_ts) = Math64x61_ts()
+    
+    # test sufficient funds to repay
+    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    let (usdc_user) = Erc20.ERC20_balanceOf(usdc_addy, user)   
+    let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)   
+    let (repay_erc) = Math64x61_convert_from(repay,usdc_decimals)
+    with_attr error_message("Not sufficient funds to repay."):
+        assert_le(repay_erc,usdc_user)
+    end
+    
+    # ai split
+    let (lp_split, if_split, gt_split) = Settings.get_accrued_interest_split(settings_addy)  
+    
+    # deal with full or partial repayment
+    let (temp1) = is_le(acrrued_notional,repay)
+    if temp1 == 1:
+        # set cb loan to 0
+        # transfer funds
+        # user to czcore czcore to if czcore, gt is storage on czcore
+    
+    else:
+        let (new_notional) = Math64x61_sub(acrrued_notional,repay)
+    
+    end
+    
+
+
+    # call oracle price for collateral
+    let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
+    let (weth_price) = Oracle.get_weth_price(oracle_addy)
+    let (weth_price_decimals) = Oracle.get_weth_decimals(oracle_addy)
+
+    # get ltv from setting
+    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
+    let (weth_ltv) = Settings.get_weth_ltv(settings_addy)
+    # test sufficient collateral to proceed vs notional of loan
+    let (temp1) = Math64x61_convert_to(weth_price,weth_price_decimals)
+    let (temp2) = Math64x61_mul(temp1,collateral)
+    let (temp3) = Math64x61_mul(temp2,WETH_ltv)
+    with_attr error_message("Not sufficient collateral for loan"):
+        assert_le(notional,temp3)
+    end
+    
+    # Verify that the user has sufficient funds before call
+    let (weth_user) = Erc20.ERC20_balanceOf(weth_addy, user)   
+    let (weth_quant_decimals) = Erc20.ERC20_decimals(weth_addy)   
+    let (collateral_erc) = Math64x61_convert_from(collateral,weth_quant_decimals) 
+    with_attr error_message("User does not have sufficient funds."):
+       assert_le(collateral_erc, weth_user)
+    enn
+    
+    # check below utilization level post loan
+    let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
+    let (stop) = Settings.get_utilization(settings_addy)
+    let (temp4) = Math64x61_add(notional,loan_total)
+    let (temp5) = Math64x61_div(temp4,capital_total)
+    with_attr error_message("Utilization to high, cannot issue loan."):
+       assert_le(temp5, stop)
+    enn
+    
+    # check end time less than setting max loan time
+    let (block_ts) = Math64x61_ts()
+    let (max_term) = Settings.get_max_loan_term(settings_addy)
+    let (temp6) = Math64x61_add(block_ts,max_term)
+    with_attr error_message("Loan term should be within term range."):
+       assert_in_range(end_ts, block_ts, temp6)
+    enn
+
+    # check loan amount within correct ranges
+    let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
+    with_attr error_message("Notional should be within min max loan range."):
        assert_in_range(notional, min_loan, max_loan)
     enn
 
