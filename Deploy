@@ -38,7 +38,7 @@ starknet deploy --contract Compiled/TrustedAddy_compiled.json \
     0
 
 Last test
-[deployer] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+[deployer] = 0
 [lp] = 0
 [pp] = 0
 [cb] = 0
