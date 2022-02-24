@@ -336,6 +336,19 @@ end
 # set above
 @external
 func set_staker_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(stake_total : felt, index : felt):
+    # check authorised caller
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_gt_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    # check if paused
+    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.get_paused(_controller_addy)
+    with_attr error_message("System is paused."):
+        assert paused = 0
+    end
     staker_total.write((stake_total,index))
     return ()
 end
