@@ -108,6 +108,15 @@ func gt_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     end
 end
 
+func controller_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_controller_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+end
+
 ##################################################################
 # this is a pass thru function to the ERC-20 token contract
 @external
@@ -172,6 +181,16 @@ func set_captal_loan_reward_total{syscall_ptr : felt*, pedersen_ptr : HashBuilti
     is_paused()
     let (res) = cz_state.read()
     cz_state.write((res[0],capital_amount,loan_amount,res[3],reward_amount))
+    return ()
+end
+
+# set the reward total
+@external
+func set_reward_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    controller_caller()
+    is_paused()
+    let (res) = cz_state.read()
+    cz_state.write((res[0],res[1],res[2],res[3],0))
     return ()
 end
 
