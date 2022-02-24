@@ -160,7 +160,6 @@ end
 func set_lp_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_amount : felt, capital_amount : felt):
     lp_caller()
     is_paused()
-    # read old cz state
     let (res) = cz_state.read()
     cz_state.write((lp_amount,capital_amount,res[2],res[3],res[4]))
     return ()
@@ -171,7 +170,6 @@ end
 func set_captal_loan_reward_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(capital_amount : felt, loan_amount : felt, reward_amount : felt):
     cb_caller()
     is_paused()
-    # read old cz state
     let (res) = cz_state.read()
     cz_state.write((res[0],capital_amount,loan_amount,res[3],reward_amount))
     return ()
@@ -199,15 +197,11 @@ func set_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     is_paused()
     if promote == 1:
         # promote user to pp and lock lp and cz tokens
-        # reduce lp balance of user
         lp_balances.write(user, (lp_user - lp_amount, lockup))
-        # update the pp status
         pp_status.write(user, (lp_amount, cz_amount, 1))
     else:
         # demote user from pp and return lp and cz tokens
-        # reduce lp balance of user
         lp_balances.write(user, (lp_user + lp_amount, lockup))
-        # update the pp status
         pp_status.write(user, (0, 0, 0))    
     end    
     return ()
