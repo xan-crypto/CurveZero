@@ -151,7 +151,3 @@ func run_distribution{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     staker_users.write(user,(stake,reward_new,1))
     return ()
 end
-
-
-
-
