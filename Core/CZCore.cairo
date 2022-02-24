@@ -255,22 +255,22 @@ func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 end
 
 ##################################################################
-# functions to record user and aggregate staking time 
-# the user staking time
+# functions to record user and total staking -> reward distribution triggered by controller
+# index that maps index to unique users
 @storage_var
-func staking_time_user(user : felt) -> (res : (felt,felt)):
+func staker_index(index:felt) -> (user : felt):
 end
 
-# returns the user stake and wt avg staking time
+# returns user which mapped to that index
 @view
-func get_staking_time_user{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (gt_user : felt, avg_time: felt):
-    let (res) = staking_time_user.read(user=user)
-    return (res[0],res[1])
+func get_staker_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(index : felt) -> (user : felt):
+    let (user) = staker_index.read(index=index)
+    return (user)
 end
 
-# set the user stake and wt avg staking time
+# sets index / user mapping
 @external
-func set_staking_time_user{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt, time : felt):
+func set_staker_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(index:felt,user : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -284,25 +284,25 @@ func set_staking_time_user{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     with_attr error_message("System is paused."):
         assert paused = 0
     end
-    staking_time_user.write(user,(amount,time))
+    staker_index.write(index,user)
     return ()
 end
 
-# the aggregate staking time 
+# maps unique users to their stake, unclaimed rewards, old_user status
 @storage_var
-func staking_time_total() -> (res : (felt,felt)):
+func staker_details(user:felt) -> (res : (felt,felt,felt)):
 end
 
-# returns the aggregate stake and staking time 
+# returns above
 @view
-func get_staking_time_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (gt_total : felt, avg_time: felt):
-    let (res) = staking_time_total.read()
-    return (res[0],res[1])
+func get_staker_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user:felt) -> (gt_token : felt, unclaimed_reward : felt, old_user:felt):
+    let (res) = staker_details.read(user=user)
+    return (res[0],res[1],res[2])
 end
 
-# set the aggregate stake and staking time 
+# sets above
 @external
-func set_staking_time_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_amount : felt, time : felt):
+func set_staker_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, gt_token : felt):
     # check authorised caller
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -316,6 +316,26 @@ func set_staking_time_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     with_attr error_message("System is paused."):
         assert paused = 0
     end
-    staking_time_total.write((gt_amount,time))
+    let (res) = staker_details.read(user=user)
+    staker_details.write(user,(gt_token,res[1],1))
+    return ()
+end
+
+# total amount staked and index of unique stakers
+@storage_var
+func staker_total() -> (res : (felt,felt)):
+end
+
+# get above
+@view
+func get_staker_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (stake_total : felt, index : felt):
+    let (res) = staker_total.read()
+    return (res[0],res[1])
+end
+
+# set above
+@external
+func set_staker_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(stake_total : felt, index : felt):
+    staker_total.write((stake_total,index))
     return ()
 end
