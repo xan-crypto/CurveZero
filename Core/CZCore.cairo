@@ -273,11 +273,10 @@ end
 
 # sets stake, unclaimed rewards, old_user status
 @external
-func set_staker_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, gt_token : felt):
+func set_staker_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, gt_token : felt, unclaimed_reward : felt):
     gt_caller()
     is_paused()
-    let (res) = staker_details.read(user=user)
-    staker_details.write(user,(gt_token,res[1],1))
+    staker_details.write(user,(gt_token,unclaimed_reward,1))
     return ()
 end
 
