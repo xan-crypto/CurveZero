@@ -68,7 +68,7 @@ end
 
 ##################################################################
 # GT contract functions
-# stake GT tokens to earn staking time which aportions to rewards
+# stake GT tokens to earn a proportional rewards
 @external
 func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt) -> (res:felt):
     
@@ -90,47 +90,31 @@ func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
         assert_le(gt_token_erc, czt_user)
     end
     
-    # get current user staking time
-    let (gt_user, avg_time_user) = CZCore.get_staking_time_user(czcore_addy,user)
-    # get aggregate staking time
-    let (gt_total, avg_time_total) = CZCore.get_staking_time_total(czcore_addy)
-    let (block_ts) = Math64x61_ts()
-    
-    # cal new user / total staking time
-    let (new_gt_user, new_avg_time_user) = update_staking(gt_user, avg_time_user, gt_token, block_ts)
-    let (new_gt_total, new_avg_time_total) = update_staking(gt_total, avg_time_total, gt_token, block_ts)    
-       
-    # transfer tokens
-    CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, gt_token_erc)            
-    # update user
-    CZCore.set_staking_time_user(czcore_addy, user, new_gt_user, new_avg_time_user)
-    # update aggregate
-    CZCore.set_staking_time_total(czcore_addy, new_gt_total, new_avg_time_total)
-    # event
-    gt_stake_unstake.emit(addy=user,stake=gt_token)
-    return(1)
-end
+    # get user and total staking details
+    let (gt_user, reward, old_user) = CZCore.get_staker_users(czcore_addy,user)
+    let (gt_total, index) = CZCore.get_staker_total(czcore_addy)
 
-# update staking function
-func update_staking{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(old_gt:felt,old_time:felt,new_gt:felt,new_time:felt) -> (updated_gt:felt,updated_time:felt):
-    alloc_locals
-    if old_gt == 0:
-        return(new_gt,new_time)
+    # transfer tokens
+    CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, gt_token_erc)   
+    # update user and aggregate
+    let (gt_user_new) = Math64x61_add(gt_user, gt_token)
+    let (gt_total_new) = Math64x61_add(gt_total, gt_token)
+    CZCore.set_staker_users(user, gt_user_new, reward)    
+    if old_user == 1:
+        CZCore.set_staker_total(gt_total_new, index)
+        # event
+        gt_stake_unstake.emit(addy=user,stake=gt_token)
+        return(1)
     else:
-        let (temp1) = Math64x61_add(old_gt, new_gt)        
-        if temp1 == 0: 
-            return(0,0)
-        else:
-            let (temp2) = Math64x61_mul(old_gt, old_time)
-            let (temp3) = Math64x61_mul(new_gt, new_time)
-            let (temp4) = Math64x61_add(temp2, temp3)
-            let (temp5) = Math64x61_div(temp4, temp1)
-            return(temp1,temp5)    
-        end
+        CZCore.set_staker_total(gt_total_new, index + 1)
+        CZCore.set_staker_index(index, user)
+        # event
+        gt_stake_unstake.emit(addy=user,stake=gt_token)
+        return(1)
     end
 end
 
-# unstake GT tokens, call claim before if unstaking all
+# unstake GT tokens, doesnt affect existing unclaimed rewards
 @external
 func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt) -> (res:felt):
     
@@ -143,54 +127,31 @@ func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
         assert_nn(gt_token)
     end
     
-    # get current user staking time
-    let (gt_user, avg_time_user) = CZCore.get_staking_time_user(czcore_addy,user)
-    # get aggregate staking time
-    let (gt_total, avg_time_total) = CZCore.get_staking_time_total(czcore_addy)
-    let (block_ts) = Math64x61_ts()
+    # get user and total staking details
+    let (gt_user, reward, old_user) = CZCore.get_staker_users(czcore_addy,user)
+    let (gt_total, index) = CZCore.get_staker_total(czcore_addy)
     
     # check user have the coins to unstake
     with_attr error_message("User does not have sufficient funds to unstake."):
         assert_le(gt_token, gt_user)
     end
 
-    # cal new user / total staking time
-    let (new_gt_user, new_avg_time_user) = update_staking(gt_user, avg_time_user, -gt_token, block_ts)
-    let (new_gt_total, new_avg_time_total) = update_staking(gt_total, avg_time_total, -gt_token, block_ts)   
+    # update user and aggregate
+    let (gt_user_new) = Math64x61_sub(gt_user, gt_token)
+    let (gt_total_new) = Math64x61_sub(gt_total, gt_token)
 
-    # if no more coins post unstake => call claim for user
-    if new_gt_user == 0:
-        claim_rewards()
-        # check user have the coins to stake
-        let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
-        let (czt_decimals) = Erc20.ERC20_decimals(czt_addy)
-        let (gt_token_erc) = Math64x61_convert_from(gt_token, czt_decimals)
-
-        # transfer tokens
-        CZCore.erc20_transferFrom(czcore_addy, czt_addy, czcore_addy, user, gt_token_erc)            
-        # update user
-        CZCore.set_staking_time_user(czcore_addy, user, new_gt_user, new_avg_time_user)
-        # update aggregate
-        CZCore.set_staking_time_total(czcore_addy, new_gt_total, new_avg_time_total)
-        # event
-        gt_stake_unstake.emit(addy=user,stake=-gt_token)
-        return(1)
-    else:
-        # check user have the coins to stake
-        let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
-        let (czt_decimals) = Erc20.ERC20_decimals(czt_addy)
-        let (gt_token_erc) = Math64x61_convert_from(gt_token, czt_decimals)
-
-        # transfer tokens
-        CZCore.erc20_transferFrom(czcore_addy, czt_addy, czcore_addy, user, gt_token_erc)            
-        # update user
-        CZCore.set_staking_time_user(czcore_addy, user, new_gt_user, new_avg_time_user)
-        # update aggregate
-        CZCore.set_staking_time_total(czcore_addy, new_gt_total, new_avg_time_total)
-        # event
-        gt_stake_unstake.emit(addy=user,stake=-gt_token)
-        return(1)
-    end
+    # transfer tokens
+    let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
+    let (czt_decimals) = Erc20.ERC20_decimals(czt_addy)
+    let (gt_token_erc) = Math64x61_convert_from(gt_token, czt_decimals)
+    CZCore.erc20_transferFrom(czcore_addy, czt_addy, czcore_addy, user, gt_token_erc)            
+    
+    # update user and aggregate
+    CZCore.set_staker_users(user, gt_user_new, reward)   
+    CZCore.set_staker_total(gt_total_new, index)
+    # event
+    gt_stake_unstake.emit(addy=user,stake=-gt_token)
+    return(1)
 end
 
 # claim rewards in portion to GT staked time
@@ -203,19 +164,7 @@ func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     
     # get current user staking time
-    let (gt_user, avg_time_user) = CZCore.get_staking_time_user(czcore_addy,user)
-    # get aggregate staking time
-    let (gt_total, avg_time_total) = CZCore.get_staking_time_total(czcore_addy)
-    let (block_ts) = Math64x61_ts()    
-    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)    
-    
-    # aportion reward for user
-    let (temp1) = Math64x61_sub(block_ts,avg_time_user)
-    let (temp2) = Math64x61_mul(gt_user,temp1)
-    let (temp3) = Math64x61_sub(block_ts,avg_time_total)
-    let (temp4) = Math64x61_mul(gt_total,temp3)
-    let (temp5) = Math64x61_div(temp2,temp4)
-    let (reward) = Math64x61_mul(temp5,reward_total)
+    let (gt_user, reward, old_user) = CZCore.get_staker_users(czcore_addy,user)
     
     # transfer tokens
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
@@ -224,9 +173,8 @@ func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
         
     # transfer tokens
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, reward_erc)            
-    # update reward_total
-    let (new_reward_total) = Math64x61_sub(reward_total,reward)
-    CZCore.set_reward_total(czcore_addy, new_reward_total)      
+    # update user rewards
+    CZCore.set_staker_users(user, gt_user, 0)   
     
     # event
     gt_claim.emit(addy=user,reward=reward)
