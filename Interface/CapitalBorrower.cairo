@@ -236,7 +236,7 @@ end
 
 # repay loan in partial or full
 @external
-func repay_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt) - > (res : felt):
+func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt) - > (res : felt):
     
     # addys and check if existing loan
     let (user) = get_caller_address()
@@ -246,17 +246,16 @@ func repay_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     with_attr error_message("User does not have an existing loan to repay."):
         assert has_loan = 1
     end
-   
-    # check that repay positive
-    with_attr error_message("Repayment amount should be positive."):
-        assert assert_nn(repay)
-    end
         
     # new notional = old notional + ai -repay
-    # start_ts in block_ts
     let (acrrued_notional) = Math64x61_add(notional,accrued_interest)
     let (block_ts) = Math64x61_ts()
-    
+
+    # check that repay positive and le accrued notional
+    with_attr error_message("Repayment amount should be positive and at most the accrued notional."):
+        assert assert_nn_le(repay,acrrued_notional)
+    end
+
     # test sufficient funds to repay
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
@@ -272,39 +271,45 @@ func repay_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     let (lp_split, if_split, gt_split) = Settings.get_accrued_interest_split(settings_addy)  
     let(if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
     
-    # deal with full or partial repayment
-    let (temp1) = is_le(acrrued_notional,repay)
-    if temp1 == 1:
-        # user to czcore usdc czcore to user weth
-        let (acrrued_notional_erc) = Math64x61_convert_from(acrrued_notional,usdc_decimals) 
-        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, acrrued_notional_erc)        
-        let (collateral_erc) = Math64x61_convert_from(collateral,weth_decimals) 
-        CZCore.ERC20_transferFrom(czcore_addy, weth_addy, czcore_addy, user, collateral_erc)
-        
-        # work out splits for AI
-        let (accrued_interest_lp) = Math64x61_mul(lp_split, accrued_interest)
-        let (accrued_interest_if) = Math64x61_mul(if_split, accrued_interest)
-        let (accrued_interest_gt) = Math64x61_mul(gt_split, accrued_interest)
-        let (accrued_interest_if_erc) = Math64x61_convert_from(accrued_interest_if,usdc_decimals) 
-        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, accrued_interest_if_erc)
+    # repay split loan vs interest
+    let (temp1) = Math64x61_div(notional,acrrued_notional)
+    let (loan_total_change) = Math64x61_mul(repay,temp1)
+    let (temp2) = Math64x61_div(accrued_interest,acrrued_notional)
+    let (accrued_interest_change) = Math64x61_mul(repay,temp2)
+    # work out splits for AI
+    let (accrued_interest_lp) = Math64x61_mul(lp_split, accrued_interest_change)
+    let (accrued_interest_if) = Math64x61_mul(if_split, accrued_interest_change)
+    let (accrued_interest_gt) = Math64x61_mul(gt_split, accrued_interest_change)
 
-        #update CZCore
-        CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0)
-        let (lp_total, capital_total, loan_total, insolvency_total, gt_total, reward_total) = CZCore.get_cz_state(czcore_addy)
-        let (new_loan_total) = Math64x61_sub(loan_total,notional)
-        let (new_capital_total) = Math64x61_add(capital_total,accrued_interest_lp)
-        let (new_reward_total) = Math64x61_add(reward_total,accrued_interest_gt)
-        CZCore.set_loan_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
+    # deal with partial repayment by aportioning payment
+    let (repay_erc) = Math64x61_convert_from(repay,usdc_decimals) 
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, repay_erc)     
+    let (accrued_interest_if_erc) = Math64x61_convert_from(accrued_interest_if, usdc_decimals) 
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, accrued_interest_if_erc)
+    
+    #update CZCore    
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
+    let (new_loan_total) = Math64x61_sub(loan_total, loan_total_change)
+    let (new_capital_total) = Math64x61_add(capital_total, accrued_interest_lp)
+    let (new_reward_total) = Math64x61_add(reward_total, accrued_interest_gt)
+    CZCore.set_loan_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
+    
+    (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest)
+    let (new_notional) = Math64x61_sub(notional, loan_total_change)
+    let (new_start_ts) = Math64x61_ts()
+    
+    if new_notional == 0:
+        decrease_collateral(collateral)
+        CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0)
         #event
-        repay_loan.emit(addy=user, notional=0, collateral=0,start_ts=0,end_ts=0,rate=0)
-    
+        repay_loan.emit(addy=user, notional=0, collateral=0,start_ts=0,end_ts=0,rate=0)    
+        return (1)
     else:
-        let (new_notional) = Math64x61_sub(acrrued_notional,repay)
-    
+        CZCore.set_cb_loan(czcore_addy, user, 1, new_notional, collateral, new_start_ts, end_ts, rate)
+        #event
+        repay_loan.emit(addy=user, notional=new_notional, collateral=collateral,start_ts=new_start_ts,end_ts=end_ts,rate=rate)   
+        return (1)
     end
-    
-
-    return (1)
 end
 
 # check all PPs are valid
