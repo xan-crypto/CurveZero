@@ -71,19 +71,7 @@ end
 # need to emit CB events so that we can build the loan book for liquidation/monitoring/dashboard
 # events keeping tracks of what happened
 @event
-func new_loan.emit(addy : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt)
-end
-
-@event
-func repay_loan():
-end
-
-@event
-func refinance_loan():
-end
-
-@event
-func collateral_change():
+func loan_change.emit(addy : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt)
 end
 
 ##################################################################
@@ -230,7 +218,7 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     CZCore.set_loan_total(czcore_addy, new_loan_total)
     
     #event
-    new_loan.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
+    loan_change.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
     return (1)
 end
 
@@ -301,12 +289,12 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         decrease_collateral(collateral)
         CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0)
         #event
-        repay_loan.emit(addy=user, notional=0, collateral=0,start_ts=0,end_ts=0,rate=0)    
+        loan_change.emit(addy=user, notional=0, collateral=0,start_ts=0,end_ts=0,rate=0)    
         return (1)
     else:
         CZCore.set_cb_loan(czcore_addy, user, 1, new_notional, collateral, new_start_ts, end_ts, rate)
         #event
-        repay_loan.emit(addy=user, notional=new_notional, collateral=collateral,start_ts=new_start_ts,end_ts=end_ts,rate=rate)   
+        loan_change.emit(addy=user, notional=new_notional, collateral=collateral,start_ts=new_start_ts,end_ts=end_ts,rate=rate)   
         return (1)
     end
 end
@@ -347,6 +335,7 @@ func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (has_loan, notional, old_collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
     let (new_collateral) = Math64x61_add(collateral, old_collateral)
     CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate)
+    loan_change.emit(addy=user, notional=notional, collateral=new_collateral,start_ts=start_ts,end_ts=end_ts,rate=rate)  
     return(1)
 end
 
@@ -383,6 +372,7 @@ func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, czcore_addy, user, collateral_erc)
     CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate)
+    loan_change.emit(addy=user, notional=notional, collateral=new_collateral,start_ts=start_ts,end_ts=end_ts,rate=rate)  
     return(1)
 end
 
