@@ -234,7 +234,7 @@ func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return (1)
 end
 
-# repay loan in partial or full
+# repay loan in partial
 @external
 func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt) - > (res : felt):
     
@@ -310,6 +310,22 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         repay_loan.emit(addy=user, notional=new_notional, collateral=collateral,start_ts=new_start_ts,end_ts=end_ts,rate=rate)   
         return (1)
     end
+end
+
+# repay loan in full
+@external
+func repay_loan_full{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() - > (res : felt):
+    
+    # addys and check if existing loan
+    let (user) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
+        
+    # new notional = old notional + ai -repay
+    let (acrrued_notional) = Math64x61_add(notional,accrued_interest)
+    res = repay_loan_partial(acrrued_notional)
+    return(res)
 end
 
 # check all PPs are valid
