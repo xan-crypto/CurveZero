@@ -327,6 +327,29 @@ func repay_loan_full{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return(res)
 end
 
+# increase collateral
+@external
+func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(collateral : felt) - > (res : felt):
+    
+    # Verify that the user has sufficient funds before call
+    let (_trusted_addy) = trusted_addy.read()
+    let (user) = get_caller_address()    
+    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
+    let (weth_user) = Erc20.ERC20_balanceOf(weth_addy, user)   
+    let (weth_quant_decimals) = Erc20.ERC20_decimals(weth_addy)   
+    let (collateral_erc) = Math64x61_convert_from(collateral,weth_quant_decimals) 
+    with_attr error_message("User does not have sufficient funds."):
+       assert_le(collateral_erc, weth_user)
+    enn
+    
+    # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
+    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
+    let (has_loan, notional, old_collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
+    let (new_collateral) = Math64x61_add(collateral, old_collateral)
+    CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate)
+    return(1)
+end
+
 # check all PPs are valid
 # check sigs vs. signed loanID and sigs vs. signed rate provided
 func check_pricing{
