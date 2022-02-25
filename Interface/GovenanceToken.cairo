@@ -56,8 +56,8 @@ func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 ##################################################################
-# need to emit LP events so that we can do reporting / dashboard to monitor system
-# dont need to emit total lp and total capital since can do that with history of changes
+# need to emit GT events so that we can do reporting / dashboard to monitor system
+# dont need to emit totals since can do that with history of changes
 @event
 func gt_stake_unstake(addy : felt, stake : felt):
 end
@@ -68,7 +68,7 @@ end
 
 ##################################################################
 # GT contract functions
-# stake GT tokens to earn a proportional rewards
+# stake GT tokens to earn proportional rewards 2% of accrued interest initially
 @external
 func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt) -> (res:felt):
     
