@@ -350,6 +350,42 @@ func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     return(1)
 end
 
+# decrease collateral
+@external
+func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(collateral : felt) - > (res : felt):
+    
+    # Verify amount positive
+    let (_trusted_addy) = trusted_addy.read()
+    let (user) = get_caller_address()    
+    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
+    with_attr error_message("Collateral withdrawal should be a positive amount."):
+       assert_nn(collateral)
+    enn
+    
+    # check withdrawal would not make loan insolvent
+    let (has_loan, notional, old_collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
+    let (acrrued_notional) = Math64x61_add(notional,accrued_interest)
+    let (new_collateral) = Math64x61_sub(old_collateral, collateral)
+    let (weth_ltv) = Settings.get_weth_ltv(settings_addy)
+    # call oracle price for collateral
+    let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
+    let (weth_price) = Oracle.get_weth_price(oracle_addy)
+    let (weth_price_decimals) = Oracle.get_weth_decimals(oracle_addy)
+    let (temp1) = Math64x61_convert_to(weth_price,weth_price_decimals)
+    let (temp2) = Math64x61_mul(temp1,new_collateral)
+    let (temp3) = Math64x61_mul(temp2,weth_ltv)
+    with_attr error_message("Not sufficient collateral for loan"):
+        assert_le(acrrued_notional,temp3)
+    end
+        
+    let (weth_quant_decimals) = Erc20.ERC20_decimals(weth_addy)   
+    let (collateral_erc) = Math64x61_convert_from(collateral,weth_quant_decimals) 
+    # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
+    CZCore.erc20_transferFrom(czcore_addy, weth_addy, czcore_addy, user, collateral_erc)
+    CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate)
+    return(1)
+end
+
 # check all PPs are valid
 # check sigs vs. signed loanID and sigs vs. signed rate provided
 func check_pricing{
