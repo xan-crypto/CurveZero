@@ -294,8 +294,7 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (new_reward_total) = Math64x61_add(reward_total, accrued_interest_gt)
     CZCore.set_loan_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
     
-    (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest)
-    let (new_notional) = Math64x61_sub(notional, loan_total_change)
+    let (new_notional) = Math64x61_sub(acrrued_notional, repay)
     let (new_start_ts) = Math64x61_ts()
     
     if new_notional == 0:
