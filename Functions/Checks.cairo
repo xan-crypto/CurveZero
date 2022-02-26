@@ -4,7 +4,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_le
-from Functions.Math64x61 import Math64x61_div, Math64x61_convert_from
+from Functions.Math64x61 import Math64x61_div, Math64x61_convert_from, Math64x61_zero
 from InterfaceAll import Erc20
 
 func check_is_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt):
