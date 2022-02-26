@@ -8,7 +8,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn_le, assert_le, assert_in_range
 from starkware.starknet.common.syscalls import get_caller_address
-from InterfaceAll import TrustedAddy, CZCore, Settings, ERC20
+from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20
 from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_convert_from, Math64x61_ts
 from Functions.Checks import check_is_owner, check_user_balance, check_insurance_shortfall_ratio
 
@@ -44,7 +44,8 @@ end
 
 @external
 func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
-    check_is_owner()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     trusted_addy.write(addy)
     return ()
 end
@@ -56,81 +57,59 @@ func event_lp_token(addy : felt, lp_change : felt, capital_change : felt):
 end
 
 ##################################################################
-# LP contract functions
-# issue LP tokens to user vs deposit
+# mint LP tokens for user vs deposit
 @external
-func usdc_deposit_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(usdc_deposit : felt) -> (lp_token : felt):
+func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(usdc_deposit : felt) -> (lp_token : felt):
     
     alloc_locals
-    # check that usdc depo within restricted deposit range
+    # check that usdc deposit within restricted deposit range
     let (_trusted_addy) = trusted_addy.read()
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (min_deposit, max_deposit) = Settings.get_min_max_deposit(settings_addy)
-    with_attr error_message("LP deposit not in required range."):
+    with_attr error_message("Deposit not in required range."):
         assert_in_range(usdc_deposit, min_deposit, max_deposit)
     end
 
     # check insurance shortfall ratio acceptable
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (lp_total, capital_total, loan_total, insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
     let (min_is_ratio) = Settings.get_insurance_shortfall_ratio(settings_addy)   
-    if capital_total == 0:  
-        let (current_is_ratio) = 0
-    else:
-        let (current_is_ratio) = Math64x61_div(insolvency_shortfall, capital_total)
-    end
-    with_attr error_message("Insurance shortfall ratio too high."):
-        assert_le(current_ratio, is_ratio)
-    end
+    check_insurance_shortfall_ratio(capital_total, insolvency_total, min_is_ratio)
 
     # check user has sufficient USDC
-    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (user) = get_caller_address()
-    let (usdc_user) = ERC20.ERC20_balanceOf(usdc_addy, user)
-    let (usdc_decimals) = ERC20.ERC20_decimals(usdc_addy)
-    # do decimal conversion so comparing like with like
-    let (usdc_deposit_erc) = Math64x61_convert_from(usdc_deposit, usdc_decimals)
-    with_attr error_message("User does not have sufficient funds."):
-        assert_le(usdc_deposit_erc, usdc_user)
-    end
+    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    let (usdc_deposit_erc) = check_user_balance(user, usdc_addy, usdc_deposit)
 
     # other variables and calcs
     let (lockup_period) = Settings.get_lockup_period(settings_addy)
     let (block_ts) = Math64x61_ts()
     let (new_capital_total) = Math64x61_add(capital_total, usdc_deposit)
 
-    # calc new lp total and new lp issuance
+    # transfer the USDC, mint the lp token and update variables
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, usdc_deposit_erc)
+    let (new_lp_total, new_lp_issuance) = lp_update(lp_total, usdc_deposit, new_capital_total, capital_total)
+    CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
+    let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
+    let (new_lp_user) = Math64x61_add(lp_user, new_lp_issuance)
+    let (new_lockup) = Math64x61_add(block_ts, lockup_period)
+    CZCore.set_lp_balance(czcore_addy, user, new_lp_user, new_lockup)
+    # event 
+    event_lp_token.emit(addy=user, lp_change=new_lp_issuance, capital_change=usdc_deposit)
+    return (new_lp_issuance)
+end
+
+# calc new lp total and issuance
+func lp_update{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_total : felt, usdc_deposit: felt, new_capital_total : felt, capital_total: felt) -> (new_lp_total : felt, new_lp_issuance : felt):
     if lp_total == 0:
-        let new_lp_total = depo_USD
-        let new_lp_issuance = depo_USD
-        # transfer the actual USDC tokens to CZCore reserves - ERC decimal version
-        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, usdc_deposit_erc)
-        # store all new data
-        CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
-        # mint the lp token
-        let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
-        let (temp1) = Math64x61_add(lp_user, new_lp_issuance)
-        let (temp2) = Math64x61_add(block_ts, lockup_period)
-        CZCore.set_lp_balance(czcore_addy, user, temp1, temp2)
-        # event
-        lp_token_change.emit(addy=user, lp_change=new_lp_issuance, capital_change=usdc_deposit)
-        return (new_lp_issuance)
+        let new_lp_total = usdc_deposit
+        let new_lp_issuance = usdc_deposit
+        return(new_lp_total, new_lp_issuance)
     else:
-        let (temp3) = Math64x61_mul(new_capital_total, lp_total)
-        let (new_lp_total) = Math64x61_div(temp3, capital_total)
+        let (new_capital_ratio) = Math64x61_div(new_capital_total, capital_total)
+        let (new_lp_total) = Math64x61_mul(lp_total, new_capital_ratio)
         let (new_lp_issuance) = Math64x61_sub(new_lp_total, lp_total)
-        # transfer the actual USDC tokens to CZCore reserves - ERC decimal version
-        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, usdc_deposit_erc)
-        # store all new data
-        CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
-        # mint the lp token
-        let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
-        let (temp4) = Math64x61_add(lp_user, new_lp_issuance)
-        let (temp5) = Math64x61_add(block_ts, lockup_period)
-        CZCore.set_lp_balance(czcore_addy, user, temp4, temp5)
-        # event
-        lp_token_change.emit(addy=user, lp_change=new_lp_issuance, capital_change=usdc_deposit_erc)
-        return (new_lp_issuance)
+        return(new_lp_total, new_lp_issuance)
     end
 end
 
