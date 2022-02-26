@@ -60,7 +60,6 @@ end
 # mint LP tokens for user vs deposit
 @external
 func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(usdc_deposit : felt) -> (lp_token : felt):
-    
     alloc_locals
     # check that usdc deposit within restricted deposit range
     let (_trusted_addy) = trusted_addy.read()
@@ -116,9 +115,7 @@ end
 # burn LP tokens from user
 @external
 func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_token : felt) -> (usdc_withdraw : felt):
-    
     alloc_locals
-    
     # check insurance shortfall ratio acceptable
     let (_trusted_addy) = trusted_addy.read()
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
@@ -164,23 +161,21 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     return (capital_redeem)
 end
 
-# whats my LP tokens worth
+# whats are user LP tokens worth
 @view
-func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd_value : felt, lockup : felt):
-    
+func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd_value : felt, lockup : felt):
     alloc_locals
     # get variables
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (lp_total, capital_total, loan_total, insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
-
     # calc user capital to return
     if lp_user == 0:
         return (0, 0)
     else:
-        let (temp1) = Math64x61_mul(lp_user, capital_total)
-        let (capital_user) = Math64x61_div(temp1, lp_total)
+        let (lp_ratio) = Math64x61_div(lp_user, lp_total)
+        let (capital_user) = Math64x61_mul(lp_ratio, capital_total)
         return (capital_user, lockup)
     end
 end
