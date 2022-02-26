@@ -126,12 +126,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
     check_utilization(settings_addy, notional, loan_total, capital_total)
     check_max_term(settings_addy, end_ts)
-
-    # check loan amount within correct ranges
-    let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
-    with_attr error_message("Notional should be within min max loan range."):
-       assert_in_range(notional, min_loan, max_loan)
-    enn
+    check_loan_range(settings_addy, notional)
 
     # add origination fee
     let (fee, pp_split, if_split) = Settings.get_origination_fee(settings_addy)
@@ -393,10 +388,7 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     check_max_term(settings_addy, end_ts)
 
     # check loan amount within correct ranges
-    let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
-    with_attr error_message("Notional should be within min max loan range."):
-       assert_in_range(notional, min_loan, max_loan)
-    enn
+    check_loan_range(settings_addy, notional)
 
     # add origination fee
     let (fee, pp_split, if_split) = Settings.get_origination_fee(settings_addy)
