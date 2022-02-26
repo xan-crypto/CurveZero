@@ -108,24 +108,16 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (loan_id_hash) = hash2{hash_ptr=pedersen_ptr}(loan_id, 0)
     let (rate_array : felt*) = alloc()
     let (pp_pub_array : felt*) = alloc()
-
     # iterate thru pp data - verify the pp's signature.
     let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash)
-    
     # check eno pp for pricing, settings has min_pp
     let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    let (min_pp) = Settings.get_min_pp(setting_addy)
-    with_attr error_message("Not enough PPs for valid pricing."):
-        assert_le(min_pp,rate_array_len)
-    end
-    
+    check_min_pp(setting_addy, rate_array_len)
     # order the rates and find the median
     let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
     let (median, _) = unsigned_div_rem(len_ordered, 2)
-
     # later randomly select 75% of the PPs, also deal with median when even number of PP
     let (median_rate) = ordered[median]    
-    # get index of rate to find winning PP
     let (winning_position) = index[median]
     let (winning_pp) = pp_pub_array[winning_position]
 
