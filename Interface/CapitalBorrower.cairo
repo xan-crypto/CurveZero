@@ -128,13 +128,8 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (collateral_erc) = check_user_balance(user, weth_addy, collateral)
 
     # check below utilization level post loan
-    let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
-    let (stop) = Settings.get_utilization(settings_addy)
-    let (temp4) = Math64x61_add(notional,loan_total)
-    let (temp5) = Math64x61_div(temp4,capital_total)
-    with_attr error_message("Utilization to high, cannot issue loan."):
-       assert_le(temp5, stop)
-    enn
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
+    check_utilization(settings_addy, notional, loan_total, capital_total)
     
     # check end time less than setting max loan time
     let (block_ts) = Math64x61_ts()
@@ -398,15 +393,13 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     enn
     
     # check below utilization level post loan
-    let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
-    let (stop) = Settings.get_utilization(settings_addy)
-    let (old_accrued_notional) = Math64x61_add(old_notional,accrued_interest) 
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
+    let (change_notional) = Math64x61_sub(notional, old_notional) 
+    check_utilization(settings_addy, change_notional, loan_total, capital_total)
+    
+    # check below utilization level post loan
+    let (accrued_old_notional) = Math64x61_add(old_notional, accrued_interest) 
     let (change_notional) = Math64x61_sub(notional,old_accrued_notional) 
-    let (temp4) = Math64x61_add(change_notional,loan_total)
-    let (temp5) = Math64x61_div(temp4,capital_total)
-    with_attr error_message("Utilization to high, cannot refinance loan."):
-       assert_le(temp5, stop)
-    enn
     
     # check end time less than setting max loan time
     let (block_ts) = Math64x61_ts()
