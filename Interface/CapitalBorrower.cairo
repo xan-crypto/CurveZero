@@ -66,7 +66,6 @@ end
 @view
 func view_loan_detail{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (
         has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, accrued_interest : felt):
-    
     alloc_locals
     # calc accrued interest and return loan details
     let (_trusted_addy) = trusted_addy.read()
@@ -93,7 +92,6 @@ end
 @external
 func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
         (loan_id : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*) - > (res : felt):
-    
     # addys and check if existing loan
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
@@ -189,7 +187,6 @@ end
 # repay loan in partial
 @external
 func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt) - > (res : felt):
-    
     # addys and check if existing loan
     let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -266,7 +263,6 @@ end
 # repay loan in full
 @external
 func repay_loan_full{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() - > (res : felt):
-    
     # addys and check if existing loan
     let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -282,7 +278,6 @@ end
 # increase collateral
 @external
 func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(collateral : felt) - > (res : felt):
-    
     # Verify that the user has sufficient funds before call
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()    
@@ -306,7 +301,6 @@ end
 # decrease collateral
 @external
 func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(collateral : felt) - > (res : felt):
-    
     # Verify amount positive
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()    
@@ -343,7 +337,6 @@ end
 # refinance laon
 @external
 func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt,pp_data : felt*) - > (res : felt):
-    
     # addys and check if existing loan
     let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
