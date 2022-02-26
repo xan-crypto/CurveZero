@@ -110,9 +110,9 @@ namespace Settings:
     end
     func set_min_max_loan(min_loan : felt, max_loan : felt):
     end       
-    func get_min_max_capital() -> (min_capital : felt, max_capital : felt):
+    func get_min_max_deposit() -> (min_deposit : felt, max_deposit : felt):
     end
-    func set_min_max_capital(min_capital : felt, max_capital : felt):
+    func set_min_max_deposit(min_deposit : felt, max_deposit : felt):
     end    
     func get_utilization() -> (stop : felt):
     end
