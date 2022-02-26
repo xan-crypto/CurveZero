@@ -376,6 +376,131 @@ func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     return(1)
 end
 
+# refinance laon
+@external
+func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt,pp_data : felt*) - > (res : felt):
+    
+    # addys and check if existing loan
+    let (user) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (has_loan, old_notional, old_collateral, old_start_ts, old_end_ts, old_rate, accrued_interest) = get_loan_details(user)
+    with_attr error_message("User does not have an existing loan."):
+        assert has_loan = 1
+    end
+    
+    # pp data should be passed as follows
+    # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
+    let (loanID_hash) = hash2{hash_ptr=pedersen_ptr}(loanID, 0)
+    let (rate_array : felt*) = alloc()
+    let (pp_pub_array : felt*) = alloc()
+
+    # iterate thru pp data - verify the pp's signature.
+    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loanID_hash)
+    
+    # check eno pp for pricing, settings has min_pp
+    let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    let (min_pp) = Settings.get_min_pp(setting_addy)
+    with_attr error_message("Not enough PPs for valid pricing."):
+        assert_le(min_pp,rate_array_len)
+    end
+    
+    # order the rates and find the median
+    let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
+    let (median, _) = unsigned_div_rem(len_ordered, 2)
+
+    # later randomly select 75% of the PPs, also deal with median when even number of PP
+    let (median_rate) = ordered[median]    
+    # get index of rate to find winning PP
+    let (winning_position) = index[median]
+    let (winning_pp) = pp_pub_array[winning_position]
+
+    # call oracle price for collateral
+    let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
+    let (weth_price) = Oracle.get_weth_price(oracle_addy)
+    let (weth_price_decimals) = Oracle.get_weth_decimals(oracle_addy)
+
+    # get ltv from setting
+    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
+    let (weth_ltv) = Settings.get_weth_ltv(settings_addy)
+    # test sufficient collateral to proceed vs notional of loan
+    let (temp1) = Math64x61_convert_to(weth_price,weth_price_decimals)
+    let (temp2) = Math64x61_mul(temp1,collateral)
+    let (temp3) = Math64x61_mul(temp2,WETH_ltv)
+    with_attr error_message("Not sufficient collateral for loan"):
+        assert_le(notional,temp3)
+    end
+    
+    # Verify that the user has sufficient funds before call
+    let (weth_user) = Erc20.ERC20_balanceOf(weth_addy, user)   
+    let (weth_quant_decimals) = Erc20.ERC20_decimals(weth_addy)  
+    let (change_collateral) = Math64x61_sub(collateral,old_collateral) 
+    let (change_collateral_erc) = Math64x61_convert_from(change_collateral,weth_quant_decimals) 
+    with_attr error_message("User does not have sufficient funds."):
+       assert_le(change_collateral, weth_user)
+    enn
+    
+    # check below utilization level post loan
+    let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
+    let (stop) = Settings.get_utilization(settings_addy)
+    let (old_accrued_notional) = Math64x61_add(old_notional,accrued_interest) 
+    let (change_notional) = Math64x61_sub(notional,old_accrued_notional) 
+    let (temp4) = Math64x61_add(change_notional,loan_total)
+    let (temp5) = Math64x61_div(temp4,capital_total)
+    with_attr error_message("Utilization to high, cannot refinance loan."):
+       assert_le(temp5, stop)
+    enn
+    
+    # check end time less than setting max loan time
+    let (block_ts) = Math64x61_ts()
+    let (max_term) = Settings.get_max_loan_term(settings_addy)
+    let (temp6) = Math64x61_add(block_ts,max_term)
+    with_attr error_message("Loan term should be within term range."):
+       assert_in_range(end_ts, block_ts, temp6)
+    enn
+
+    # check loan amount within correct ranges
+    let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
+    with_attr error_message("Notional should be within min max loan range."):
+       assert_in_range(notional, min_loan, max_loan)
+    enn
+
+    # add origination fee
+    let (fee, pp_split, if_split) = Settings.get_origination_fee(settings_addy)
+    let (temp7) = Math64x61_add(fee,Math64x61_ONE)
+    let (change_notional_with_fee) = Math64x61_mul(temp7,change_notional)
+
+    # transfer collateral to CZCore and transfer USDC to user
+    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
+    let (change_notional_erc) = Math64x61_convert_from(change_notional,usdc_decimals) 
+    let (origination_fee) = Math64x61_sub(change_notional_with_fee,change_notional)
+    let (temp8) = Math64x61_mul(origination_fee,pp_split)
+    let(fee_erc_pp) = Math64x61_convert_from(temp8,usdc_decimals)
+    let (temp9) =  Math64x61_mul(origination_fee,if_split)
+    let (fee_erc_if) = Math64x61_convert_from(temp9,usdc_decimals)
+    let(if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
+    
+    let (new_notional_with_fee) = Math64x61_add(old_accrued_notional,change_notional_with_fee)
+
+    # transfer the actual USDC tokens to user - ERC decimal version
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, change_notional_erc)
+    # transfer pp and if
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, fee_erc_pp)
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, fee_erc_if)
+    # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
+    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, change_collateral_erc)
+    #update CZCore
+    CZCore.set_cb_loan(czcore_addy, user, 1, new_notional_with_fee, collateral, block_ts, end_ts, median_rate, 0)
+    let (lp_total, capital_total, loan_total, insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
+    let (new_loan_total) = Math64x61_add(loan_total,change_notional_with_fee)
+    CZCore.set_loan_total(czcore_addy, new_loan_total)
+    
+    #event
+    loan_change.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
+    return (1)
+end
+
 # check all PPs are valid
 # check sigs vs. signed loanID and sigs vs. signed rate provided
 func check_pricing{
