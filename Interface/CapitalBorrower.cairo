@@ -15,7 +15,7 @@ from starkware.cairo.common.math import unsigned_div_rem, assert_in_range
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20, Oracle
 from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_pow_frac, Math64x61_sub, Math64x61_add, Math64x61_ts, Math64x61_one, Math64x61_year
-from Functions.Checks import check_is_owner
+from Functions.Checks import check_is_owner, check_min_pp, check_ltv, check_utilization, check_max_term, check_loan_range
 
 ##################################################################
 # addy of the owner
@@ -109,7 +109,6 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # iterate thru pp data - verify the pp's signature.
     let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash)
     let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    check_min_pp(setting_addy, rate_array_len)
     # order the rates and find the median
     let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
     let (median, _) = unsigned_div_rem(len_ordered, 2)
@@ -119,6 +118,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (winning_pp) = pp_pub_array[winning_position]
 
     #checks
+    check_min_pp(setting_addy, rate_array_len)
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
     check_ltv(oracle_addy, settings_addy, notional, collateral)
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
