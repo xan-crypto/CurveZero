@@ -4,7 +4,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_le
-from Functions.Math64x61 import Math64x61_div, Math64x61_convert_from, Math64x61_zero, Math64x61_convert_to
+from Functions.Math64x61 import Math64x61_div, Math64x61_convert_from, Math64x61_zero, Math64x61_convert_to, Math64x61_ts, Math64x61_add
 from InterfaceAll import Settings, Erc20, Oracle
 
 func check_is_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt):
@@ -65,6 +65,16 @@ func check_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (utilization) = Math64x61_div(new_loan_total, capital_total)
     with_attr error_message("Utilization to high, cannot issue loan."):
        assert_le(utilization, stop)
+    enn
+    return()
+end
+
+func check_max_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, end_ts : felt):
+    let (block_ts) = Math64x61_ts()
+    let (max_term) = Settings.get_max_loan_term(settings_addy)
+    let (max_end_ts) = Math64x61_add(block_ts, max_term)
+    with_attr error_message("Loan term should be within term range."):
+       assert_in_range(end_ts, block_ts, max_end_ts)
     enn
     return()
 end
