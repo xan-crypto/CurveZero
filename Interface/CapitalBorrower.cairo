@@ -423,9 +423,9 @@ func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (loan_id_hash) = hash2{hash_ptr=pedersen_ptr}(loan_id, 0)
     let (rate_array : felt*) = alloc()
     let (pp_pub_array : felt*) = alloc()
-    # iterate thru pp_pub and reduce invalid PPs
+    # iterate thru pp_pub and reduce total dataset where pp_pub is not valid PP
     let (new_pp_data_len, new_pp_data) = validate_pp_data(pp_data_len,pp_data)
-    # iterate thru pp data - verify the pp's signature.
+    # iterate thru remaining pp data - verify the pp's signature for both rate and unique loan ID.
     let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(new_pp_data_len, new_pp_data, loan_id_hash)
     # order the rates and find the median
     let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
@@ -437,7 +437,7 @@ func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return(median_rate, winning_pp)
 end
 
-# iterate thru pp_pub and reduce invalid PPs
+# iterate thru pp_pub and reduce total dataset where pp_pub is not valid PP
 func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
         (length: felt, array : felt*) -> (pp_data_len: felt, pp_data : felt*):
     if length == 0:
@@ -465,7 +465,7 @@ func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     end
 end
 
-# check all PPs are valid - check sigs vs. signed loan and sigs vs. signed rate provided
+# check all PPs data correctly signed - check sigs vs. signed loan and sigs vs. signed rate provided
 func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,ecdsa_ptr : SignatureBuiltin*}
         (length : felt, array : felt*, loan_hash : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
     # create arrays at last step
