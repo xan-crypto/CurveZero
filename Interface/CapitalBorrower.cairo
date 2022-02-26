@@ -108,7 +108,6 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (pp_pub_array : felt*) = alloc()
     # iterate thru pp data - verify the pp's signature.
     let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash)
-    # check eno pp for pricing, settings has min_pp
     let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     check_min_pp(setting_addy, rate_array_len)
     # order the rates and find the median
@@ -119,19 +118,13 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (winning_position) = index[median]
     let (winning_pp) = pp_pub_array[winning_position]
 
-    # test sufficient collateral to proceed vs notional of loan
+    #checks
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
     check_ltv(oracle_addy, settings_addy, notional, collateral)
-    
-    # verify that the user has sufficient funds before call
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
     let (collateral_erc) = check_user_balance(user, weth_addy, collateral)
-
-    # check below utilization level post loan
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
     check_utilization(settings_addy, notional, loan_total, capital_total)
-    
-    # check end time less than setting max loan time
     check_max_term(settings_addy, end_ts)
 
     # check loan amount within correct ranges
