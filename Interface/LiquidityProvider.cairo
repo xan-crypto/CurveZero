@@ -88,50 +88,44 @@ func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 
     # transfer the USDC, mint the lp token and update variables
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, usdc_deposit_erc)
-    let (new_lp_total, new_lp_issuance) = lp_update(lp_total, usdc_deposit, new_capital_total, capital_total)
+    let (new_lp_total, lp_issuance) = lp_update(lp_total, usdc_deposit, new_capital_total, capital_total)
     CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
-    let (new_lp_user) = Math64x61_add(lp_user, new_lp_issuance)
+    let (new_lp_user) = Math64x61_add(lp_user, lp_issuance)
     let (new_lockup) = Math64x61_add(block_ts, lockup_period)
     CZCore.set_lp_balance(czcore_addy, user, new_lp_user, new_lockup)
     # event 
-    event_lp_token.emit(addy=user, lp_change=new_lp_issuance, capital_change=usdc_deposit)
-    return (new_lp_issuance)
+    event_lp_token.emit(addy=user, lp_change=lp_issuance, capital_change=usdc_deposit)
+    return (lp_issuance)
 end
 
 # calc new lp total and issuance
-func lp_update{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_total : felt, usdc_deposit: felt, new_capital_total : felt, capital_total: felt) -> (new_lp_total : felt, new_lp_issuance : felt):
+func lp_update{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_total : felt, usdc_deposit: felt, new_capital_total : felt, capital_total: felt) -> (new_lp_total : felt, lp_issuance : felt):
     if lp_total == 0:
         let new_lp_total = usdc_deposit
-        let new_lp_issuance = usdc_deposit
-        return(new_lp_total, new_lp_issuance)
+        let lp_issuance = usdc_deposit
+        return(new_lp_total, lp_issuance)
     else:
-        let (new_capital_ratio) = Math64x61_div(new_capital_total, capital_total)
-        let (new_lp_total) = Math64x61_mul(lp_total, new_capital_ratio)
-        let (new_lp_issuance) = Math64x61_sub(new_lp_total, lp_total)
-        return(new_lp_total, new_lp_issuance)
+        let (capital_ratio) = Math64x61_div(new_capital_total, capital_total)
+        let (new_lp_total) = Math64x61_mul(lp_total, capital_ratio)
+        let (lp_issuance) = Math64x61_sub(new_lp_total, lp_total)
+        return(new_lp_total, lp_issuance)
     end
 end
 
-# redeem LP tokens from user
+# burn LP tokens from user
 @external
-func usdc_withdraw_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_withdraw : felt) -> (usdc : felt):
+func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_token : felt) -> (usdc_withdraw : felt):
     
     alloc_locals
+    
     # check insurance shortfall ratio acceptable
     let (_trusted_addy) = trusted_addy.read()
-    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    let (lp_total, capital_total, loan_total, insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
-    let (is_ratio) = Settings.get_insurance_shortfall_ratio(settings_addy)
-    if capital_total == 0:  
-        let (current_is_ratio) = 0
-    else:
-        let (current_is_ratio) = Math64x61_div(insolvency_shortfall, capital_total)
-    end    
-    with_attr error_message("Insurance shortfall ratio too high."):
-        assert_le(current_ratio, is_ratio)
-    end
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
+    let (min_is_ratio) = Settings.get_insurance_shortfall_ratio(settings_addy)   
+    check_insurance_shortfall_ratio(capital_total, insolvency_total, min_is_ratio)
 
     # can only withdraw if not in lock up
     let (user) = get_caller_address()
@@ -143,39 +137,36 @@ func usdc_withdraw_vs_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 
     # verify that the amount is lp withdraw is positive and below total.
     with_attr error_message("Amount must be positive and below LP total available."):
-        assert_nn_le(lp_withdraw, lp_total)
+        assert_nn_le(lp_token, lp_total)
     end
     # verify user has sufficient LP tokens to redeem
-    with_attr error_message("Insufficent LP tokens to redeem."):
-        assert_le(lp_withdraw, lp_user)
+    with_attr error_message("Insufficent LP tokens to burn."):
+        assert_le(lp_token, lp_user)
     end
 
     # other variables and calcs
-    let (new_lp_total) = Math64x61_sub(lp_total, lp_withdraw)
-    let (temp1) = Math64x61_mul(new_lp_total, capital_total)
-    let (new_capital_total) = Math64x61_div(temp1, lp_total)
-    let (new_capital_redeem) = Math64x61_sub(capital_total, new_capital_total)
+    let (new_lp_total) = Math64x61_sub(lp_total, lp_token)
+    let (new_lp_ratio) = Math64x61_div(new_lp_total, lp_total)
+    let (new_capital_total) = Math64x61_mul(capital_total, new_lp_ratio)
+    let (capital_redeem) = Math64x61_sub(capital_total, new_capital_total)
 
-    # transfer the actual USDC tokens from CZCore reserves
+    # check czcore has sufficient USDC
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    let (usdc_decimals) = ERC20.ERC20_decimals(usdc_addy)
-    # do decimal conversion so comparing like with like
-    let (new_capital_redeem_erc) = Math64x61_convert_from(new_capital_redeem, usdc_decimals)
-    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, new_capital_redeem_erc)
+    let (capital_redeem_erc) = check_user_balance(czcore_addy, usdc_addy, capital_redeem)
 
-    # store all new data
+    # transfer the USDC, burn the lp token and update variables
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, capital_redeem_erc)
     CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
-    # burn lp tokens
-    let (temp2) = Math64x61_sub(lp_user, lp_withdraw)
-    CZCore.set_lp_balance(czcore_addy, user, temp2, lockup)
+    let (new_lp_user) = Math64x61_sub(lp_user, lp_token)
+    CZCore.set_lp_balance(czcore_addy, user, new_lp_user, lockup)
     # event
-    lp_token_change.emit(addy=user, lp_change=-lp_withdraw, capital_change=-new_capital_redeem)
-    return (new_capital_redeem)
+    event_lp_token.emit(addy=user, lp_change=-lp_token, capital_change=-capital_redeem)
+    return (capital_redeem)
 end
 
 # whats my LP tokens worth
 @view
-func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd : felt, lockup : felt):
+func lp_token_worth{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd_value : felt, lockup : felt):
     
     alloc_locals
     # get variables
