@@ -143,8 +143,8 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 
     # other variables and calcs
     let (new_lp_total) = Math64x61_sub(lp_total, lp_token)
-    let (new_lp_ratio) = Math64x61_div(new_lp_total, lp_total)
-    let (new_capital_total) = Math64x61_mul(capital_total, new_lp_ratio)
+    let (lp_ratio) = Math64x61_div(new_lp_total, lp_total)
+    let (new_capital_total) = Math64x61_mul(capital_total, lp_ratio)
     let (capital_redeem) = Math64x61_sub(capital_total, new_capital_total)
 
     # check czcore has sufficient USDC
