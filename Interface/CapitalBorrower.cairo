@@ -125,16 +125,10 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
     check_ltv(oracle_addy, settings_addy, notional, collateral)
     
-    # Verify that the user has sufficient funds before call
+    # verify that the user has sufficient funds before call
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
-    
-    let (weth_user) = Erc20.ERC20_balanceOf(weth_addy, user)   
-    let (weth_quant_decimals) = Erc20.ERC20_decimals(weth_addy)   
-    let (collateral_erc) = Math64x61_convert_from(collateral,weth_quant_decimals) 
-    with_attr error_message("User does not have sufficient funds."):
-       assert_le(collateral_erc, weth_user)
-    enn
-    
+    let (collateral_erc) = check_user_balance(user, weth_addy, collateral)
+
     # check below utilization level post loan
     let (lp_total,capital_total,loan_total,insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
     let (stop) = Settings.get_utilization(settings_addy)
