@@ -96,27 +96,15 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (has_loan, a, b, c, d, e) = CZCore.get_cb_loan(czcore_addy, user)
     with_attr error_message("User already has an existing loan, refinance instead."):
         assert has_loan = 0
     end
     
-    # pp data should be passed as follows
-    # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
-    let (loan_id_hash) = hash2{hash_ptr=pedersen_ptr}(loan_id, 0)
-    let (rate_array : felt*) = alloc()
-    let (pp_pub_array : felt*) = alloc()
-    # iterate thru pp data - verify the pp's signature.
-    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash)
-    let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    # order the rates and find the median
-    let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
-    let (median, _) = unsigned_div_rem(len_ordered, 2)
-    # later randomly select 75% of the PPs, also deal with median when even number of PP
-    let (median_rate) = ordered[median]    
-    let (winning_position) = index[median]
-    let (winning_pp) = pp_pub_array[winning_position]
-
+    # process pp data
+    let (median_rate, winning_pp) = process_pp_data(loan_id, pp_data_len, pp_data)
+    
     #checks
     check_min_pp(setting_addy, rate_array_len)
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
@@ -424,6 +412,27 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     #event
     loan_change.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
     return (1)
+end
+
+##################################################################
+# process pp data
+func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
+        (loan_id : felt, pp_data_len: felt, pp_data : felt*) -> (median_rate: felt, winning_pp : felt):
+    # pp data should be passed as follows
+    # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
+    let (loan_id_hash) = hash2{hash_ptr=pedersen_ptr}(loan_id, 0)
+    let (rate_array : felt*) = alloc()
+    let (pp_pub_array : felt*) = alloc()
+    # iterate thru pp data - verify the pp's signature.
+    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash)
+    # order the rates and find the median
+    let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
+    let (median, _) = unsigned_div_rem(len_ordered, 2)
+    # later randomly select 75% of the PPs, also deal with median when even number of PP
+    let (median_rate) = ordered[median]    
+    let (winning_position) = index[median]
+    let (winning_pp) = pp_pub_array[winning_position]
+    return(median_rate, winning_pp)
 end
 
 # check all PPs are valid - check sigs vs. signed loan and sigs vs. signed rate provided
