@@ -20,6 +20,7 @@ const Math64x61_FRACT_PART = 2 ** 61
 const Math64x61_BOUND = 2 ** 125
 const Math64x61_ONE = 1 * Math64x61_FRACT_PART
 const Math64x61_TEN = 10 * Math64x61_FRACT_PART
+const Math64x61_ZERO = 0 * Math64x61_FRACT_PART
 const Math64x61_E = 6267931151224907085
 
 func Math64x61_assert64x61 {range_check_ptr} (x: felt):
@@ -70,6 +71,11 @@ func Math64x61_convert_to {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     let (convert) = Math64x61_fromFelt(x)
     let (res, _) = unsigned_div_rem(convert, divider)
     return (res)
+end
+
+# returns the constant zero
+func Math64x61_zero {range_check_ptr} () -> (res: felt):
+    return (Math64x61_ZERO)
 end
 
 # Convenience addition method to assert no overflow before returning
