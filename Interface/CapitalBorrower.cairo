@@ -89,27 +89,28 @@ func view_loan_detail{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     end
 end
 
-# accecpt a loan / set loan terms
+# create new loan
 @external
-func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt,pp_data : felt*) - > (res : felt):
+func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
+        (loan_id : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*) - > (res : felt):
     
     # addys and check if existing loan
-    let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
+    let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (has_loan, _) = CZCore.get_cb_loan(czcore_addy, user)
+    let (has_loan, notional, collateral, start_ts, end_ts, rate) = CZCore.get_cb_loan(czcore_addy, user)
     with_attr error_message("User already has an existing loan, refinance instead."):
         assert has_loan = 0
     end
     
     # pp data should be passed as follows
     # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
-    let (loanID_hash) = hash2{hash_ptr=pedersen_ptr}(loanID, 0)
+    let (loan_id_hash) = hash2{hash_ptr=pedersen_ptr}(loan_id, 0)
     let (rate_array : felt*) = alloc()
     let (pp_pub_array : felt*) = alloc()
 
     # iterate thru pp data - verify the pp's signature.
-    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loanID_hash)
+    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash)
     
     # check eno pp for pricing, settings has min_pp
     let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
@@ -488,39 +489,27 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return (1)
 end
 
-# check all PPs are valid
-# check sigs vs. signed loanID and sigs vs. signed rate provided
-func check_pricing{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        ecdsa_ptr : SignatureBuiltin*}(length : felt, array : felt*, loanID_hash : felt) -> (
-        r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
+# check all PPs are valid - check sigs vs. signed loan and sigs vs. signed rate provided
+func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,ecdsa_ptr : SignatureBuiltin*}
+        (length : felt, array : felt*, loan_hash : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
     # create arrays at last step
     if length == 0:
         let (r_array : felt*) = alloc()
         let (p_array : felt*) = alloc()
         return (0, r_array, 0, p_array)
     end
-
     # recursive call
-    let (r_array_len, r_array, p_array_len, p_array) = check_pricing(
-        length - 6, array + 6, loanID_hash)
-
+    let (r_array_len, r_array, p_array_len, p_array) = check_pricing(length - 6, array + 6, loan_hash)
     # validate that the PP signed both loanID and rate correctly
-    let signed_loanID_r = array[0]
-    let signed_loanID_s = array[1]
+    let signed_loan_r = array[0]
+    let signed_loan_s = array[1]
     let signed_rate_r = array[2]
     let signed_rate_s = array[3]
     let rate = array[4]
     let pp_pub = array[5]
-
-    verify_ecdsa_signature(
-        message=loanID_hash,
-        public_key=pp_pub,
-        signature_r=signed_loanID_r,
-        signature_s=signed_loanID_s)
     let (rate_hash) = hash2{hash_ptr=pedersen_ptr}(rate, 0)
+    verify_ecdsa_signature(message=loan_hash, public_key=pp_pub, signature_r=signed_loan_r, signature_s=signed_loan_s)    
     verify_ecdsa_signature(message=rate_hash, public_key=pp_pub, signature_r=signed_rate_r, signature_s=signed_rate_s)
-
     # add to new arrays
     assert [r_array + r_array_len] = rate
     assert [p_array + p_array_len] = pp_pub
@@ -528,16 +517,13 @@ func check_pricing{
 end
 
 # this function returns to min value of an array and the index thereof
-func get_min_value_above{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        x : felt, array_len : felt, array : felt*) -> (y : felt, index : felt):
-    # alloc()
+func get_min_value_above{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
+        (x : felt, array_len : felt, array : felt*) -> (y : felt, index : felt):
     alloc_locals
     if array_len == 1:
         return (array[0], 0)
     end
-
     let (y, index) = get_min_value_above(x, array_len - 1, array + 1)
-
     let (test1) = is_le(array[0], y)
     if test1 == 1:
         let (test2) = is_le(array[0], x)
@@ -555,8 +541,7 @@ func get_min_value_above{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     end
 end
 
-# this function sorts an array of size n from high to low
-# need this for the median calc for PPs
+# this function sorts an array of size n from high to low - need this for the median calc for PPs
 func sort_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         x_len : felt, x : felt*, y_len : felt, y : felt*) -> (
         z_len : felt, z : felt*, i_len : felt, i : felt*):
@@ -569,9 +554,7 @@ func sort_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
         assert [i] = index
         return (1, z, 1, i)
     end
-
     let (z_len, z, i_len, i) = sort_index(x_len, x, y_len - 1, y + 1)
-
     let (min, index) = get_min_value_above(z[z_len - 1], x_len, x)
     assert [z + z_len] = min
     assert [i + i_len] = index
