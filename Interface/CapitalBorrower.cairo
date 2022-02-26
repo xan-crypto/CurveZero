@@ -98,7 +98,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (has_loan, notional, collateral, start_ts, end_ts, rate) = CZCore.get_cb_loan(czcore_addy, user)
+    let (has_loan, a, b, c, d, e) = CZCore.get_cb_loan(czcore_addy, user)
     with_attr error_message("User already has an existing loan, refinance instead."):
         assert has_loan = 0
     end
@@ -121,23 +121,13 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (winning_position) = index[median]
     let (winning_pp) = pp_pub_array[winning_position]
 
-    # call oracle price for collateral
-    let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
-    let (weth_price) = Oracle.get_weth_price(oracle_addy)
-    let (weth_price_decimals) = Oracle.get_weth_decimals(oracle_addy)
-
-    # get ltv from setting
-    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
-    let (weth_ltv) = Settings.get_weth_ltv(settings_addy)
     # test sufficient collateral to proceed vs notional of loan
-    let (temp1) = Math64x61_convert_to(weth_price,weth_price_decimals)
-    let (temp2) = Math64x61_mul(temp1,collateral)
-    let (temp3) = Math64x61_mul(temp2,WETH_ltv)
-    with_attr error_message("Not sufficient collateral for loan"):
-        assert_le(notional,temp3)
-    end
+    let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
+    check_ltv(oracle_addy, settings_addy, notional, collateral)
     
     # Verify that the user has sufficient funds before call
+    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
+    
     let (weth_user) = Erc20.ERC20_balanceOf(weth_addy, user)   
     let (weth_quant_decimals) = Erc20.ERC20_decimals(weth_addy)   
     let (collateral_erc) = Math64x61_convert_from(collateral,weth_quant_decimals) 
