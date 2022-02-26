@@ -423,8 +423,10 @@ func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (loan_id_hash) = hash2{hash_ptr=pedersen_ptr}(loan_id, 0)
     let (rate_array : felt*) = alloc()
     let (pp_pub_array : felt*) = alloc()
+    # iterate thru pp_pub and reduce invalid PPs
+    let (new_pp_data_len, new_pp_data) = validate_pp_data(pp_data_len,pp_data)
     # iterate thru pp data - verify the pp's signature.
-    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash)
+    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(new_pp_data_len, new_pp_data, loan_id_hash)
     # order the rates and find the median
     let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
     let (median, _) = unsigned_div_rem(len_ordered, 2)
@@ -433,6 +435,34 @@ func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (winning_position) = index[median]
     let (winning_pp) = pp_pub_array[winning_position]
     return(median_rate, winning_pp)
+end
+
+# iterate thru pp_pub and reduce invalid PPs
+func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
+        (length: felt, array : felt*) -> (pp_data_len: felt, pp_data : felt*):
+    if length == 0:
+        let (pp_data : felt*) = alloc()
+        return (0, pp_data)
+    end
+    # recursive call
+    let (pp_data_len, pp_data) = check_pricing(length - 6, array + 6)
+    # validate PP status
+    let pp_pub = array[5]
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (lp_token, czt_token, status) = CZCore.view_pp_status(pp_pub)
+    # add to new arrays
+    if status == 1:
+        assert [pp_data + 0 + pp_data_len] = array[0]
+        assert [pp_data + 1 + pp_data_len] = array[1]
+        assert [pp_data + 2 + pp_data_len] = array[2]
+        assert [pp_data + 3 + pp_data_len] = array[3]
+        assert [pp_data + 4 + pp_data_len] = array[4]
+        assert [pp_data + 5 + pp_data_len] = array[5]
+        return (pp_data_len+6,pp_data)
+    else:
+        return (pp_data_len,pp_data)
+    end
 end
 
 # check all PPs are valid - check sigs vs. signed loan and sigs vs. signed rate provided
