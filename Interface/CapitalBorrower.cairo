@@ -132,12 +132,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     check_utilization(settings_addy, notional, loan_total, capital_total)
     
     # check end time less than setting max loan time
-    let (block_ts) = Math64x61_ts()
-    let (max_term) = Settings.get_max_loan_term(settings_addy)
-    let (temp6) = Math64x61_add(block_ts,max_term)
-    with_attr error_message("Loan term should be within term range."):
-       assert_in_range(end_ts, block_ts, temp6)
-    enn
+    check_max_term(settings_addy, end_ts)
 
     # check loan amount within correct ranges
     let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
@@ -402,12 +397,7 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (change_notional) = Math64x61_sub(notional,old_accrued_notional) 
     
     # check end time less than setting max loan time
-    let (block_ts) = Math64x61_ts()
-    let (max_term) = Settings.get_max_loan_term(settings_addy)
-    let (temp6) = Math64x61_add(block_ts,max_term)
-    with_attr error_message("Loan term should be within term range."):
-       assert_in_range(end_ts, block_ts, temp6)
-    enn
+    check_max_term(settings_addy, end_ts)
 
     # check loan amount within correct ranges
     let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
