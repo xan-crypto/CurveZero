@@ -1,5 +1,7 @@
 # CB contract
 # all numbers passed into contract must be Math64x61 type
+# events include event_loan_change
+# functions include repay_loan_full, repay_loan_partial, create_loan, refinance_loan, increase_collateral, decrease_collateral, view_loan_detail
 
 # imports
 %lang starknet
@@ -12,73 +14,57 @@ from starkware.cairo.common.signature import verify_ecdsa_signature
 from starkware.cairo.common.math import unsigned_div_rem, assert_in_range
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20, Oracle
-from Math.Math64x61 import (Math64x61_mul, Math64x61_div, Math64x61_pow_frac, Math64x61_sub, Math64x61_add, Math64x61_ts)
+from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_pow_frac, Math64x61_sub, Math64x61_add, Math64x61_ts, Math64x61_one, Math64x61_year
+from Functions.Checks import check_is_owner
 
 ##################################################################
-# constants
-# is this needed or is it caught via the import
-const Math64x61_ONE = 2 ** 61
-# 24*60*60*365.25
-const year_secs = 31557600 * 2 ** 61
-
-##################################################################
-# addy of the deployer
+# addy of the owner
 @storage_var
-func deployer_addy() -> (addy : felt):
+func owner_addy() -> (addy : felt):
 end
 
-# set the addy of the delpoyer on deploy
 @constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(deployer : felt):
-    deployer_addy.write(deployer)
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt):
+    owner_addy.write(owner)
     return ()
 end
 
-# who is deployer
 @view
-func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
-    let (addy) = deployer_addy.read()
+func get_owner_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
+    let (addy) = owner_addy.read()
     return (addy)
 end
 
 ##################################################################
-# Trusted addy, only deployer can point contract to Trusted Addy contract
-# addy of the Trusted Addy contract
+# trusted addy where contract addys are stored, only owner can change this
 @storage_var
 func trusted_addy() -> (addy : felt):
 end
 
-# get the trusted contract addy
 @view
 func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
     let (addy) = trusted_addy.read()
     return (addy)
 end
 
-# set the trusted contract addy
 @external
 func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
-    let (caller) = get_caller_address()
-    let (deployer) = deployer_addy.read()
-    with_attr error_message("Only deployer can change the Trusted addy."):
-        assert caller = deployer
-    end
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     trusted_addy.write(addy)
     return ()
 end
 
 ##################################################################
-# need to emit CB events so that we can build the loan book for liquidation/monitoring/dashboard
-# events keeping tracks of what happened
+# emit CB events to build/maintain the loan book for liquidation/monitoring/dashboard
 @event
-func loan_change.emit(addy : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt)
+func event_loan_change.emit(addy : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt)
 end
 
 ##################################################################
-# CB contract functions
 # query a users loan
 @view
-func get_loan_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (
+func view_loan_detail{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (
         has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, accrued_interest : felt):
     
     alloc_locals
@@ -87,24 +73,25 @@ func get_loan_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (has_loan, notional, collateral, start_ts, end_ts, rate) = CZCore.get_cb_loan(czcore_addy, user)
     let (block_ts) = Math64x61_ts()
+    let (one) = Math64x61_one()
+    let (year_secs) = Math64x61_year()
 
-    # if no loan
     if has_loan == 0:
         return (has_loan, notional, collateral, start_ts, end_ts, rate, 0)
     else:
-        let (temp1) = Math64x61_sub(block_ts, start_ts)
-        let (temp2) = Math64x61_div(temp1, year_secs)
-        let (temp3) = Math64x61_add(Math64x61_ONE, rate)
-        let (temp4) = Math64x61_pow_frac(temp3, temp2)
-        let (temp5) = Math64x61_mul(notional, temp4)
-        let (accrued_interest) = Math64x61_sub(temp5, notional)
+        let (diff_ts) = Math64x61_sub(block_ts, start_ts)
+        let (year_frac) = Math64x61_div(diff_ts, year_secs)
+        let (one_plus_rate) = Math64x61_add(one, rate)
+        let (accrual) = Math64x61_pow_frac(one_plus_rate, year_frac)
+        let (accrued_notional) = Math64x61_mul(notional, accrual)
+        let (accrued_interest) = Math64x61_sub(accrued_notional, notional)
         return (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest)
     end
 end
 
 # accecpt a loan / set loan terms
 @external
-func accept_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt,pp_data : felt*) - > (res : felt):
+func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt,pp_data : felt*) - > (res : felt):
     
     # addys and check if existing loan
     let (user) = get_caller_address()
