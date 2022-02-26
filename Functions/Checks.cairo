@@ -1,5 +1,4 @@
 # Useful functions
-%lang starknet
 
 func check_is_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (caller) = get_caller_address()
