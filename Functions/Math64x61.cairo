@@ -18,9 +18,10 @@ from starkware.cairo.common.math import (
 const Math64x61_INT_PART = 2 ** 64
 const Math64x61_FRACT_PART = 2 ** 61
 const Math64x61_BOUND = 2 ** 125
+const Math64x61_ZERO = 0 * Math64x61_FRACT_PART
 const Math64x61_ONE = 1 * Math64x61_FRACT_PART
 const Math64x61_TEN = 10 * Math64x61_FRACT_PART
-const Math64x61_ZERO = 0 * Math64x61_FRACT_PART
+const Math64x61_YEAR = 31557600 * Math64x61_FRACT_PART
 const Math64x61_E = 6267931151224907085
 
 func Math64x61_assert64x61 {range_check_ptr} (x: felt):
@@ -76,6 +77,16 @@ end
 # returns the constant zero
 func Math64x61_zero {range_check_ptr} () -> (res: felt):
     return (Math64x61_ZERO)
+end
+
+# returns the constant one
+func Math64x61_one {range_check_ptr} () -> (res: felt):
+    return (Math64x61_ONE)
+end
+
+# returns the constant year secounds
+func Math64x61_year {range_check_ptr} () -> (res: felt):
+    return (Math64x61_YEAR)
 end
 
 # Convenience addition method to assert no overflow before returning
