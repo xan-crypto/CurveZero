@@ -69,6 +69,7 @@ end
 # promote user to PP
 @external
 func promote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}():
+    alloc_locals
     # check if status not 1 already - existing pp
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
@@ -90,7 +91,7 @@ func promote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_ch
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
     let (czt_require_erc) = check_user_balance(user, czt_addy, czt_require)
     # transfer the CZT, promote PP
-    CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, cz_require_erc)
+    CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, czt_require_erc)
     CZCore.set_pp_status(czcore_addy, user, lp_user, lp_require, czt_require, lockup, 1)
     # event
     event_pp_status.emit(addy=user, pp_status=1, lp_change=lp_require, czt_change=czt_require)  
@@ -100,6 +101,7 @@ end
 # demote user from PP
 @external
 func demote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}():
+    alloc_locals
     # check if status not 0 already - not a pp
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
@@ -114,7 +116,7 @@ func demote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_che
     let (czt_locked_erc) = check_user_balance(czcore_addy, czt_addy, czt_locked)
 
     # transfer the CZT, demote PP
-    CZCore.erc20_transferFrom(czcore_addy, cztc_addy, czcore_addy, user, czt_locked_erc)
+    CZCore.erc20_transferFrom(czcore_addy, czt_addy, czcore_addy, user, czt_locked_erc)
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
     CZCore.set_pp_status(czcore_addy, user, lp_user, lp_locked, czt_locked, lockup, 0)
     # event
