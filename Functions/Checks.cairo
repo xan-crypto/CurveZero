@@ -58,3 +58,13 @@ func check_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     end
     return()
 end
+
+func check_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, notional : felt, loan_total : felt, capital_total : felt):
+    let (stop) = Settings.get_utilization(settings_addy)
+    let (new_loan_total) = Math64x61_add(notional,loan_total)
+    let (utilization) = Math64x61_div(new_loan_total, capital_total)
+    with_attr error_message("Utilization to high, cannot issue loan."):
+       assert_le(utilization, stop)
+    enn
+    return()
+end
