@@ -155,7 +155,7 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
+    let (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest) = view_loan_detail(user)
     with_attr error_message("User does not have an existing loan to repay."):
         assert has_loan = 1
     end
@@ -212,15 +212,12 @@ end
 
 # repay loan in full
 @external
-func repay_loan_full{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() - > (res : felt):
-    # addys and check if existing loan
-    let (user) = get_caller_address()
+func repay_loan_full{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (_trusted_addy) = trusted_addy.read()
+    let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
-        
-    # new notional = old notional + ai -repay
-    let (acrrued_notional) = Math64x61_add(notional,accrued_interest)
+    let (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest) = view_loan_detail(user)
+    let (acrrued_notional) = Math64x61_add(notional, accrued_interest)
     repay_loan_partial(acrrued_notional)
     return()
 end
@@ -241,7 +238,7 @@ func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     
     # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
-    let (has_loan, notional, old_collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
+    let (has_loan, notional, old_collateral, start_ts, end_ts, rate, accrued_interest) = view_loan_detail(user)
     let (new_collateral) = Math64x61_add(collateral, old_collateral)
     CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate)
     loan_change.emit(addy=user, notional=notional, collateral=new_collateral,start_ts=start_ts,end_ts=end_ts,rate=rate)  
@@ -255,12 +252,12 @@ func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()    
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
-    with_attr error_message("Collateral withdrawal should be a positive amount."):
-       assert_nn(collateral)
+    let (has_loan, notional, old_collateral, start_ts, end_ts, rate, accrued_interest) = view_loan_detail(user)
+    with_attr error_message("Collateral withdrawal should be positive and at most the user total collateral."):
+       assert_in_range(collateral, 0, old_collateral)
     enn
     
     # check withdrawal would not make loan insolvent
-    let (has_loan, notional, old_collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
     let (acrrued_notional) = Math64x61_add(notional,accrued_interest)
     let (new_collateral) = Math64x61_sub(old_collateral, collateral)
     let (weth_ltv) = Settings.get_weth_ltv(settings_addy)
