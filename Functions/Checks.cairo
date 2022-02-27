@@ -76,8 +76,7 @@ func check_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 # check end time less than setting max loan time
-func check_max_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, end_ts : felt):
-    let (block_ts) = Math64x61_ts()
+func check_max_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, block_ts : felt, end_ts : felt):
     let (max_term) = Settings.get_max_loan_term(settings_addy)
     let (max_end_ts) = Math64x61_add(block_ts, max_term)
     with_attr error_message("Loan term should be within term range."):
