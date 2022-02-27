@@ -118,35 +118,33 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 
     # add origination fee
     let (fee, pp_split, if_split) = Settings.get_origination_fee(settings_addy)
-    let (temp7) = Math64x61_add(fee,Math64x61_ONE)
-    let (notional_with_fee) = Math64x61_mul(temp7,notional)
+    let (if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
+    let (one) = Math64x61_one()
+    let (one_plus_fee) = Math64x61_add(one, fee)
+    let (notional_with_fee) = Math64x61_mul(one_plus_fee, notional)
+    let (origination_fee) = Math64x61_sub(notional_with_fee, notional)
 
-    # transfer collateral to CZCore and transfer USDC to user
+    # transfer collateral to CZCore and transfer USDC to user    
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
-    let (notional_erc) = Math64x61_convert_from(notional,usdc_decimals) 
-    let (origination_fee) = Math64x61_sub(notional_with_fee,notional)
-    let (temp8) = Math64x61_mul(origination_fee,pp_split)
-    let(fee_erc_pp) = Math64x61_convert_from(temp8,usdc_decimals)
-    let (temp9) =  Math64x61_mul(origination_fee,if_split)
-    let (fee_erc_if) = Math64x61_convert_from(temp9,usdc_decimals)
-    let(if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
-
-    # transfer the actual USDC tokens to user - ERC decimal version
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
-    # transfer pp and if
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, fee_erc_pp)
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, fee_erc_if)
-    # transfer the actual WETH tokens to CZCore reserves - ERC decimal version
-    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
-    #update CZCore
-    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts, end_ts, median_rate, 0)
-    let (lp_total, capital_total, loan_total, insolvency_shortfall) = CZCore.get_cz_state(czcore_addy)
-    let (new_loan_total) = Math64x61_add(loan_total,notional_with_fee)
-    CZCore.set_loan_total(czcore_addy, new_loan_total)
+    let (notional_erc) = Math64x61_convert_from(notional, usdc_decimals)     
+    let (pp_fee) = Math64x61_mul(origination_fee, pp_split)
+    let (pp_fee_erc) = Math64x61_convert_from(pp_fee, usdc_decimals)
+    let (if_fee) =  Math64x61_mul(origination_fee, if_split)
+    let (if_fee_erc) = Math64x61_convert_from(if_fee, usdc_decimals)
     
+    # transfers
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, pp_fee_erc)
+    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, if_fee_erc)
+    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
+    # update CZCore
+    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts, end_ts, median_rate)
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
+    let (new_loan_total) = Math64x61_add(loan_total, notional_with_fee)
+    CZCore.set_loan_total(czcore_addy, new_loan_total)
     #event
-    loan_change.emit(addy=user, notional=notional_with_fee, collateral=collateral,start_ts=block_ts,end_ts=end_ts,rate=median_rate)
+    event_loan_change.emit(addy=user, notional=notional_with_fee, collateral=collateral, start_ts=block_ts, end_ts=end_ts, rate=median_rate)
     return (1)
 end
 
