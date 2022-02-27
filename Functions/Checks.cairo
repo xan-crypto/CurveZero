@@ -30,15 +30,15 @@ func check_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBui
 end
 
 # check user has sufficient funds and return erc amount
-func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(caller : felt, erc_addy: felt, amount : felt) -> (erc_amount : felt):
+func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(caller : felt, erc_addy: felt, amount : felt) -> (amount_erc : felt):
     alloc_locals
     let (caller_balance) = Erc20.ERC20_balanceOf(erc_addy, caller)
-    let (erc_decimals) = Erc20.ERC20_decimals(erc_addy)
-    let (erc_amount) = Math64x61_convert_from(amount, erc_decimals)
+    let (decimals_erc) = Erc20.ERC20_decimals(erc_addy)
+    let (amount_erc) = Math64x61_convert_from(amount, decimals_erc)
     with_attr error_message("Caller does not have sufficient funds."):
-        assert_le(erc_amount, caller_balance)
+        assert_le(amount_erc, caller_balance)
     end
-    return(erc_amount)
+    return(amount_erc)
 end
 
 # check eno pp for pricing, settings has min_pp
@@ -52,10 +52,10 @@ end
 
 # test sufficient collateral to proceed vs notional of loan
 func check_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(oracle_addy : felt, settings_addy : felt, notional : felt, collateral : felt):
-    let (erc_price) = Oracle.get_weth_price(oracle_addy)
+    let (price_erc) = Oracle.get_weth_price(oracle_addy)
     let (decimals) = Oracle.get_weth_decimals(oracle_addy)
     let (ltv) = Settings.get_weth_ltv(settings_addy)
-    let (price) = Math64x61_convert_to(erc_price, decimals)
+    let (price) = Math64x61_convert_to(price_erc, decimals)
     let (value_collateral) = Math64x61_mul(price, collateral)
     let (max_loan) = Math64x61_mul(value_collateral, ltv)
     with_attr error_message("Not sufficient collateral for loan"):
