@@ -91,7 +91,7 @@ end
 # create new loan
 @external
 func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
-        (loan_id : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*) - > (res : felt):
+        (loan_id : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*):
     # addys and check if existing loan
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
@@ -145,12 +145,12 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     CZCore.set_loan_total(czcore_addy, new_loan_total)
     #event
     event_loan_change.emit(addy=user, notional=notional_with_fee, collateral=collateral, start_ts=block_ts, end_ts=end_ts, rate=median_rate)
-    return (1)
+    return ()
 end
 
 # repay loan in partial
 @external
-func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt) - > (res : felt):
+func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt):
     # addys and check if existing loan
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
@@ -160,25 +160,18 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         assert has_loan = 1
     end
         
-    # new notional = old notional + ai -repay
+    # check repay doesnt exceed accrued notional
     let (acrrued_notional) = Math64x61_add(notional, accrued_interest)
     let (block_ts) = Math64x61_ts()
-
-    # check that repay positive and le accrued notional
     with_attr error_message("Repayment amount should be positive and at most the accrued notional."):
-        assert assert_nn_le(repay,acrrued_notional)
+        assert assert_nn_le(repay, acrrued_notional)
     end
 
     # test sufficient funds to repay
-    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    let (usdc_user) = Erc20.ERC20_balanceOf(usdc_addy, user)   
-    let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)   
-    let (weth_decimals) = Erc20.ERC20_decimals(weth_addy)   
-    let (repay_erc) = Math64x61_convert_from(repay,usdc_decimals)
-    with_attr error_message("Not sufficient funds to repay."):
-        assert_le(repay_erc,usdc_user)
-    end
+    let (repay_erc) = check_user_balance(user, usdc_addy, repay)
+    
+
     
     # ai split
     let (lp_split, if_split, gt_split) = Settings.get_accrued_interest_split(settings_addy)  
@@ -215,12 +208,12 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0)
         #event
         loan_change.emit(addy=user, notional=0, collateral=0,start_ts=0,end_ts=0,rate=0)    
-        return (1)
+        return ()
     else:
         CZCore.set_cb_loan(czcore_addy, user, 1, new_notional, collateral, new_start_ts, end_ts, rate)
         #event
         loan_change.emit(addy=user, notional=new_notional, collateral=collateral,start_ts=new_start_ts,end_ts=end_ts,rate=rate)   
-        return (1)
+        return ()
     end
 end
 
@@ -235,8 +228,9 @@ func repay_loan_full{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         
     # new notional = old notional + ai -repay
     let (acrrued_notional) = Math64x61_add(notional,accrued_interest)
-    res = repay_loan_partial(acrrued_notional)
-    return(res)
+    repay_loan_partial(acrrued_notional)
+    decrease_collateral(collateral)
+    return()
 end
 
 # increase collateral
