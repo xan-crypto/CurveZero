@@ -87,7 +87,7 @@ func check_max_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 end
 
 # check loan amount within correct ranges
-func check_max_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, notional : felt):
+func check_loan_range{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, notional : felt):
     let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
     with_attr error_message("Notional should be within min max loan range."):
        assert_in_range(notional, min_loan, max_loan)
