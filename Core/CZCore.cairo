@@ -176,6 +176,16 @@ end
 
 # set the loan total
 @external
+func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loan_amount : felt):
+    cb_caller()
+    is_paused()
+    let (res) = cz_state.read()
+    cz_state.write((res[0], res[1], loan_amount, res[3], res[4]))
+    return ()
+end
+
+# set the capital loan reward total
+@external
 func set_captal_loan_reward_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(capital_amount : felt, loan_amount : felt, reward_amount : felt):
     cb_caller()
     is_paused()
