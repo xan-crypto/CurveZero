@@ -124,7 +124,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (notional_with_fee) = Math64x61_mul(one_plus_fee, notional)
     let (origination_fee) = Math64x61_sub(notional_with_fee, notional)
 
-    # transfer collateral to CZCore and transfer USDC to user    
+    # calc amounts to transfer 
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
     let (notional_erc) = Math64x61_convert_from(notional, usdc_decimals)     
@@ -133,7 +133,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (if_fee) =  Math64x61_mul(origination_fee, if_split)
     let (if_fee_erc) = Math64x61_convert_from(if_fee, usdc_decimals)
     
-    # transfers
+    # all transfers
     CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
     CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, pp_fee_erc)
     CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, if_fee_erc)
@@ -152,8 +152,8 @@ end
 @external
 func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt) - > (res : felt):
     # addys and check if existing loan
-    let (user) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
+    let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest) = get_loan_details(user)
     with_attr error_message("User does not have an existing loan to repay."):
@@ -161,7 +161,7 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     end
         
     # new notional = old notional + ai -repay
-    let (acrrued_notional) = Math64x61_add(notional,accrued_interest)
+    let (acrrued_notional) = Math64x61_add(notional, accrued_interest)
     let (block_ts) = Math64x61_ts()
 
     # check that repay positive and le accrued notional
