@@ -1,4 +1,5 @@
 # CZCore contract
+# all numbers passed into contract must be Math64x61 type
 # all interactions with reserves or state should flow through here
 
 %lang starknet
@@ -158,8 +159,8 @@ end
 
 # returns the cz state
 @view
-func get_cz_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
+func get_cz_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> 
+	(lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
     let (res) = cz_state.read()
     return (res[0],res[1],res[2],res[3],res[4])
 end
@@ -240,27 +241,29 @@ end
 # functions to create loans, repay laons and refinance loans
 # the CB loans by user
 @storage_var
-func cb_loan(user : felt) -> (res : (felt, felt, felt, felt, felt, felt)):
+func cb_loan(user : felt) -> (res : (felt, felt, felt, felt, felt, felt, felt)):
 end
 
 # returns the CB loan of the given user
 @view
-func get_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt):
+func get_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> 
+        (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, accrual : felt):
     let (res) = cb_loan.read(user=user)
-    return (res[0], res[1], res[2], res[3], res[4], res[5])
+    return (res[0], res[1], res[2], res[3], res[4], res[5], res[6])
 end
 
 # set loan terms
 @external
-func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, refinance : felt):
+func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
+        (user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, accrual : felt, new : felt):
     cb_caller()
-    # new loans not allowed when system paused, refinancing loans still allowed
-    if refinance != 1:
+    # new loans not allowed when system paused, repay refinancing inc dec collateral still allowed
+    if new == 1:
     	is_paused()
-	cb_loan.write(user,(has_loan,notional,collateral,start_ts,end_ts,rate))
+    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, end_ts, rate, accrual))
         return()
     else:
-	cb_loan.write(user,(has_loan,notional,collateral,start_ts,end_ts,rate))
+    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, end_ts, rate, accrual))
         return()
     end		
 end
