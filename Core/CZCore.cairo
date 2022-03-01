@@ -57,11 +57,13 @@ end
 ##################################################################
 # useful functions
 func is_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (_controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    let (paused) = Controller.get_paused(_controller_addy)
+    let (_trusted_addy) = trusted_addy.read()
+    let (controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
+    let (paused) = Controller.get_paused(controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
     end
+    return()
 end
 
 func lp_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -71,6 +73,7 @@ func lp_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
+    return()
 end
 
 func pp_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -80,6 +83,7 @@ func pp_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
+    return()
 end
 
 func cb_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -89,6 +93,7 @@ func cb_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
+    return()
 end
 
 func ll_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -98,6 +103,7 @@ func ll_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
+    return()
 end
 
 func gt_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -107,6 +113,7 @@ func gt_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
+    return()
 end
 
 func controller_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -116,6 +123,7 @@ func controller_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     with_attr error_message("Not authorised caller."):
         assert caller = authorised_caller
     end
+    return()
 end
 
 ##################################################################
@@ -254,8 +262,7 @@ end
 
 # set loan terms
 @external
-func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
-        (user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, new : felt):
+func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, new : felt):
     cb_caller()
     # new loans not allowed when system paused, repay refinancing inc dec collateral still allowed
     if new == 1:
