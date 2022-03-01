@@ -24,34 +24,34 @@ starknet deploy --contract Compiled/Controller_compiled.json --inputs 0x02e7b3a6
 starknet deploy --contract Compiled/InsuranceFund_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/Settings_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
---inputs \
+--inputs 0x06260bdd98ee9ce1747d8ae368ca5fb50f02f3bade4a22fae3118cf28601657f \
     0 \
     0 \
     0 \
     0 \
     0 \
+    0x06a40c52e92b690ef1cab51aa048f21e011f98633a122311d53bdc8c6ff0871a \
     0 \
-    0 \
-    0 \
+    0x01011af61c128e8f9b53ffee96b5aa1b9ccf69210581c930c322235f301810f8 \
     0 \
     0 \
     0
 
 Last test
-[deployer] = 0
-[lp] = 0
+[owner] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+[lp] = 0x06260bdd98ee9ce1747d8ae368ca5fb50f02f3bade4a22fae3118cf28601657f
 [pp] = 0
 [cb] = 0
 [ll] = 0
 [gt] = 0
 [if] = 0
-[czcore] = 0
+[czcore] = 0x06a40c52e92b690ef1cab51aa048f21e011f98633a122311d53bdc8c6ff0871a
 [controller] = 0
-[setttings] = 0
+[setttings] = 0x01011af61c128e8f9b53ffee96b5aa1b9ccf69210581c930c322235f301810f8
 [usdc] = 0
 [czt] = 0
 [weth] = 0
-[trusted] = 0
+[trusted] = 0x06b4ab4b37961b8ae550875ec738fe5e91d42d95b71e6ac384ca40e1798e84d8
 
 # check transactions / testing
 starknet tx_status --hash [tx_hash]
