@@ -14,8 +14,8 @@ from starkware.cairo.common.signature import verify_ecdsa_signature
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20, Oracle
-from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_pow_frac, Math64x61_sub, Math64x61_add, Math64x61_ts, Math64x61_one, Math64x61_year
-from Functions.Checks import check_is_owner, check_min_pp, check_ltv, check_utilization, check_max_term, check_loan_range
+from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_pow_frac, Math64x61_sub, Math64x61_add, Math64x61_ts, Math64x61_one, Math64x61_year, Math64x61_convert_from
+from Functions.Checks import check_is_owner, check_min_pp, check_ltv, check_utilization, check_max_term, check_loan_range, check_user_balance
 
 ##################################################################
 # addy of the owner
@@ -58,7 +58,7 @@ end
 ##################################################################
 # emit CB events to build/maintain the loan book for liquidation/monitoring/dashboard
 @event
-func event_loan_change.emit(addy : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt)
+func event_loan_change(addy : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt):
 end
 
 ##################################################################
@@ -90,14 +90,14 @@ end
 
 # create new loan
 @external
-func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
-        (loan_id : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*):
+func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(loan_id : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*):
+    alloc_locals
     # addys and check if existing loan
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    let (has_loan, a, b, c, d, e) = CZCore.get_cb_loan(czcore_addy, user)
+    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    let (has_loan, a, b, c, d, e, f) = CZCore.get_cb_loan(czcore_addy, user)
     with_attr error_message("User already has an existing loan, refinance instead."):
         assert has_loan = 0
     end
@@ -106,7 +106,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (median_rate, winning_pp, rate_array_len) = process_pp_data(loan_id, pp_data_len, pp_data)
     
     #checks
-    check_min_pp(setting_addy, rate_array_len)
+    check_min_pp(settings_addy, rate_array_len)
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
     check_ltv(oracle_addy, settings_addy, notional, collateral)
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
@@ -135,9 +135,9 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (if_fee_erc) = Math64x61_convert_from(if_fee, usdc_decimals)
     
     # all transfers
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, pp_fee_erc)
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, if_fee_erc)
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, pp_fee_erc)
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, if_fee_erc)
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
     # update CZCore
     CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, start_ts, end_ts, median_rate, 0, 1)
@@ -151,10 +151,12 @@ end
 # repay loan in partial
 @external
 func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(repay : felt):
+    alloc_locals
     # addys and check if existing loan
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest) = view_loan_detail(user)
     with_attr error_message("User does not have an existing loan to repay."):
         assert has_loan = 1
@@ -172,7 +174,7 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (notional_change) = Math64x61_sub(repay, accrued_interest)
     
     # tranfers
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, repay_erc)     
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, repay_erc)     
     # new variable calcs
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
     let (new_notional) = Math64x61_sub(notional, notional_change)
@@ -188,7 +190,7 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         let (accrued_interest_gt) = Math64x61_mul(gt_split, total_accrual)
         let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
         let (accrued_interest_if_erc) = Math64x61_convert_from(accrued_interest_if, usdc_decimals) 
-        CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, accrued_interest_if_erc)
+        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, accrued_interest_if_erc)
         # update CZCore and loan  
         let (new_loan_total_before_accrual) = Math64x61_sub(loan_total, repay)
         let (new_loan_total) = Math64x61_add(new_loan_total_before_accrual, total_accrual)
@@ -212,6 +214,7 @@ end
 # repay loan in full
 @external
 func repay_loan_full{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
@@ -224,6 +227,7 @@ end
 # increase collateral
 @external
 func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(collateral : felt):
+    alloc_locals
     # Verify that the user has sufficient funds before call
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()    
@@ -235,7 +239,7 @@ func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
     let (has_loan, notional, old_collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest) = view_loan_detail(user)
     let (new_collateral) = Math64x61_add(collateral, old_collateral)
-    CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate, hist_accrual)
+    CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate, hist_accrual, 0)
     # event
     event_loan_change.emit(addy=user, has_loan=has_loan, notional=notional, collateral=new_collateral, start_ts=start_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual)  
     return()
@@ -244,15 +248,16 @@ end
 # decrease collateral
 @external
 func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(collateral : felt):
+    alloc_locals
     # Verify amount positive
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()    
-    let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (has_loan, notional, old_collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest) = view_loan_detail(user)
     with_attr error_message("Collateral withdrawal should be positive and at most the user total collateral."):
        assert_nn_le(collateral, old_collateral)
-    enn
+    end
     
     # check withdrawal would not make loan insolvent
     let (acrrued_notional) = Math64x61_add(notional, accrued_interest)
@@ -274,13 +279,13 @@ end
 
 # refinance laon
 @external
-func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
-        (loanID : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt,pp_data : felt*):
+func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(loan_id : felt, notional : felt, collateral : felt, end_ts : felt, pp_data_len : felt,pp_data : felt*):
+    alloc_locals
     # addys and check if existing loan
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (setting_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (has_loan, old_notional, old_collateral, old_start_ts, old_end_ts, old_rate, hist_accrual, accrued_interest) = view_loan_detail(user)
     with_attr error_message("User does not have an existing loan."):
         assert has_loan = 1
@@ -299,7 +304,7 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (median_rate, winning_pp, rate_array_len) = process_pp_data(loan_id, pp_data_len, pp_data)
     
     #checks
-    check_min_pp(setting_addy, rate_array_len)
+    check_min_pp(settings_addy, rate_array_len)
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
     check_ltv(oracle_addy, settings_addy, notional, collateral)
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
@@ -332,9 +337,9 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (total_accrual) = Math64x61_add(hist_accrual, accrued_interest)
 
     # all transfers
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, change_notional_erc)
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, pp_fee_erc)
-    CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, if_fee_erc)
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, change_notional_erc)
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, winning_pp, pp_fee_erc)
+    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, if_fee_erc)
     if change_collateral != 0:
         CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, change_collateral_erc)
     end
@@ -349,8 +354,8 @@ end
 
 ##################################################################
 # process pp data
-func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
-        (loan_id : felt, pp_data_len: felt, pp_data : felt*) -> (median_rate: felt, winning_pp : felt):
+func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(loan_id : felt, pp_data_len: felt, pp_data : felt*) -> (median_rate: felt, winning_pp : felt, rate_array_len : felt):
+    alloc_locals
     # pp data should be passed as follows
     # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
     let (loan_id_hash) = hash2{hash_ptr=pedersen_ptr}(loan_id, 0)
@@ -364,26 +369,26 @@ func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
     let (median, _) = unsigned_div_rem(len_ordered, 2)
     # later randomly select 75% of the PPs, also deal with median when even number of PP
-    let (median_rate) = ordered[median]    
-    let (winning_position) = index[median]
-    let (winning_pp) = pp_pub_array[winning_position]
+    let median_rate = ordered[median]    
+    let winning_position = index[median]
+    let winning_pp = pp_pub_array[winning_position]
     return(median_rate, winning_pp, rate_array_len)
 end
 
 # iterate thru pp_pub and reduce total dataset where pp_pub is not valid PP
-func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
-        (length: felt, array : felt*) -> (pp_data_len: felt, pp_data : felt*):
+func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(length: felt, array : felt*) -> (pp_data_len: felt, pp_data : felt*):
+    alloc_locals
     if length == 0:
         let (pp_data : felt*) = alloc()
         return (0, pp_data)
     end
     # recursive call
-    let (pp_data_len, pp_data) = check_pricing(length - 6, array + 6)
+    let (pp_data_len, pp_data) = validate_pp_data(length - 6, array + 6)
     # validate PP status
     let pp_pub = array[5]
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (lp_token, czt_token, status) = CZCore.view_pp_status(pp_pub)
+    let (lp_token, czt_token, status) = CZCore.get_pp_status(czcore_addy, pp_pub)
     # add to new arrays
     if status == 1:
         assert [pp_data + 0 + pp_data_len] = array[0]
@@ -399,8 +404,8 @@ func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 # check all PPs data correctly signed - check sigs vs. signed loan and sigs vs. signed rate provided
-func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,ecdsa_ptr : SignatureBuiltin*}
-        (length : felt, array : felt*, loan_hash : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
+func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(length : felt, array : felt*, loan_hash : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
+    alloc_locals
     # create arrays at last step
     if length == 0:
         let (r_array : felt*) = alloc()
@@ -426,8 +431,7 @@ func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 end
 
 # this function returns to min value of an array and the index thereof
-func get_min_value_above{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
-        (x : felt, array_len : felt, array : felt*) -> (y : felt, index : felt):
+func get_min_value_above{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(x : felt, array_len : felt, array : felt*) -> (y : felt, index : felt):
     alloc_locals
     if array_len == 1:
         return (array[0], 0)
@@ -451,9 +455,7 @@ func get_min_value_above{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 end
 
 # this function sorts an array of size n from high to low - need this for the median calc for PPs
-func sort_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        x_len : felt, x : felt*, y_len : felt, y : felt*) -> (
-        z_len : felt, z : felt*, i_len : felt, i : felt*):
+func sort_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(x_len : felt, x : felt*, y_len : felt, y : felt*) -> (z_len : felt, z : felt*, i_len : felt, i : felt*):
     alloc_locals
     if y_len == 1:
         let (z : felt*) = alloc()
