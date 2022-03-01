@@ -113,7 +113,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (collateral_erc) = check_user_balance(user, weth_addy, collateral)
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
     check_utilization(settings_addy, notional, loan_total, capital_total)
-    let (block_ts) = Math64x61_ts()
+    let (start_ts) = Math64x61_ts()
     check_max_term(settings_addy, block_ts, end_ts)
     check_loan_range(settings_addy, notional)
 
@@ -144,7 +144,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (new_loan_total) = Math64x61_add(loan_total, notional_with_fee)
     CZCore.set_loan_total(czcore_addy, new_loan_total)
     #event
-    event_loan_change.emit(addy=user, has_loan=1, notional=notional_with_fee, collateral=collateral, start_ts=block_ts, end_ts=end_ts, rate=median_rate, hist_accrual=0)
+    event_loan_change.emit(addy=user, has_loan=1, notional=notional_with_fee, collateral=collateral, start_ts=start_ts, end_ts=end_ts, rate=median_rate, hist_accrual=0)
     return ()
 end
 
@@ -214,7 +214,7 @@ func repay_loan_full{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (has_loan, notional, collateral, start_ts, end_ts, rate, accrued_interest) = view_loan_detail(user)
+    let (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest) = view_loan_detail(user)
     let (acrrued_notional) = Math64x61_add(notional, accrued_interest)
     repay_loan_partial(acrrued_notional)
     return()
@@ -232,11 +232,11 @@ func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     
     # transfers
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
-    let (has_loan, notional, old_collateral, start_ts, end_ts, rate, accrued_interest) = view_loan_detail(user)
+    let (has_loan, notional, old_collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest) = view_loan_detail(user)
     let (new_collateral) = Math64x61_add(collateral, old_collateral)
-    CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate)
+    CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate, hist_accrual)
     # event
-    event_loan_change.emit(addy=user, notional=notional, collateral=new_collateral, start_ts=start_ts, end_ts=end_ts, rate=rate)  
+    event_loan_change.emit(addy=user, has_loan=has_loan, notional=notional, collateral=new_collateral, start_ts=start_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual)  
     return()
 end
 
