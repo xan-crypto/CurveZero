@@ -247,7 +247,7 @@ end
 # returns the CB loan of the given user
 @view
 func get_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> 
-        (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, accrual : felt):
+        (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt):
     let (res) = cb_loan.read(user=user)
     return (res[0], res[1], res[2], res[3], res[4], res[5], res[6])
 end
@@ -255,15 +255,15 @@ end
 # set loan terms
 @external
 func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
-        (user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, accrual : felt, new : felt):
+        (user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, new : felt):
     cb_caller()
     # new loans not allowed when system paused, repay refinancing inc dec collateral still allowed
     if new == 1:
     	is_paused()
-    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, end_ts, rate, accrual))
+    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual))
         return()
     else:
-    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, end_ts, rate, accrual))
+    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual))
         return()
     end		
 end
