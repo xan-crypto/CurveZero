@@ -6,7 +6,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import (TrustedAddy)
-from Math.Math64x61 import (Math64x61_add)
+from Functions.Math64x61 import (Math64x61_add)
 
 ##################################################################
 # constants 
