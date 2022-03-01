@@ -61,13 +61,17 @@ namespace CZCore:
     end  
     func set_cb_loan(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, new : felt):
     end  
-    func get_staking_time_user(user : felt) -> (gt_user : felt, avg_time: felt):
+    func get_staker_index(index : felt) -> (user : felt):
     end  
-    func set_staking_time_user(user : felt, amount : felt, time : felt):
+    func set_staker_index(index:felt,user : felt):
     end  
-    func get_staking_time_total() -> (gt_total : felt, avg_time: felt):
+    func get_staker_details(user:felt) -> (gt_token : felt, unclaimed_reward : felt, old_user:felt):
     end  
-    func set_staking_time_total(gt_amount : felt, time : felt):
+    func set_staker_details(user : felt, gt_token : felt, unclaimed_reward : felt):
+    end  
+    func get_staker_total() -> (stake_total : felt, index : felt):
+    end  
+    func set_staker_total(stake_total : felt, index : felt):
     end  
 end
 
