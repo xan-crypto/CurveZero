@@ -29,6 +29,10 @@ namespace TrustedAddy:
     end
     func get_czt_addy() -> (addy : felt):
     end
+    func get_weth_addy() -> (addy : felt):
+    end
+    func get_oracle_addy() -> (addy : felt):
+    end
 end
 
 ##################################################################
@@ -45,15 +49,17 @@ namespace CZCore:
     end
     func set_captal_loan_reward_total(capital_amount : felt, loan_amount : felt, reward_amount : felt):
     end    
+    func set_loan_total(loan_amount : felt):
+    end    
     func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     end
     func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
     end
     func set_pp_status(user : felt, lp_user : felt, lp_amount : felt, cz_amount : felt, lockup : felt, promote : felt):
     end  
-    func get_cb_loan(user : felt) -> (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt):
+    func get_cb_loan(user : felt) -> (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt):
     end  
-    func set_cb_loan(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, refinance : felt):
+    func set_cb_loan(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, new : felt):
     end  
     func get_staking_time_user(user : felt) -> (gt_user : felt, avg_time: felt):
     end  
@@ -118,9 +124,9 @@ namespace Settings:
     end
     func set_utilization(stop : felt):
     end       
-    func get_min_pp_accepted() -> (min_pp : felt):
+    func get_min_pp() -> (min_pp : felt):
     end
-    func set_min_pp_accepted(min_pp : felt):
+    func set_min_pp(min_pp : felt):
     end       
     func get_insurance_shortfall_ratio() -> (insurance_shortfall_ratio : felt):
     end
@@ -130,4 +136,18 @@ namespace Settings:
     end
     func set_max_loan_term(max_term : felt):
     end  
+    func get_weth_ltv() -> (ltv : felt):
+    end
+    func set_weth_ltv(ltv : felt):
+    end  
+end
+
+##################################################################
+# interface for the oracle contract
+@contract_interface
+namespace Oracle:
+    func get_weth_price() -> (price : felt):
+    end    
+    func get_weth_decimals() -> (decimals : felt):
+    end   
 end
