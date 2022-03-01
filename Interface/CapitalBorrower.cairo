@@ -114,7 +114,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
     check_utilization(settings_addy, notional, loan_total, capital_total)
     let (start_ts) = Math64x61_ts()
-    check_max_term(settings_addy, block_ts, end_ts)
+    check_max_term(settings_addy, start_ts, end_ts)
     check_loan_range(settings_addy, notional)
 
     # add origination fee
@@ -140,7 +140,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     CZCore.ERC20_transferFrom(czcore_addy, usdc_addy, czcore_addy, if_addy, if_fee_erc)
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
     # update CZCore
-    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, block_ts, end_ts, median_rate, 0, 1)
+    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, start_ts, end_ts, median_rate, 0, 1)
     let (new_loan_total) = Math64x61_add(loan_total, notional_with_fee)
     CZCore.set_loan_total(czcore_addy, new_loan_total)
     #event
@@ -162,7 +162,6 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         
     # check repay doesnt exceed accrued notional
     let (acrrued_notional) = Math64x61_add(notional, accrued_interest)
-    let (block_ts) = Math64x61_ts()
     with_attr error_message("Repayment should be positive and at most the accrued notional."):
         assert_nn_le(repay, acrrued_notional)
     end
