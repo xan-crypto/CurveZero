@@ -12,6 +12,13 @@ from Functions.Math64x61 import (Math64x61_add)
 # constants 
 const Math64x61_FRACT_PART = 2 ** 61
 const Math64x61_ONE = 1 * Math64x61_FRACT_PART
+const origination_fee_total = 2305843009213694
+const origination_fee_split = 2**60
+const accrued_interest_split_1 = 2190550858753009254
+const accrued_interest_split_2 = 69175290276410819
+const accrued_interest_split_3 = 46116860184273879
+const utilization_total = 2075258708292324557
+const insurance_shortfall = 23058430092136940
 
 ##################################################################
 # addy of the deployer
@@ -28,19 +35,19 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     # 7 day lockup period
     lockup_period.write(604800 * Math64x61_ONE)
     # origination fee and split 10bps and 50/50 PP IF
-    origination_fee.write((Math64x61_ONE/1000, Math64x61_ONE*50/100, Math64x61_ONE*50/100))
+    origination_fee.write((origination_fee_total, origination_fee_split, origination_fee_split))
     # accrued interest split between LP IF and GT - 95/3/2
-    accrued_interest_split.write((Math64x61_ONE*95/100, Math64x61_ONE*3/100, Math64x61_ONE*2/100))
+    accrued_interest_split.write((accrued_interest_split_1, accrued_interest_split_2, accrued_interest_split_3))
     # min loan and max loan amounts
     min_max_loan.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
     # min deposit and max deposit from LPs accepted
     min_max_deposit.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
     # utilization start and stop levels
-    utilization.write(Math64x61_ONE*90/100)
+    utilization.write(utilization_total)
     # min number of PPs for pricing
     min_pp_accepted.write(1*Math64x61_ONE)
     # insurance shortfall ratio to lp capital
-    insurance_shortfall_ratio.write(Math64x61_ONE*1/100)    
+    insurance_shortfall_ratio.write(insurance_shortfall)    
     # max loan term - 1 year initially
     max_loan_term.write(366 * 86400 * Math64x61_ONE)   
     return ()
