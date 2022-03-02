@@ -4,6 +4,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_le, assert_nn_le, assert_in_range
+from starkware.cairo.common.uint256 import Uint256
 from Functions.Math64x61 import Math64x61_div, Math64x61_mul, Math64x61_convert_from, Math64x61_zero, Math64x61_convert_to, Math64x61_ts, Math64x61_add, Math64x61_fromUint256 
 from InterfaceAll import Settings, Erc20, Oracle
 
