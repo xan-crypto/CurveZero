@@ -7,6 +7,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256)
 from InterfaceAll import (TrustedAddy,Controller,Erc20)
+from Functions.Math import Math64x61_toUint256 
 
 ##################################################################
 # addy of the deployer
@@ -131,10 +132,22 @@ end
 @external
 func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     lp_caller()
+    # add other caller protection
     is_paused()
-    Erc20.ERC20_transferFrom(erc_addy,sender=sender,recipient=recipient,amount=amount)
+    let (amount_unit) = Math64x61_toUint256(amount)
+    Erc20.ERC20_transferFrom(erc_addy,sender=sender,recipient=recipient,amount=amount_unit)
     return ()
 end
+
+@external
+func erc20_transfer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, recipient: felt, amount: felt):
+    lp_caller()
+    # add other caller protection
+    is_paused()
+    let (amount_unit) = Math64x61_toUint256(amount)
+    Erc20.ERC20_transfer(erc_addy,recipient=recipient,amount=amount_unit)
+    return ()
+end 
 
 ##################################################################
 # functions to set and get lp tokens by user
