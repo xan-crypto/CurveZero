@@ -30,7 +30,7 @@ starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 435a54 435
 starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 57455448 57455448 1000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/Oracle_compiled.json --inputs 57455448 57455448
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
---inputs 0 \
+--inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0 \
     0 \
     0 \
     0 \
@@ -60,7 +60,7 @@ Last test
 [czt] = 0
 [weth] = 0
 [oracle] = 0
-[trusted] = 0x039be203f79aa7e790428abff1fdd563d90b78c7db2b55440eaa10d7d5dc2062
+[trusted] = 0x074fff96d5e941e5506bcbe629bed5f778f637b88c2e271889840a95e1705711
 
 # check transactions / testing
 starknet tx_status --hash [tx_hash]
