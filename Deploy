@@ -30,15 +30,15 @@ starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 435a54 435
 starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 57455448 57455448 1000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/Oracle_compiled.json --inputs 57455448 57455448
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
---inputs 0x05a1ad6214506b36cb1305e97def6e2749f44c875d54b3d4964a06d96d0922ab \
+--inputs 0 \
     0 \
     0 \
     0 \
     0 \
     0 \
-    0x0614815fd431b31928f6d453d599a1e7939b9073015402a5c9a2431a3961ccd6 \
     0 \
-    0x05e8369155c45c203a50399035cf64823c6c3e93892aad0420671acf06229ed5 \
+    0 \
+    0 \
     0 \
     0 \
     0 \
@@ -46,20 +46,20 @@ starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 
 Last test
 [owner] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp] = 0x05a1ad6214506b36cb1305e97def6e2749f44c875d54b3d4964a06d96d0922ab
+[lp] = 0
 [pp] = 0
 [cb] = 0
 [ll] = 0
 [gt] = 0
 [if] = 0
-[czcore] = 0x0614815fd431b31928f6d453d599a1e7939b9073015402a5c9a2431a3961ccd6
+[czcore] = 0
 [controller] = 0
-[setttings] = 0x05e8369155c45c203a50399035cf64823c6c3e93892aad0420671acf06229ed5
+[setttings] = 0
 [usdc] = 0
 [czt] = 0
 [weth] = 0
 [oracle] = 0
-[trusted] = 0x01e9dd397dd5a484653d7a5e836cce747de24954569a75d58fde1c2e352f2e3f
+[trusted] = 0
 
 # check transactions / testing
 starknet tx_status --hash [tx_hash]
