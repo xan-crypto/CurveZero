@@ -36,8 +36,7 @@ func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     alloc_locals
     let (caller_balance_unit) = Erc20.ERC20_balanceOf(erc_addy, caller)
     let (caller_balance) = Math64x61_fromUint256(caller_balance_unit)
-    let (decimals_unit) = Erc20.ERC20_decimals(erc_addy)
-    let (decimals) = Math64x61_fromUint256(decimals_unit)
+    let (decimals) = Erc20.ERC20_decimals(erc_addy)
     let (amount_erc) = Math64x61_convert_from(amount, decimals)
     with_attr error_message("Caller does not have sufficient funds."):
         assert_nn_le(amount_erc, caller_balance)
