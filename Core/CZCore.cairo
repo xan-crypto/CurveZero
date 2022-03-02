@@ -7,7 +7,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256)
 from InterfaceAll import (TrustedAddy,Controller,Erc20)
-from Functions.Math import Math64x61_toUint256 
+from Functions.Math64x61 import Math64x61_toUint256 
 
 ##################################################################
 # addy of the deployer
