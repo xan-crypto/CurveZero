@@ -1,5 +1,6 @@
 # the addys of all the contracts in the protocol
 # this prevents anyone from calling CZCore functions for example
+# owner can set all of the trusted addys, this is initially for testing but also useful for upgradability
 
 %lang starknet
 %builtins pedersen range_check
