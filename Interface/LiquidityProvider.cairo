@@ -164,7 +164,7 @@ end
 
 # whats are user LP tokens worth
 @view
-func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (usd_value : felt, lockup : felt):
+func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_user : felt, usd_value : felt, lockup : felt):
     alloc_locals
     # get variables
     let (_trusted_addy) = trusted_addy.read()
@@ -177,6 +177,6 @@ func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     else:
         let (lp_ratio) = Math64x61_div(lp_user, lp_total)
         let (capital_user) = Math64x61_mul(lp_ratio, capital_total)
-        return (capital_user, lockup)
+        return (lp_user, capital_user, lockup)
     end
 end
