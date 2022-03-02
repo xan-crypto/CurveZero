@@ -61,6 +61,7 @@ end
 # Converts 64.61 number to token number for transactions
 # x is 64x61 fixed point number and y is a positive integer for decimals
 func Math64x61_convert_from {range_check_ptr} (x: felt, y: felt) -> (res: felt):
+    alloc_locals
     let (partial_1, _) = unsigned_div_rem(x, Math64x31_ONE)
     let (multiplier_1) = Math64x61_pow(Math64x61_TEN, y - 10)
     let (product_1) = Math64x61_mul(partial_1, multiplier_1)
@@ -73,6 +74,7 @@ end
 # Converts token number to a 64.61 fixed point number
 # x is token number and y is a positive integer for decimals
 func Math64x61_convert_to {range_check_ptr} (x: felt, y: felt) -> (res: felt):
+    alloc_locals
     let (divider) = Math64x61_pow(Math64x61_TEN, y)
     let (convert) = Math64x61_fromFelt(x)
     let (res, _) = unsigned_div_rem(convert, divider)
@@ -96,6 +98,7 @@ end
 
 # Convenience addition method to assert no overflow before returning
 func Math64x61_add {range_check_ptr} (x: felt, y: felt) -> (res: felt):
+    alloc_locals
     let res = x + y
     Math64x61_assert64x61(res)
     return (res)
@@ -103,6 +106,7 @@ end
 
 # Convenience subtraction method to assert no overflow before returning
 func Math64x61_sub {range_check_ptr} (x: felt, y: felt) -> (res: felt):
+    alloc_locals
     let res = x - y
     Math64x61_assert64x61(res)
     return (res)
@@ -110,6 +114,7 @@ end
 
 # Multiples two fixed point values and checks for overflow before returning
 func Math64x61_mul {range_check_ptr} (x: felt, y: felt) -> (res: felt):
+    alloc_locals
     tempvar product = x * y
     let (res, _) = signed_div_rem(product, Math64x61_FRACT_PART, Math64x61_BOUND)
     Math64x61_assert64x61(res)
