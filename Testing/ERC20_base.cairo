@@ -38,8 +38,8 @@ end
 #
 # Constructor
 #
-
-func ERC20_initializer{
+@constructor
+func constructor{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
@@ -56,6 +56,7 @@ func ERC20_initializer{
     return ()
 end
 
+@view
 func ERC20_name{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -65,6 +66,7 @@ func ERC20_name{
     return (name)
 end
 
+@view
 func ERC20_symbol{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -74,6 +76,7 @@ func ERC20_symbol{
     return (symbol)
 end
 
+@view
 func ERC20_totalSupply{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -83,6 +86,7 @@ func ERC20_totalSupply{
     return (totalSupply)
 end
 
+@view
 func ERC20_decimals{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -92,6 +96,7 @@ func ERC20_decimals{
     return (decimals)
 end
 
+@view
 func ERC20_balanceOf{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -101,6 +106,7 @@ func ERC20_balanceOf{
     return (balance)
 end
 
+@view
 func ERC20_allowance{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -110,6 +116,7 @@ func ERC20_allowance{
     return (remaining)
 end
 
+@external
 func ERC20_transfer{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -120,6 +127,7 @@ func ERC20_transfer{
     return ()
 end
 
+@external
 func ERC20_transferFrom{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -158,6 +166,7 @@ func ERC20_approve{
     return ()
 end
 
+@external
 func ERC20_increaseAllowance{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -176,6 +185,7 @@ func ERC20_increaseAllowance{
     return ()
 end
 
+@external
 func ERC20_decreaseAllowance{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -195,6 +205,7 @@ func ERC20_decreaseAllowance{
     return ()
 end
 
+@external
 func ERC20_mint{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -218,6 +229,7 @@ func ERC20_mint{
     return ()
 end
 
+@external
 func ERC20_burn{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
