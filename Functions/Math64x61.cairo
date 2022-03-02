@@ -23,6 +23,8 @@ const Math64x61_ONE = 1 * Math64x61_FRACT_PART
 const Math64x61_TEN = 10 * Math64x61_FRACT_PART
 const Math64x61_YEAR = 31557600 * Math64x61_FRACT_PART
 const Math64x61_E = 6267931151224907085
+const Math64x31_ONE = 2 ** 31
+const Math64x30_ONE = 2 ** 30
 
 func Math64x61_assert64x61 {range_check_ptr} (x: felt):
     assert_le(x, Math64x61_BOUND)
@@ -59,9 +61,12 @@ end
 # Converts 64.61 number to token number for transactions
 # x is 64x61 fixed point number and y is a positive integer for decimals
 func Math64x61_convert_from {range_check_ptr} (x: felt, y: felt) -> (res: felt):
-    let (multiplier) = Math64x61_pow(Math64x61_TEN, y)
-    let (product) = Math64x61_mul(x, multiplier)
-    let (res, _) = unsigned_div_rem(product, Math64x61_ONE)
+    let (partial_1, _) = unsigned_div_rem(x, Math64x31_ONE)
+    let (multiplier_1) = Math64x61_pow(Math64x61_TEN, y - 10)
+    let (product_1) = Math64x61_mul(partial_1, multiplier_1)
+    let (partial_2, _) = unsigned_div_rem(product_1, Math64x30_ONE)
+    let (multiplier_2) = Math64x61_pow(Math64x61_TEN, 10)
+    let (res) = Math64x61_mul(partial_2, multiplier_2)    
     return (res)
 end
 
