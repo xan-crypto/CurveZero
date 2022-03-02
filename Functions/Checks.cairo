@@ -34,7 +34,8 @@ end
 # check user has sufficient funds and return erc amount
 func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(caller : felt, erc_addy: felt, amount : felt) -> (amount_erc : felt):
     alloc_locals
-    let (caller_balance) = Erc20.ERC20_balanceOf(erc_addy, caller)
+    let (caller_balance_unit) = Erc20.ERC20_balanceOf(erc_addy, caller)
+    let (caller_balance) = Math64x61_fromUint256(caller_balance_unit)
     let (decimals_unit) = Erc20.ERC20_decimals(erc_addy)
     let (decimals) = Math64x61_fromUint256(decimals_unit)
     let (amount_erc) = Math64x61_convert_from(amount, decimals)
