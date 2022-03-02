@@ -67,6 +67,11 @@ end
 func weth_addy() -> (addy : felt):
 end
 
+# addy of the ERC-20 WETH Oracle
+@storage_var
+func oracle_addy() -> (addy : felt):
+end
+
 # set the relevant addys on deployment, is there a better way to do this?
 # check with starknet devs
 @constructor
@@ -82,7 +87,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     _settings_addy : felt,
     _usdc_addy : felt,
     _czt_addy : felt,
-    _weth_addy : felt):
+    _weth_addy : felt,
+    _oracle_addy : felt):
     lp_addy.write(_lp_addy)
     pp_addy.write(_pp_addy)
     cb_addy.write(_cb_addy)
@@ -95,6 +101,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     usdc_addy.write(_usdc_addy)
     czt_addy.write(_czt_addy)
     weth_addy.write(_weth_addy)
+    oracle_addy.write(_oracle_addy)
     return ()
 end
 
@@ -179,5 +186,12 @@ end
 @view
 func get_weth_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
     let (addy) = weth_addy.read()
+    return (addy)
+end
+
+# get the ERC-20 WETH oracle contract addy
+@view
+func get_oracle_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = oracle_addy.read()
     return (addy)
 end
