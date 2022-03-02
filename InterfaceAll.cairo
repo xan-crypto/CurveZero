@@ -53,6 +53,8 @@ namespace CZCore:
     end    
     func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     end
+    func erc20_transfer(erc_addy : felt, recipient: felt, amount: felt):
+    end
     func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
     end
     func set_pp_status(user : felt, lp_user : felt, lp_amount : felt, cz_amount : felt, lockup : felt, promote : felt):
