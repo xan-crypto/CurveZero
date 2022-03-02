@@ -33,7 +33,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     # set initial amounts for becoming pp - NB NB change this later
     pp_token_requirement.write((10000 * Math64x61_ONE, 10000 * Math64x61_ONE))
     # 7 day lockup period
-    lockup_period.write(604800 * Math64x61_ONE)
+    lockup_period.write(0 * 604800 * Math64x61_ONE)
     # origination fee and split 10bps and 50/50 PP IF
     origination_fee.write((origination_fee_total, origination_fee_split, origination_fee_split))
     # accrued interest split between LP IF and GT - 95/3/2
