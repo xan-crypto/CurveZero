@@ -90,11 +90,13 @@ end
 # use the transfer from function to send the token from sender to recipient
 @contract_interface
 namespace Erc20:
-    func ERC20_transferFrom(sender: felt, recipient: felt, amount: felt) -> ():
+    func ERC20_transferFrom(sender: felt, recipient: felt, amount: Uint256) -> ():
+    end
+    func ERC20_transfer(recipient: felt, amount: Uint256) -> ():
     end
     func ERC20_balanceOf(account: felt) -> (balance: Uint256):
     end
-    func ERC20_decimals() -> (decimals: Uint256):
+    func ERC20_decimals() -> (decimals: felt):
     end    
 end
 
