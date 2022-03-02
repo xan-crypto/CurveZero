@@ -47,7 +47,7 @@ starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 
 Last test
 [owner] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp] = 0x00decc74333ce58057e137349b95358f80a6fa99969bdb10d4556a053b4d5e8e
+[lp] = 0x00decc74333ce58057e137349b95358f80a6fa99969bdb10d4556a053b4d5e8e / 0x06f8d6cd4087687e01fdd1cec93c02dd8d8d899810a68af1570c0b677428332c
 [pp] = 0
 [cb] = 0
 [ll] = 0
