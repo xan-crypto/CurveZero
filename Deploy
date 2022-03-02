@@ -12,6 +12,8 @@ starknet-compile Core/CZCore.cairo --output Compiled/CZCore_compiled.json --abi 
 starknet-compile Core/Controller.cairo --output Compiled/Controller_compiled.json --abi Compiled/Controller_abi.json
 starknet-compile Core/InsuranceFund.cairo --output Compiled/InsuranceFund_compiled.json --abi Compiled/InsuranceFund_abi.json
 starknet-compile Config/Settings.cairo --output Compiled/Settings_compiled.json --abi Compiled/Settings_abi.json
+starknet-compile Testing/ERC20_base.cairo --output Compiled/ERC20_base_compiled.json --abi Compiled/ERC20_base_abi.json
+starknet-compile Testing/Oracle.cairo --output Compiled/Oracle_compiled.json --abi Compiled/Oracle_abi.json
 starknet-compile Config/TrustedAddy.cairo --output Compiled/TrustedAddy_compiled.json --abi Compiled/TrustedAddy_abi.json
 
 starknet deploy --contract Compiled/LiquidityProvider_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
@@ -23,6 +25,10 @@ starknet deploy --contract Compiled/CZCore_compiled.json --inputs 0x02e7b3a6df35
 starknet deploy --contract Compiled/Controller_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/InsuranceFund_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/Settings_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs USDC USDC 10000000000000000000000 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs CZT CZT 10000000000000000000000 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs WETH WETH 100000000000000000000 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/Oracle_compiled.json --inputs WETH WETH
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 --inputs 0x05a1ad6214506b36cb1305e97def6e2749f44c875d54b3d4964a06d96d0922ab \
     0 \
@@ -33,6 +39,7 @@ starknet deploy --contract Compiled/TrustedAddy_compiled.json \
     0x0614815fd431b31928f6d453d599a1e7939b9073015402a5c9a2431a3961ccd6 \
     0 \
     0x05e8369155c45c203a50399035cf64823c6c3e93892aad0420671acf06229ed5 \
+    0 \
     0 \
     0 \
     0
@@ -51,6 +58,7 @@ Last test
 [usdc] = 0
 [czt] = 0
 [weth] = 0
+[oracle] = 0
 [trusted] = 0x01e9dd397dd5a484653d7a5e836cce747de24954569a75d58fde1c2e352f2e3f
 
 # check transactions / testing
