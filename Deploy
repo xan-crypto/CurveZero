@@ -42,24 +42,25 @@ starknet deploy --contract Compiled/TrustedAddy_compiled.json \
     0 \
     0 \
     0 \
+    0 \
     0
 
 Last test
 [owner] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp] = 0
+[lp] = 0x00decc74333ce58057e137349b95358f80a6fa99969bdb10d4556a053b4d5e8e
 [pp] = 0
 [cb] = 0
 [ll] = 0
 [gt] = 0
 [if] = 0
-[czcore] = 0
+[czcore] = 0x0144529e51eabcc794a2544973e4f7fb20d8132262dfa33c3e9b9e0e480a6e7a
 [controller] = 0
-[setttings] = 0
-[usdc] = 0
+[setttings] = 0x027625efcc20ca3c9f11969561179c445649a308b4a8dec4248d287e17d0868a
+[usdc] = 0x01f34f531e13439eb7a3f2fe07a839c8c3e50bc4757184867f45d79431ca0566
 [czt] = 0
 [weth] = 0
 [oracle] = 0
-[trusted] = 0
+[trusted] = 0x039be203f79aa7e790428abff1fdd563d90b78c7db2b55440eaa10d7d5dc2062
 
 # check transactions / testing
 starknet tx_status --hash [tx_hash]
