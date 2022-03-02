@@ -51,6 +51,8 @@ namespace CZCore:
     end    
     func set_loan_total(loan_amount : felt):
     end    
+    func set_reward_total():
+    end    
     func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     end
     func erc20_transfer(erc_addy : felt, recipient: felt, amount: felt):
@@ -65,9 +67,9 @@ namespace CZCore:
     end  
     func get_staker_index(index : felt) -> (user : felt):
     end  
-    func set_staker_index(index:felt,user : felt):
+    func set_staker_index(index : felt, user : felt):
     end  
-    func get_staker_details(user:felt) -> (gt_token : felt, unclaimed_reward : felt, old_user:felt):
+    func get_staker_details(user : felt) -> (gt_token : felt, unclaimed_reward : felt, old_user : felt):
     end  
     func set_staker_details(user : felt, gt_token : felt, unclaimed_reward : felt):
     end  
