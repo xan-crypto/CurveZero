@@ -100,6 +100,7 @@ end
 
 # calc new lp total and issuance
 func lp_update{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_total : felt, usdc_deposit: felt, new_capital_total : felt, capital_total: felt) -> (new_lp_total : felt, lp_issuance : felt):
+    alloc_locals
     if lp_total == 0:
         let new_lp_total = usdc_deposit
         let lp_issuance = usdc_deposit
