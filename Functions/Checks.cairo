@@ -4,7 +4,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_le, assert_nn_le, assert_in_range
-from Functions.Math64x61 import Math64x61_div, Math64x61_mul, Math64x61_convert_from, Math64x61_zero, Math64x61_convert_to, Math64x61_ts, Math64x61_add
+from Functions.Math64x61 import Math64x61_div, Math64x61_mul, Math64x61_convert_from, Math64x61_zero, Math64x61_convert_to, Math64x61_ts, Math64x61_add, Math64x61_fromUint256 
 from InterfaceAll import Settings, Erc20, Oracle
 
 # check if owner
@@ -35,7 +35,8 @@ end
 func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(caller : felt, erc_addy: felt, amount : felt) -> (amount_erc : felt):
     alloc_locals
     let (caller_balance) = Erc20.ERC20_balanceOf(erc_addy, caller)
-    let (decimals) = Erc20.ERC20_decimals(erc_addy)
+    let (decimals_unit) = Erc20.ERC20_decimals(erc_addy)
+    let (decimals) = Math64x61_fromUint256(decimals_unit)
     let (amount_erc) = Math64x61_convert_from(amount, decimals)
     with_attr error_message("Caller does not have sufficient funds."):
         assert_nn_le(amount_erc, caller_balance)
