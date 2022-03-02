@@ -152,7 +152,7 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (capital_redeem_erc) = check_user_balance(czcore_addy, usdc_addy, capital_redeem)
 
     # transfer the USDC, burn the lp token and update variables
-    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, capital_redeem_erc)
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, capital_redeem_erc)
     CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
     let (new_lp_user) = Math64x61_sub(lp_user, lp_token)
     CZCore.set_lp_balance(czcore_addy, user, new_lp_user, lockup)
