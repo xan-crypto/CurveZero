@@ -47,25 +47,25 @@ starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 
 Last test
 [owner] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp] = 0x00decc74333ce58057e137349b95358f80a6fa99969bdb10d4556a053b4d5e8e / 0x06f8d6cd4087687e01fdd1cec93c02dd8d8d899810a68af1570c0b677428332c
+[lp] = 0
 [pp] = 0
 [cb] = 0
 [ll] = 0
 [gt] = 0
 [if] = 0
-[czcore] = 0x0144529e51eabcc794a2544973e4f7fb20d8132262dfa33c3e9b9e0e480a6e7a
+[czcore] = 0
 [controller] = 0
-[setttings] = 0x027625efcc20ca3c9f11969561179c445649a308b4a8dec4248d287e17d0868a
-[usdc] = 0x01f34f531e13439eb7a3f2fe07a839c8c3e50bc4757184867f45d79431ca0566
+[setttings] = 0
+[usdc] = 0
 [czt] = 0
 [weth] = 0
 [oracle] = 0
-[trusted] = 0x074fff96d5e941e5506bcbe629bed5f778f637b88c2e271889840a95e1705711
+[trusted] = 0
 
 # check transactions / testing
-starknet tx_status --hash [tx_hash]
-starknet get_transaction --hash [tx_hash]
-starknet get_transaction_receipt --hash [tx_hash]
+starknet tx_status --hash 0x2f7fb37a7af22cb9cd03f5aefb52a35f098d24bf0f5607bab5ebcb7ef91f2dd
+starknet get_transaction --hash 0x2f7fb37a7af22cb9cd03f5aefb52a35f098d24bf0f5607bab5ebcb7ef91f2dd
+starknet get_transaction_receipt --hash 0x2f7fb37a7af22cb9cd03f5aefb52a35f098d24bf0f5607bab5ebcb7ef91f2dd
 
 # update contract addy to point to TrustedAddy
 starknet invoke \
@@ -75,8 +75,8 @@ starknet invoke \
     --inputs 0x07283fce2d2efc1720fbc9b85a0235d442abc5d98f6fff5beddabd90ac7d6acc
 
 starknet call \
-    --address 0x03aed6d7a15f0fe3bd3112ac122e9f0ae422b1a9023e5b60934fb0a6a011239a \
-    --abi Compiled/CapitalBorrower_abi.json \
-    --function get_loan_accured_interest \
-    --inputs 0x0077113fdcee61d3257d7617d7b01a766a7fcd1dd05e96a91f00e13ea4e77399
+    --address 0x04103df6bfa6c6f0a6cdc276d7278b20c3c935f48ae2c9720c68e94951a76628 \
+    --abi Compiled/LiquidityProvider_abi.json \
+    --function value_lp_token \
+    --inputs 0
 
