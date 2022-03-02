@@ -5,7 +5,9 @@
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
-from InterfaceAll import (TrustedAddy,Settings)
+from starkware.cairo.common.math import assert_nn
+from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add
+from InterfaceAll import TrustedAddy, Settings, CZCore
 
 ##################################################################
 # addy of the deployer
@@ -29,12 +31,13 @@ end
 
 ##################################################################
 # useful functions
-func is_deployer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}:
+func is_deployer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (caller) = get_caller_address()
     let (deployer) = deployer_addy.read()
     with_attr error_message("Only deployer has access."):
         assert caller = deployer
     end
+    return()
 end
 
 ##################################################################
@@ -141,56 +144,55 @@ end
 
 # set level below which we make loans and above which we stop loans
 @external
-func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(start : felt, stop : felt):
+func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(stop : felt):
     is_deployer()
     let (_trusted_addy) = trusted_addy.read()
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    Settings.set_utilization(settings_addy,start=start,stop=stop)
+    Settings.set_utilization(settings_addy,stop=stop)
     return ()
 end
 
 # set min PP required for acceptable pricing request
 @external
-func set_min_pp_accepted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_pp : felt):
+func set_min_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_pp : felt):
     is_deployer()
     let (_trusted_addy) = trusted_addy.read()
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    Settings.set_min_pp_accepted(settings_addy,min_pp=min_pp)
+    Settings.set_min_pp(settings_addy,min_pp=min_pp)
     return ()
 end
 
 # distribute rewards from total pot to individual users unclaimed rewards 
 @external
 func distribute_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res:felt):
+    alloc_locals
     is_deployer()
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
-    alloc_locals
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)    
     # check total stake is positve amount
     with_attr error_message("Reward total must be postive."):
         assert_nn(reward_total)
     end
-    
     let (stake_total,index) = CZCore.get_staker_total(czcore_addy)
-    run_distribution(stake_total,reward_total,index)
+    run_distribution(czcore_addy,stake_total,reward_total,index)
     # set CZCore reward_total to 0
     CZCore.set_reward_total(czcore_addy)
     return (1)
 end
 
 # send out user unclaimed rewards
-func run_distribution{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(stake_total : felt, reward_total : felt, index : felt):
+func run_distribution{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(czcore_addy : felt, stake_total : felt, reward_total : felt, index : felt):
     alloc_locals
     if index == 0:
         return()
     end
-    run_distribution(stake_total,reward_total,index-1)
+    run_distribution(czcore_addy,stake_total,reward_total,index-1)
     let (user) = CZCore.get_staker_index(czcore_addy, index-1)
-    let (stake,reward,old_user) = CZCore.get_staker_users(czcore_addy, user)
+    let (stake, reward, old_user) = CZCore.get_staker_details(czcore_addy, user)
     let (temp1) = Math64x61_mul(reward_total, stake)
     let (temp2) = Math64x61_div(temp1,stake_total)
     let (reward_new) = Math64x61_add(temp2, reward)
-    staker_users.write(user,(stake,reward_new,1))
+    CZCore.set_staker_details(user,stake,reward_new,1)
     return ()
 end
