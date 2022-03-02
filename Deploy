@@ -31,14 +31,14 @@ starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 57455448 5
 starknet deploy --contract Compiled/Oracle_compiled.json --inputs 57455448 57455448
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0 \
-    0x001ef10e44bc58b7d048108d1c3a576465e0ecb38cc47a0baecaebc60687967c \
+    0x02c25efd4fb4e5109dff6fc5860e8ccbc08af31cb37f5ebd8314a3e811520037 \
     0 \
     0 \
     0 \
     0 \
     0 \
     0x04d7ebe534e539e4f6ef0409aab27dc8eb964249b4eeb3c5b9ccb17b741351fe \
-    0 \
+    0x02bd47a60d79a1a68240254b974875facb732f9183d08b32e29f24238e3ff2c4 \
     0x01047551afeb83e8917f5135d6663694c895b73d069a7f1178fdaafa2af6726d \
     0x00fab882affd32569c826ae1df7f00f95013e1da5ded793f5553a62bfbf09cac \
     0 \
@@ -47,14 +47,14 @@ starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 
 Last test
 [owner] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp] = 0x001ef10e44bc58b7d048108d1c3a576465e0ecb38cc47a0baecaebc60687967c
+[lp] = 0x05b2aa9420edcf16beeeff3c0f1d23365cd50030e23e9deaaf2eddc454bbcd82
 [pp] = 0
 [cb] = 0
 [ll] = 0
 [gt] = 0
 [if] = 0
 [czcore] = 0x04d7ebe534e539e4f6ef0409aab27dc8eb964249b4eeb3c5b9ccb17b741351fe
-[controller] = 0
+[controller] = 0x02bd47a60d79a1a68240254b974875facb732f9183d08b32e29f24238e3ff2c4
 [setttings] = 0x01047551afeb83e8917f5135d6663694c895b73d069a7f1178fdaafa2af6726d
 [usdc] = 0x00fab882affd32569c826ae1df7f00f95013e1da5ded793f5553a62bfbf09cac
 [czt] = 0
@@ -63,20 +63,15 @@ Last test
 [trusted] = 0x01ec4ac12b227220131aa07126f6b643af96264a9e977c22e381b6042c551ce5
 
 # check transactions / testing
-starknet tx_status --hash 0x2f7fb37a7af22cb9cd03f5aefb52a35f098d24bf0f5607bab5ebcb7ef91f2dd
-starknet get_transaction --hash 0x2f7fb37a7af22cb9cd03f5aefb52a35f098d24bf0f5607bab5ebcb7ef91f2dd
-starknet get_transaction_receipt --hash 0x2f7fb37a7af22cb9cd03f5aefb52a35f098d24bf0f5607bab5ebcb7ef91f2dd
+starknet tx_status --hash 0x3d4689e0ec1af5cb1c79b9cdf0819400b6635838e9b2ddc5b80b4fda009d084
+starknet get_transaction --hash 0x3d4689e0ec1af5cb1c79b9cdf0819400b6635838e9b2ddc5b80b4fda009d084
+starknet get_transaction_receipt --hash 0x3d4689e0ec1af5cb1c79b9cdf0819400b6635838e9b2ddc5b80b4fda009d084
 
-# update contract addy to point to TrustedAddy
-starknet invoke \
-    --address 0x01653ffc3bfed9630ed5d02651f8c5695cb671d60266b8ecc39ec02066c0e3a5 \
-    --abi LiquidityProvider_abi.json \
-    --function set_trusted_addy \
-    --inputs 0x07283fce2d2efc1720fbc9b85a0235d442abc5d98f6fff5beddabd90ac7d6acc
-
+# call / invoke
 starknet call \
-    --address 0x04103df6bfa6c6f0a6cdc276d7278b20c3c935f48ae2c9720c68e94951a76628 \
-    --abi Compiled/LiquidityProvider_abi.json \
-    --function value_lp_token \
-    --inputs 0
-
+    --address 0x059bdbb99a3daa7370a420951d6383ec3857a4b456785dee8e96a1bab1ce46f0 \
+    --abi test_abi.json \
+    --function check_user_balance \
+    --inputs 0x0077113fdcee61d3257d7617d7b01a766a7fcd1dd05e96a91f00e13ea4e77399 \
+             0x00fab882affd32569c826ae1df7f00f95013e1da5ded793f5553a62bfbf09cac \
+             1152921504606846976000
