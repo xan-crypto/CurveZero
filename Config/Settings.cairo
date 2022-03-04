@@ -32,7 +32,7 @@ end
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(deployer : felt):
     deployer_addy.write(deployer)
     # set initial amounts for becoming pp - NB NB change this later
-    pp_token_requirement.write((10000 * Math64x61_ONE, 10000 * Math64x61_ONE))
+    pp_token_requirement.write((1000 * Math64x61_ONE, 1000 * Math64x61_ONE))
     # 7 day lockup period
     lockup_period.write(0 * 604800 * Math64x61_ONE)
     # origination fee and split 10bps and 50/50 PP IF
