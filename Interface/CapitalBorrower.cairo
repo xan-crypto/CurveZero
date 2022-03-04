@@ -362,7 +362,8 @@ func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (rate_array : felt*) = alloc()
     let (pp_pub_array : felt*) = alloc()
     # iterate thru pp_pub and reduce total dataset where pp_pub is not valid PP
-    let (new_pp_data_len, new_pp_data) = validate_pp_data(pp_data_len,pp_data)
+    # re enable this later
+    # let (new_pp_data_len, new_pp_data) = validate_pp_data(pp_data_len,pp_data)
     # iterate thru remaining pp data - verify the pp's signature for both rate and unique loan ID.
     let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(new_pp_data_len, new_pp_data, loan_id_hash)
     # order the rates and find the median
