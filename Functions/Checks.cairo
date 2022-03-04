@@ -61,10 +61,10 @@ func check_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     alloc_locals
     let (price_erc) = Oracle.get_oracle_price(oracle_addy)
     let (decimals) = Oracle.get_oracle_decimals(oracle_addy)
-    let (ltv1) = Settings.get_weth_ltv(settings_addy)
+    let (ltv) = Settings.get_weth_ltv(settings_addy)
     let (price) = Math64x61_convert_to(price_erc, decimals)
     let (value_collateral) = Math64x61_mul(price, collateral)
-    let (max_loan) = Math64x61_mul(value_collateral, ltv1)
+    let (max_loan) = Math64x61_mul(value_collateral, ltv)
     with_attr error_message("Not sufficient collateral for loan"):
         assert_le(notional, max_loan)
     end
