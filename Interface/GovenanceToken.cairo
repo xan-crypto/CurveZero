@@ -7,8 +7,8 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn_le, assert_le, assert_in_range, assert_nn
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20
-from Math.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_convert_from, Math64x61_ts
-from Functions.Checks import check_is_owner
+from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_convert_from, Math64x61_ts
+from Functions.Checks import check_is_owner, check_user_balance
 
 ##################################################################
 # addy of the owner
@@ -76,15 +76,10 @@ func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
     let (user) = get_caller_address()
-    let (czt_user) = Erc20.ERC20_balanceOf(czt_addy, user)
-    let (czt_decimals) = Erc20.ERC20_decimals(czt_addy)
-    let (gt_token_erc) = Math64x61_convert_from(gt_token, czt_decimals)
-    with_attr error_message("User does not have sufficient funds."):
-        assert_le(gt_token_erc, czt_user)
-    end
+    let (gt_token_erc) = check_user_balance(user, czt_addy, gt_token)
     
     # get user and total staking details
-    let (gt_user, reward, old_user) = CZCore.get_staker_users(czcore_addy,user)
+    let (gt_user, reward, old_user) = CZCore.get_staker_details(czcore_addy,user)
     let (gt_total, index) = CZCore.get_staker_total(czcore_addy)
 
     # transfer tokens
@@ -92,15 +87,15 @@ func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     # update user and aggregate
     let (gt_user_new) = Math64x61_add(gt_user, gt_token)
     let (gt_total_new) = Math64x61_add(gt_total, gt_token)
-    CZCore.set_staker_users(user, gt_user_new, reward)    
+    CZCore.set_staker_details(czcore_addy, user, gt_user_new, reward)    
     if old_user == 1:
-        CZCore.set_staker_total(gt_total_new, index)
+        CZCore.set_staker_total(czcore_addy, gt_total_new, index)
         # event
         gt_stake_unstake.emit(addy=user,stake=gt_token)
         return(1)
     else:
-        CZCore.set_staker_total(gt_total_new, index + 1)
-        CZCore.set_staker_index(index, user)
+        CZCore.set_staker_total(czcore_addy, gt_total_new, index + 1)
+        CZCore.set_staker_index(czcore_addy, index, user)
         # event
         gt_stake_unstake.emit(addy=user,stake=gt_token)
         return(1)
@@ -121,7 +116,7 @@ func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     end
     
     # get user and total staking details
-    let (gt_user, reward, old_user) = CZCore.get_staker_users(czcore_addy,user)
+    let (gt_user, reward, old_user) = CZCore.get_staker_details(czcore_addy,user)
     let (gt_total, index) = CZCore.get_staker_total(czcore_addy)
     
     # check user have the coins to unstake
@@ -140,8 +135,8 @@ func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     CZCore.erc20_transfer(czcore_addy, czt_addy, user, gt_token_erc)            
     
     # update user and aggregate
-    CZCore.set_staker_users(user, gt_user_new, reward)   
-    CZCore.set_staker_total(gt_total_new, index)
+    CZCore.set_staker_details(czcore_addy, user, gt_user_new, reward)   
+    CZCore.set_staker_total(czcore_addy, gt_total_new, index)
     # event
     gt_stake_unstake.emit(addy=user,stake=-gt_token)
     return(1)
@@ -157,17 +152,16 @@ func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     
     # get current user staking time
-    let (gt_user, reward, old_user) = CZCore.get_staker_users(czcore_addy,user)
+    let (gt_user, reward, old_user) = CZCore.get_staker_details(czcore_addy,user)
     
     # transfer tokens
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
-    let (reward_erc) = Math64x61_convert_from(reward, usdc_decimals)
-        
+    let (reward_erc) = check_user_balance(czcore_addy, usdc_addy, reward)    
+    
     # transfer tokens
     CZCore.erc20_transfer(czcore_addy, usdc_addy, user, reward_erc)            
     # update user rewards
-    CZCore.set_staker_users(user, gt_user, 0)   
+    CZCore.set_staker_details(czcore_addy, user, gt_user, 0)   
     
     # event
     gt_claim.emit(addy=user,reward=reward)
