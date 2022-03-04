@@ -117,6 +117,16 @@ func gt_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     return()
 end
 
+func if_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (authorised_caller) = TrustedAddy.get_if_addy(_trusted_addy)
+    with_attr error_message("Not authorised caller."):
+        assert caller = authorised_caller
+    end
+    return()
+end
+
 func controller_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
@@ -127,12 +137,46 @@ func controller_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return()
 end
 
+func authorised_callers{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
+    let (caller) = get_caller_address()
+    let (_trusted_addy) = trusted_addy.read()
+    let (lp_addy) = TrustedAddy.get_lp_addy(_trusted_addy)
+    let (pp_addy) = TrustedAddy.get_pp_addy(_trusted_addy)
+    let (cb_addy) = TrustedAddy.get_cb_addy(_trusted_addy)
+    let (ll_addy) = TrustedAddy.get_ll_addy(_trusted_addy)
+    let (gt_addy) = TrustedAddy.get_gt_addy(_trusted_addy)
+    let (if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
+    let x = 0
+    if caller == lp_addy:
+        let x = 1    
+    end
+    if caller == pp_addy:
+        let x = 1    
+    end    
+    if caller == cb_addy:
+        let x = 1    
+    end
+    if caller == ll_addy:
+        let x = 1    
+    end
+    if caller == gt_addy:
+        let x = 1    
+    end
+    if caller == if_addy:
+        let x = 1    
+    end
+    with_attr error_message("Not in list of authorised callers."):
+        assert x = 1
+    end
+    return()
+end
+
 ##################################################################
 # this is a pass thru function to the ERC-20 token contract
 @external
 func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
-    lp_caller()
-    # add other caller protection
+    authorised_callers()
     is_paused()
     let (amount_unit) = Math64x61_toUint256(amount)
     Erc20.ERC20_transferFrom(erc_addy,sender=sender,recipient=recipient,amount=amount_unit)
@@ -141,8 +185,7 @@ end
 
 @external
 func erc20_transfer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, recipient: felt, amount: felt):
-    lp_caller()
-    # add other caller protection
+    authorised_callers()
     is_paused()
     let (amount_unit) = Math64x61_toUint256(amount)
     Erc20.ERC20_transfer(erc_addy,recipient=recipient,amount=amount_unit)
