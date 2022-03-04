@@ -135,9 +135,9 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (if_fee_erc) = Math64x61_convert_from(if_fee, usdc_decimals)
     
     # all transfers
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, czcore_addy, user, notional_erc)
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, czcore_addy, winning_pp, pp_fee_erc)
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, czcore_addy, if_addy, if_fee_erc)
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, notional_erc)
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, winning_pp, pp_fee_erc)
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, if_addy, if_fee_erc)
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
     # update CZCore
     CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, start_ts, end_ts, median_rate, 0, 1)
@@ -190,7 +190,7 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         let (accrued_interest_gt) = Math64x61_mul(gt_split, total_accrual)
         let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
         let (accrued_interest_if_erc) = Math64x61_convert_from(accrued_interest_if, usdc_decimals) 
-        CZCore.erc20_transfer(czcore_addy, usdc_addy, czcore_addy, if_addy, accrued_interest_if_erc)
+        CZCore.erc20_transfer(czcore_addy, usdc_addy, if_addy, accrued_interest_if_erc)
         # update CZCore and loan  
         let (new_loan_total_before_accrual) = Math64x61_sub(loan_total, repay)
         let (new_loan_total) = Math64x61_add(new_loan_total_before_accrual, total_accrual)
@@ -270,7 +270,7 @@ func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (collateral_erc) = check_user_balance(czcore_addy, weth_addy, collateral)
         
     # transfer 
-    CZCore.erc20_transfer(czcore_addy, weth_addy, czcore_addy, user, collateral_erc)
+    CZCore.erc20_transfer(czcore_addy, weth_addy, user, collateral_erc)
     CZCore.set_cb_loan(czcore_addy, user, has_loan, notional, new_collateral, start_ts, end_ts, rate, hist_accrual, 0)
     # event
     event_loan_change.emit(addy=user, has_loan=has_loan, notional=notional, collateral=new_collateral, start_ts=start_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual)
@@ -337,9 +337,9 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (total_accrual) = Math64x61_add(hist_accrual, accrued_interest)
 
     # all transfers
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, czcore_addy, user, change_notional_erc)
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, czcore_addy, winning_pp, pp_fee_erc)
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, czcore_addy, if_addy, if_fee_erc)
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, change_notional_erc)
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, winning_pp, pp_fee_erc)
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, if_addy, if_fee_erc)
     if change_collateral != 0:
         CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, change_collateral_erc)
     end
