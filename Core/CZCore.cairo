@@ -147,27 +147,26 @@ func authorised_callers{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (ll_addy) = TrustedAddy.get_ll_addy(_trusted_addy)
     let (gt_addy) = TrustedAddy.get_gt_addy(_trusted_addy)
     let (if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
-    let x = 0
     if caller == lp_addy:
-        let x = 1    
+    	return()
     end
     if caller == pp_addy:
-        let x = 1    
+    	return()
     end    
     if caller == cb_addy:
-        let x = 1    
+    	return()
     end
     if caller == ll_addy:
-        let x = 1    
+    	return()
     end
     if caller == gt_addy:
-        let x = 1    
+    	return()
     end
     if caller == if_addy:
-        let x = 1    
+    	return()
     end
     with_attr error_message("Not in list of authorised callers."):
-        assert x = 1
+        assert 0 = 1
     end
     return()
 end
