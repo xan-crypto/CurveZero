@@ -134,9 +134,9 @@ namespace Settings:
     end
     func set_utilization(stop : felt):
     end       
-    func get_min_pp() -> (min_pp : felt):
+    func get_min_pp_accepted() -> (min_pp : felt):
     end
-    func set_min_pp(min_pp : felt):
+    func set_min_pp_accepted(min_pp : felt):
     end       
     func get_insurance_shortfall_ratio() -> (insurance_shortfall_ratio : felt):
     end
