@@ -69,10 +69,10 @@ end
 func Math64x61_convert_from {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let (partial_1, _) = unsigned_div_rem(x, Math64x31_ONE)
-    let (multiplier_1) = Math64x61_pow(Math64x61_TEN, y - 10)
+    let (multiplier_1) = Math64x61_pow(Math64x61_TEN, 10)
     let (product_1) = Math64x61_mul(partial_1, multiplier_1)
     let (partial_2, _) = unsigned_div_rem(product_1, Math64x30_ONE)
-    let (multiplier_2) = Math64x61_pow(Math64x61_TEN, 10)
+    let (multiplier_2) = Math64x61_pow(Math64x61_TEN, y - 10)
     let (res) = Math64x61_mul(partial_2, multiplier_2)    
     return (res)
 end
@@ -81,9 +81,11 @@ end
 # x is token number and y is a positive integer for decimals
 func Math64x61_convert_to {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
-    let (divider) = Math64x61_pow(Math64x61_TEN, y)
-    let (convert) = Math64x61_fromFelt(x)
-    let (res, _) = unsigned_div_rem(convert, divider)
+    let (divider_1) = Math64x61_pow(Math64x61_TEN, 10)
+    let (divider_2) = Math64x61_pow(Math64x61_TEN, y - 10)
+    let (partial_1, _) = unsigned_div_rem(x, divider_1)
+    let (partial_2) = Math64x61_fromFelt(partial_1)
+    let (res, _) = unsigned_div_rem(partial_2, divider_2)
     return (res)
 end
 
