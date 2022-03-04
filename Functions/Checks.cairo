@@ -5,7 +5,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_le, assert_nn_le, assert_in_range
 from starkware.cairo.common.uint256 import Uint256
-from Functions.Math64x61 import Math64x61_div, Math64x61_mul, Math64x61_convert_from, Math64x61_zero, Math64x61_convert_to, Math64x61_ts, Math64x61_add, Math64x61_fromUint256_felt  
+from Functions.Math64x61 import Math64x61_div, Math64x61_mul, Math64x61_convert_from, Math64x61_zero, Math64x61_convert_to, Math64x61_ts, Math64x61_add, Math64x61_fromUint256_felt, Math64x61_one  
 from InterfaceAll import Settings, Erc20, Oracle
 
 # check if owner
@@ -48,9 +48,10 @@ end
 # check eno pp for pricing, settings has min_pp
 func check_min_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, num_pp : felt):
     alloc_locals
+    let (convert_num_pp) = Math64x61_convert_to(num_pp)
     let (min_pp) = Settings.get_min_pp_accepted(settings_addy)
     with_attr error_message("Not enough PPs for valid pricing."):
-        assert_le(min_pp, num_pp)
+        assert_le(min_pp, convert_num_pp)
     end
     return()
 end
