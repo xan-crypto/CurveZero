@@ -25,9 +25,9 @@ starknet deploy --contract Compiled/CZCore_compiled.json --inputs 0x02e7b3a6df35
 starknet deploy --contract Compiled/Controller_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/InsuranceFund_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/Settings_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 55534443 55534443 100000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 435a54 435a54 100000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 57455448 57455448 1000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 55534443 55534443 1000000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 435a54 435a54 1000000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 57455448 57455448 10000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/Oracle_compiled.json --inputs 57455448 57455448
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0 \
