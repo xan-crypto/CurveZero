@@ -19,6 +19,7 @@ const accrued_interest_split_2 = 69175290276410819
 const accrued_interest_split_3 = 46116860184273879
 const utilization_total = 2075258708292324557
 const insurance_shortfall = 23058430092136940
+const ltv = 1383505805528216371
 
 ##################################################################
 # addy of the deployer
@@ -50,6 +51,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     insurance_shortfall_ratio.write(insurance_shortfall)    
     # max loan term - 1 year initially
     max_loan_term.write(366 * 86400 * Math64x61_ONE)   
+    # weth ltv
+    weth_ltv.write(ltv)  
     return ()
 end
 
@@ -314,5 +317,26 @@ end
 func set_max_loan_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(max_term : felt):
     check_caller_is_controller()
     max_loan_term.write(max_term)
+    return ()
+end
+
+##################################################################
+# weth ltv
+@storage_var
+func weth_ltv() -> (res : felt):
+end
+
+# return weth ltv
+@view
+func get_weth_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (ltv : felt):
+    let (res) = weth_ltv.read()
+    return (res)
+end
+
+# set weth ltv
+@external
+func set_weth_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(ltv : felt):
+    check_caller_is_controller()
+    weth_ltv.write(ltv)
     return ()
 end
