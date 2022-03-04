@@ -8,49 +8,42 @@ from starkware.cairo.common.math import assert_nn_le, assert_le, assert_in_range
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20
 from Math.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_convert_from, Math64x61_ts
+from Functions.Checks import check_is_owner
 
 ##################################################################
-# addy of the deployer
+# addy of the owner
 @storage_var
-func deployer_addy() -> (addy : felt):
+func owner_addy() -> (addy : felt):
 end
 
-# set the addy of the delpoyer on deploy
 @constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(deployer : felt):
-    deployer_addy.write(deployer)
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt):
+    owner_addy.write(owner)
     return ()
 end
 
-# who is deployer
 @view
-func get_deployer_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
-    let (addy) = deployer_addy.read()
+func get_owner_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
+    let (addy) = owner_addy.read()
     return (addy)
 end
 
 ##################################################################
-# Trusted addy, only deployer can point contract to Trusted Addy contract
-# addy of the Trusted Addy contract
+# trusted addy where contract addys are stored, only owner can change this
 @storage_var
 func trusted_addy() -> (addy : felt):
 end
 
-# get the trusted contract addy
 @view
 func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
     let (addy) = trusted_addy.read()
     return (addy)
 end
 
-# set the trusted contract addy
 @external
 func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
-    let (caller) = get_caller_address()
-    let (deployer) = deployer_addy.read()
-    with_attr error_message("Only deployer can change the Trusted addy."):
-        assert caller = deployer
-    end
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     trusted_addy.write(addy)
     return ()
 end
@@ -144,7 +137,7 @@ func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
     let (czt_decimals) = Erc20.ERC20_decimals(czt_addy)
     let (gt_token_erc) = Math64x61_convert_from(gt_token, czt_decimals)
-    CZCore.erc20_transferFrom(czcore_addy, czt_addy, czcore_addy, user, gt_token_erc)            
+    CZCore.erc20_transfer(czcore_addy, czt_addy, user, gt_token_erc)            
     
     # update user and aggregate
     CZCore.set_staker_users(user, gt_user_new, reward)   
@@ -172,7 +165,7 @@ func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (reward_erc) = Math64x61_convert_from(reward, usdc_decimals)
         
     # transfer tokens
-    CZCore.erc20_transferFrom(czcore_addy, usdc_addy, czcore_addy, user, reward_erc)            
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, reward_erc)            
     # update user rewards
     CZCore.set_staker_users(user, gt_user, 0)   
     
