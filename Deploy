@@ -1,6 +1,14 @@
 # new approach
-# deploy all contracts but TrustedAddy goes last
-# update all contracts to point to TrustedAddy
+1) compile all
+2) deploy all contracts but TrustedAddy goes last + addys into constructor
+3) update all contracts to point to TrustedAddy
+4) issue USDC CZT and WETH
+5) give USDC CZT and WTH approvals vs czcore
+6) create 1 lp
+7) create 1 pp
+8) create 1 cb
+9) test inc / dec collateral on cb
+10) test refinance and repay
 
 # compile all
 starknet-compile Interface/LiquidityProvider.cairo --output Compiled/LiquidityProvider_compiled.json --abi Compiled/LiquidityProvider_abi.json
