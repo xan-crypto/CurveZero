@@ -156,8 +156,8 @@ end
 # interface for the oracle contract
 @contract_interface
 namespace Oracle:
-    func get_weth_price() -> (price : felt):
+    func get_oracle_price() -> (price : felt):
     end    
-    func get_weth_decimals() -> (decimals : felt):
+    func get_oracle_decimals() -> (decimals : felt):
     end   
 end
