@@ -116,7 +116,7 @@ func demote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_che
     let (czt_locked_erc) = check_user_balance(czcore_addy, czt_addy, czt_locked)
 
     # transfer the CZT, demote PP
-    CZCore.erc20_transferFrom(czcore_addy, czt_addy, czcore_addy, user, czt_locked_erc)
+    CZCore.erc20_transfer(czcore_addy, czt_addy, czcore_addy, user, czt_locked_erc)
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
     CZCore.set_pp_status(czcore_addy, user, lp_user, lp_locked, czt_locked, lockup, 0)
     # event
