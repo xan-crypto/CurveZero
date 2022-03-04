@@ -59,8 +59,8 @@ end
 # test sufficient collateral to proceed vs notional of loan
 func check_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(oracle_addy : felt, settings_addy : felt, notional : felt, collateral : felt):
     alloc_locals
-    let (price_erc) = Oracle.get_weth_price(oracle_addy)
-    let (decimals) = Oracle.get_weth_decimals(oracle_addy)
+    let (price_erc) = Oracle.get_oracle_price(oracle_addy)
+    let (decimals) = Oracle.get_oracle_decimals(oracle_addy)
     let (ltv1) = Settings.get_weth_ltv(settings_addy)
     let (price) = Math64x61_convert_to(price_erc, decimals)
     let (value_collateral) = Math64x61_mul(price, collateral)
