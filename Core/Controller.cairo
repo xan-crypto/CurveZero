@@ -158,7 +158,7 @@ func set_min_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     is_deployer()
     let (_trusted_addy) = trusted_addy.read()
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    Settings.set_min_pp(settings_addy,min_pp=min_pp)
+    Settings.set_min_pp_accepted(settings_addy,min_pp=min_pp)
     return ()
 end
 
