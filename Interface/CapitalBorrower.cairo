@@ -181,9 +181,6 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, repay_erc)     
     # new variable calcs
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
-    with_attr error_message("Repay should be below loan total, overflow prevention."):
-        assert_nn_le(repay, loan_total)
-    end
     let (new_notional) = Math10xx8_sub(acrrued_notional, repay)
     let (new_start_ts) = Math10xx8_ts()
     let (total_accrual) = Math10xx8_add(hist_accrual, accrued_interest)
