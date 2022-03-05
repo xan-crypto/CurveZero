@@ -14,7 +14,7 @@ from starkware.cairo.common.signature import verify_ecdsa_signature
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20, Oracle
-from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_pow_frac, Math10xx8_sub, Math10xx8_add, Math10xx8_ts, Math10xx8_one, Math10xx8_year, Math10xx8_convert_from
+from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_pow_frac, Math10xx8_sub, Math10xx8_add, Math10xx8_ts, Math10xx8_one, Math10xx8_year, Math10xx8_convert_from, Math10xx8_zero
 from Functions.Checks import check_is_owner, check_min_pp, check_ltv, check_utilization, check_max_term, check_loan_range, check_user_balance
 
 ##################################################################
@@ -197,10 +197,17 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         CZCore.erc20_transfer(czcore_addy, usdc_addy, if_addy, accrued_interest_if_erc)
         # update CZCore and loan  
         let (loan_total_after_accrual) = Math10xx8_add(loan_total, total_accrual)
-        let (new_loan_total) = Math10xx8_sub(loan_total_after_accrual, repay)
         let (new_capital_total) = Math10xx8_add(capital_total, accrued_interest_lp)
         let (new_reward_total) = Math10xx8_add(reward_total, accrued_interest_gt)
-        CZCore.set_captal_loan_reward_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
+        # in the rare case of indirect rounding issues
+        let (test) = is_le(repay, loan_total_after_accrual)
+        if test == 1:
+            let (new_loan_total) = Math10xx8_sub(loan_total_after_accrual, repay)
+            CZCore.set_captal_loan_reward_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
+        else:
+            let (new_loan_total) = Math10xx8_zero()
+            CZCore.set_captal_loan_reward_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
+        end
         CZCore.set_cb_loan(czcore_addy, user, 0, 0, collateral, 0, 0, 0, 0, 0)
         decrease_collateral(collateral)
         # event captured in decrease collateral
