@@ -12,7 +12,6 @@ const Math10xx8_ZERO = 0 * Math10xx8_FRACT_PART
 const Math10xx8_ONE = 1 * Math10xx8_FRACT_PART
 const Math10xx8_TEN = 10 * Math10xx8_FRACT_PART
 const Math10xx8_YEAR = 31557600 * Math10xx8_FRACT_PART
-const TEN_MIN = 600
 
 func Math10xx8_assert10xx8 {range_check_ptr} (x: felt):
     assert_le(x, Math10xx8_BOUND)
@@ -220,6 +219,7 @@ end
 
 # Calculates the natural exponent of x: e^x
 func Math10xx8_exp {range_check_ptr} (x: felt) -> (res: felt):
+    alloc_locals
     const mod = 144269504
     let (bin_exp) = Math10xx8_mul(x, mod)
     let (res) = Math10xx8_exp2(bin_exp)
@@ -272,6 +272,7 @@ end
 # Calculates the natural logarithm of x: ln(x)
 # x must be greater than zero
 func Math10xx8_ln {range_check_ptr} (x: felt) -> (res: felt):
+    alloc_locals
     const ln_2 = 69314718
     let (log2_x) = Math10xx8_log2(x)
     let (product) = Math10xx8_mul(log2_x, ln_2)
@@ -280,8 +281,8 @@ end
 
 # Returns block ts in 10xx8 format
 func Math10xx8_ts {syscall_ptr : felt*,range_check_ptr} () -> (res: felt):
+    alloc_locals
     let (block_ts) = get_block_timestamp()
-    tempvar temp = block_ts - TEN_MIN
-    tempvar res = temp * Math10xx8_ONE
+    tempvar res = block_ts * Math10xx8_ONE
     return (res)
 end
