@@ -1,5 +1,5 @@
 # LP contract
-# all numbers passed into contract must be Math64x61 type
+# all numbers passed into contract must be Math10xx8 type
 # events include event_lp_token
 # functions include mint_lp_token, burn_lp_token, value_lp_token
 
@@ -9,7 +9,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn_le, assert_le, assert_in_range
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20
-from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_convert_from, Math64x61_ts
+from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_sub, Math10xx8_add, Math10xx8_convert_from, Math10xx8_ts
 from Functions.Checks import check_is_owner, check_user_balance, check_insurance_shortfall_ratio
 
 ##################################################################
@@ -82,16 +82,16 @@ func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 
     # other variables and calcs
     let (lockup_period) = Settings.get_lockup_period(settings_addy)
-    let (block_ts) = Math64x61_ts()
-    let (new_capital_total) = Math64x61_add(capital_total, usdc_deposit)
+    let (block_ts) = Math10xx8_ts()
+    let (new_capital_total) = Math10xx8_add(capital_total, usdc_deposit)
 
     # transfer the USDC, mint the lp token and update variables
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, usdc_deposit_erc)
     let (new_lp_total, lp_issuance) = lp_update(lp_total, usdc_deposit, new_capital_total, capital_total)
     CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
-    let (new_lp_user) = Math64x61_add(lp_user, lp_issuance)
-    let (new_lockup) = Math64x61_add(block_ts, lockup_period)
+    let (new_lp_user) = Math10xx8_add(lp_user, lp_issuance)
+    let (new_lockup) = Math10xx8_add(block_ts, lockup_period)
     CZCore.set_lp_balance(czcore_addy, user, new_lp_user, new_lockup)
     # event 
     event_lp_token.emit(addy=user, lp_change=lp_issuance, capital_change=usdc_deposit)
@@ -106,9 +106,9 @@ func lp_update{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
         let lp_issuance = usdc_deposit
         return(new_lp_total, lp_issuance)
     else:
-        let (capital_ratio) = Math64x61_div(new_capital_total, capital_total)
-        let (new_lp_total) = Math64x61_mul(lp_total, capital_ratio)
-        let (lp_issuance) = Math64x61_sub(new_lp_total, lp_total)
+        let (capital_ratio) = Math10xx8_div(new_capital_total, capital_total)
+        let (new_lp_total) = Math10xx8_mul(lp_total, capital_ratio)
+        let (lp_issuance) = Math10xx8_sub(new_lp_total, lp_total)
         return(new_lp_total, lp_issuance)
     end
 end
@@ -128,7 +128,7 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     # can only withdraw if not in lock up
     let (user) = get_caller_address()
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
-    let (block_ts) = Math64x61_ts()
+    let (block_ts) = Math10xx8_ts()
     with_attr error_message("Cant withdraw in lock up period."):
         assert_le(lockup, block_ts)
     end
@@ -143,10 +143,13 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     end
 
     # other variables and calcs
-    let (new_lp_total) = Math64x61_sub(lp_total, lp_token)
-    let (lp_ratio) = Math64x61_div(new_lp_total, lp_total)
-    let (new_capital_total) = Math64x61_mul(capital_total, lp_ratio)
-    let (capital_redeem) = Math64x61_sub(capital_total, new_capital_total)
+    let (new_lp_total) = Math10xx8_sub(lp_total, lp_token)
+    let (lp_ratio) = Math10xx8_div(new_lp_total, lp_total)
+    let (new_capital_total) = Math10xx8_mul(capital_total, lp_ratio)
+    with_attr error_message("New capital should be below old capital."):
+        assert_le(new_capital_total, capital_total)
+    end
+    let (capital_redeem) = Math10xx8_sub(capital_total, new_capital_total)
 
     # check czcore has sufficient USDC
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
@@ -155,7 +158,7 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     # transfer the USDC, burn the lp token and update variables
     CZCore.erc20_transfer(czcore_addy, usdc_addy, user, capital_redeem_erc)
     CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
-    let (new_lp_user) = Math64x61_sub(lp_user, lp_token)
+    let (new_lp_user) = Math10xx8_sub(lp_user, lp_token)
     CZCore.set_lp_balance(czcore_addy, user, new_lp_user, lockup)
     # event
     event_lp_token.emit(addy=user, lp_change=-lp_token, capital_change=-capital_redeem)
@@ -175,8 +178,8 @@ func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     if lp_user == 0:
         return (0, 0, 0)
     else:
-        let (lp_ratio) = Math64x61_div(lp_user, lp_total)
-        let (capital_user) = Math64x61_mul(lp_ratio, capital_total)
+        let (lp_ratio) = Math10xx8_div(lp_user, lp_total)
+        let (capital_user) = Math10xx8_mul(lp_ratio, capital_total)
         return (lp_user, capital_user, lockup)
     end
 end
