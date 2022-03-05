@@ -12,7 +12,6 @@ const Math10xx8_ZERO = 0 * Math10xx8_FRACT_PART
 const Math10xx8_ONE = 1 * Math10xx8_FRACT_PART
 const Math10xx8_TEN = 10 * Math10xx8_FRACT_PART
 const Math10xx8_YEAR = 31557600 * Math10xx8_FRACT_PART
-const Math10xx8_E = 271828183
 
 func Math10xx8_assert10xx8 {range_check_ptr} (x: felt):
     assert_le(x, Math10xx8_BOUND)
@@ -33,21 +32,14 @@ func Math10xx8_fromFelt {range_check_ptr} (x: felt) -> (res: felt):
     return (x * Math10xx8_FRACT_PART)
 end
 
-# Converts a fixed point 10xx8 value to a uint256 value
+# Converts a felt to a uint256 value
 func Math10xx8_toUint256 (x: felt) -> (res: Uint256):
     let res = Uint256(low = x, high = 0)
     return (res)
 end
 
-# Converts a uint256 value into a fixed point 10xx6 value ensuring it will not overflow
-func Math10xx8_fromUint256 {range_check_ptr} (x: Uint256) -> (res: felt):
-    assert x.high = 0
-    let (res) = Math10xx8_fromFelt(x.low)
-    return (res)
-end
-
 # Converts a uint256 value into a felt
-func Math10xx8_fromUint256_felt {range_check_ptr} (x: Uint256) -> (res: felt):
+func Math10xx8_fromUint256 {range_check_ptr} (x: Uint256) -> (res: felt):
     assert x.high = 0
     return (x.low)
 end
@@ -56,14 +48,14 @@ end
 # x is 10xx8 fixed point number and y is a positive integer for decimals
 func Math10xx8_convert_from {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
-    let (power) = Math10xx8_pow(Math10xx8_TEN, y)
-    let (multiplier, _) = unsigned_div_rem(power, Math10xx8_ONE)
-    let (res) = Math10xx8_mul(x, multiplier)
+    tempvar power = 10 ** (y-8)
+    tempvar product = x * power
+    let (res, _) = unsigned_div_rem(product, Math10xx8_ONE)
     Math10xx8_assert10xx8(res)
     return (res)
 end
 
-# Converts token number to a 10xx6 fixed point number
+# Converts token number to a 10xx8 fixed point number
 # x is token number and y is a positive integer for decimals
 func Math10xx8_convert_to {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
