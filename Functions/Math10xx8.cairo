@@ -20,14 +20,12 @@ func Math10xx8_assert10xx8 {range_check_ptr} (x: felt):
 end
 
 # Converts a fixed point value to a felt, truncating the fractional component
-@view
 func Math10xx8_toFelt {range_check_ptr} (x: felt) -> (res: felt):
     let (res, _) = signed_div_rem(x, Math10xx8_FRACT_PART, Math10xx8_BOUND)
     return (res)
 end
 
 # Converts a felt to a fixed point value ensuring it will not overflow
-@view
 func Math10xx8_fromFelt {range_check_ptr} (x: felt) -> (res: felt):
     assert_le(x, Math10xx8_INT_PART)
     assert_le(-Math10xx8_INT_PART, x)
@@ -35,14 +33,12 @@ func Math10xx8_fromFelt {range_check_ptr} (x: felt) -> (res: felt):
 end
 
 # Converts a felt to a uint256 value
-@view
 func Math10xx8_toUint256 (x: felt) -> (res: Uint256):
     let res = Uint256(low = x, high = 0)
     return (res)
 end
 
 # Converts a uint256 value into a felt
-@view
 func Math10xx8_fromUint256 {range_check_ptr} (x: Uint256) -> (res: felt):
     assert x.high = 0
     return (x.low)
@@ -50,7 +46,6 @@ end
 
 # Converts 10xx8 number to token number for transactions
 # x is 10xx8 fixed point number and y is a positive integer for decimals
-@view
 func Math10xx8_convert_from {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let (power) = Math10xx8_pow(Math10xx8_TEN, y)
@@ -62,7 +57,6 @@ end
 
 # Converts token number to a 10xx8 fixed point number
 # x is token number and y is a positive integer for decimals
-@view
 func Math10xx8_convert_to {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let (partial) = Math10xx8_fromFelt(x)
@@ -73,25 +67,21 @@ func Math10xx8_convert_to {range_check_ptr} (x: felt, y: felt) -> (res: felt):
 end
 
 # returns the constant zero
-@view
 func Math10xx8_zero {range_check_ptr} () -> (res: felt):
     return (Math10xx8_ZERO)
 end
 
 # returns the constant one
-@view
 func Math10xx8_one {range_check_ptr} () -> (res: felt):
     return (Math10xx8_ONE)
 end
 
 # returns the constant year secounds
-@view
 func Math10xx8_year {range_check_ptr} () -> (res: felt):
     return (Math10xx8_YEAR)
 end
 
 # Convenience addition method to assert no overflow before returning
-@view
 func Math10xx8_add {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let res = x + y
@@ -100,7 +90,6 @@ func Math10xx8_add {range_check_ptr} (x: felt, y: felt) -> (res: felt):
 end
 
 # Convenience subtraction method to assert no overflow before returning
-@view
 func Math10xx8_sub {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let res = x - y
@@ -109,7 +98,6 @@ func Math10xx8_sub {range_check_ptr} (x: felt, y: felt) -> (res: felt):
 end
 
 # Multiples two fixed point values and checks for overflow before returning
-@view
 func Math10xx8_mul {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     tempvar product = x * y
@@ -120,7 +108,6 @@ end
 
 # Divides two fixed point values and checks for overflow before returning
 # Both values may be signed (i.e. also allows for division by negative b)
-@view
 func Math10xx8_div {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let (div) = abs_value(y)
@@ -134,7 +121,6 @@ end
 # Calclates the value of x^y and checks for overflow before returning
 # x is a 10xx8 fixed point value
 # y is a standard felt (int)
-@view
 func Math10xx8_pow {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let (exp_sign) = sign(y)
@@ -163,7 +149,6 @@ end
 # uses x^y = exp(y*ln(x))
 # x is a 10xx8 fixed point value x>0
 # y is a 10xx8 fixed point value y>0
-@view
 func Math10xx8_pow_frac {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let (ln_x) = Math10xx8_ln(x)
@@ -174,7 +159,6 @@ end
 
 # Calculates the square root of a fixed point value
 # x must be positive
-@view
 func Math10xx8_sqrt {range_check_ptr} (x: felt) -> (res: felt):
     alloc_locals
     let (root) = sqrt(x)
@@ -234,7 +218,6 @@ func Math10xx8_exp2 {range_check_ptr} (x: felt) -> (res: felt):
 end
 
 # Calculates the natural exponent of x: e^x
-@view
 func Math10xx8_exp {range_check_ptr} (x: felt) -> (res: felt):
     const mod = 144269504
     let (bin_exp) = Math10xx8_mul(x, mod)
@@ -287,7 +270,6 @@ end
 
 # Calculates the natural logarithm of x: ln(x)
 # x must be greater than zero
-@view
 func Math10xx8_ln {range_check_ptr} (x: felt) -> (res: felt):
     const ln_2 = 69314718
     let (log2_x) = Math10xx8_log2(x)
@@ -296,7 +278,6 @@ func Math10xx8_ln {range_check_ptr} (x: felt) -> (res: felt):
 end
 
 # Returns block ts in 10xx8 format
-@view
 func Math10xx8_ts {syscall_ptr : felt*,range_check_ptr} () -> (res: felt):
     let (block_ts) = get_block_timestamp()
     tempvar res = block_ts * Math10xx8_ONE
