@@ -1,5 +1,5 @@
 # GT contract
-# all numbers passed into contract must be Math64x61 type
+# all numbers passed into contract must be Math10xx8 type
 
 # imports
 %lang starknet
@@ -7,7 +7,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn_le, assert_le, assert_in_range, assert_nn
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20
-from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_convert_from, Math64x61_ts
+from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_sub, Math10xx8_add, Math10xx8_convert_from, Math10xx8_ts
 from Functions.Checks import check_is_owner, check_user_balance
 
 ##################################################################
@@ -85,8 +85,8 @@ func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     # transfer tokens
     CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, gt_token_erc)   
     # update user and aggregate
-    let (gt_user_new) = Math64x61_add(gt_user, gt_token)
-    let (gt_total_new) = Math64x61_add(gt_total, gt_token)
+    let (gt_user_new) = Math10xx8_add(gt_user, gt_token)
+    let (gt_total_new) = Math10xx8_add(gt_total, gt_token)
     CZCore.set_staker_details(czcore_addy, user, gt_user_new, reward)    
     if old_user == 1:
         CZCore.set_staker_total(czcore_addy, gt_total_new, index)
@@ -123,15 +123,18 @@ func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     with_attr error_message("User does not have sufficient funds to unstake."):
         assert_le(gt_token, gt_user)
     end
+    with_attr error_message("Gt token should be below gt total."):
+        assert_le(gt_token, gt_total)
+    end
 
     # update user and aggregate
-    let (gt_user_new) = Math64x61_sub(gt_user, gt_token)
-    let (gt_total_new) = Math64x61_sub(gt_total, gt_token)
+    let (gt_user_new) = Math10xx8_sub(gt_user, gt_token)
+    let (gt_total_new) = Math10xx8_sub(gt_total, gt_token)
 
     # transfer tokens
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
     let (czt_decimals) = Erc20.ERC20_decimals(czt_addy)
-    let (gt_token_erc) = Math64x61_convert_from(gt_token, czt_decimals)
+    let (gt_token_erc) = Math10xx8_convert_from(gt_token, czt_decimals)
     CZCore.erc20_transfer(czcore_addy, czt_addy, user, gt_token_erc)            
     
     # update user and aggregate
