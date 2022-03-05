@@ -12,6 +12,7 @@ const Math10xx8_ZERO = 0 * Math10xx8_FRACT_PART
 const Math10xx8_ONE = 1 * Math10xx8_FRACT_PART
 const Math10xx8_TEN = 10 * Math10xx8_FRACT_PART
 const Math10xx8_YEAR = 31557600 * Math10xx8_FRACT_PART
+const TEN_MIN = 600
 
 func Math10xx8_assert10xx8 {range_check_ptr} (x: felt):
     assert_le(x, Math10xx8_BOUND)
@@ -280,6 +281,7 @@ end
 # Returns block ts in 10xx8 format
 func Math10xx8_ts {syscall_ptr : felt*,range_check_ptr} () -> (res: felt):
     let (block_ts) = get_block_timestamp()
-    tempvar res = block_ts * Math10xx8_ONE
+    tempvar temp = block_ts - TEN_MIN
+    tempvar res = temp * Math10xx8_ONE
     return (res)
 end
