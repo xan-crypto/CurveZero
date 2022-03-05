@@ -1,5 +1,5 @@
 # PP contract
-# all numbers passed into contract must be Math64x61 type
+# all numbers passed into contract must be Math10xx8 type
 # events include event_pp_status
 # functions include view_pp_status, promote_pp_status, demote_pp_status
 
@@ -9,7 +9,6 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn_le
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20
-from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add, Math64x61_convert_from
 from Functions.Checks import check_is_owner, check_user_balance
 
 ##################################################################
