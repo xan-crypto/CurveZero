@@ -16,9 +16,9 @@ starknet-compile Interface/PriceProvider.cairo --output Compiled/PriceProvider_c
 starknet-compile Interface/CapitalBorrower.cairo --output Compiled/CapitalBorrower_compiled.json --abi Compiled/CapitalBorrower_abi.json
 starknet-compile Interface/LoanLiquidator.cairo --output Compiled/LoanLiquidator_compiled.json --abi Compiled/LoanLiquidator_abi.json
 starknet-compile Interface/GovenanceToken.cairo --output Compiled/GovenanceToken_compiled.json --abi Compiled/GovenanceToken_abi.json
+starknet-compile Core/InsuranceFund.cairo --output Compiled/InsuranceFund_compiled.json --abi Compiled/InsuranceFund_abi.json
 starknet-compile Core/CZCore.cairo --output Compiled/CZCore_compiled.json --abi Compiled/CZCore_abi.json
 starknet-compile Core/Controller.cairo --output Compiled/Controller_compiled.json --abi Compiled/Controller_abi.json
-starknet-compile Core/InsuranceFund.cairo --output Compiled/InsuranceFund_compiled.json --abi Compiled/InsuranceFund_abi.json
 starknet-compile Config/Settings.cairo --output Compiled/Settings_compiled.json --abi Compiled/Settings_abi.json
 starknet-compile Testing/ERC20_base.cairo --output Compiled/ERC20_base_compiled.json --abi Compiled/ERC20_base_abi.json
 starknet-compile Testing/Oracle.cairo --output Compiled/Oracle_compiled.json --abi Compiled/Oracle_abi.json
@@ -29,9 +29,9 @@ starknet deploy --contract Compiled/PriceProvider_compiled.json --inputs 0x02e7b
 starknet deploy --contract Compiled/CapitalBorrower_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/LoanLiquidator_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/GovenanceToken_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
+starknet deploy --contract Compiled/InsuranceFund_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/CZCore_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/Controller_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-starknet deploy --contract Compiled/InsuranceFund_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/Settings_compiled.json --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 55534443 55534443 1000000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
 starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 4414036 4414036 1000000000000000000000000 0 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
@@ -39,36 +39,36 @@ starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 57455448 5
 starknet deploy --contract Compiled/Oracle_compiled.json --inputs 57455448 57455448
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 --inputs 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0 \
-    0x06a3b558bf1cb4fecb06dfd45d2beff177e987e7fa2d5153ada2c0d46929f856 \
-    0x07197792bf540020bef49288e7d5672323d70d771b180d2749dd73bb6e09a42a \
-    0x0180427bc4f3979f020f420f8553fdc66ee1f717eb210ff45785504383c683db \
+    0x05ca47318e0944568798ba035759a03fb342868ddcdc0b42658b5a867ec84312 \
+    0x006bd4c7071bb87a4d415cd25443b9bdea7142838b5e384e7c14c495606e8cb4 \
+    0x06a128f1655d480b435f71d079978ec762826c7649984888d4dadc0bdaad7697 \
     0 \
-    0 \
-    0x05881db4d75635c4fb87937a949c97ec043f09f8e1cbf707bbf6fb8ddfe39334 \
-    0x005d741be0d38a8d00783a92398a4974ad8ff00b5200dc7425dd0c609ba04b1a \
-    0x05df14cf516b502d23e8c4d5e334fdc964f404fc8aa84f83c817ffc1067e113e \
-    0x05a48da1535268d3a3aed53a43a3bd536d1b163d55d17acf4cc2d05779ff78fb \
-    0x03a3327567af3bddd5c9220de23acdb5ba31c877bc0720405b5c397343252bf3 \
-    0x065bf5a69d677cb1d6d80f7d9571e0757016108b84a69feacc9621604f7fc761 \
-    0x07e291d96f773f00946f54c64361c8898a46ae5b5fe3097ea8b6b2aed2f1759f \
-    0x0229f0309fd362128aaa0a7f5fb81cbdc8ff550e76b68c7fb5581d55a751f9b2
+    0x043b51d5eaf7702b52f0b46898e3b975cd4917cc504690d95b2006395acb7156 \
+    0x06fa7cbd8aba94a06996ead080d10e9345fa43d0907c2378452ff5cbe0d82b53 \
+    0x04e57c36d3c70611b43d71001a21140f61244f6d1a90a5312b293035c7383843 \
+    0x0442a75c697910a72b4ff7c66559aa787ad1411c8534cf515ccfe6fe1570d239 \
+    0x065f513367f61d1cba5f3653da730654d0511fd583ec4c62d63ec342fcd948ca \
+    0x035483f86d8c773d6f17e4ba89fdcbceea8d3b5d691e1ddee7234b0882f961fa \
+    0x05e7e3b278ce4ba334ef52ad9e0a72fe9ac6fef07ebf70951529b87954fcec26 \
+    0x072a7ed0e04e1b4c8adec5dd69264cde4178eae9d7c10bb88bc1f6dc9669b4c1 \
+    0x0716733353307e15dc8cdbea2a2b84229ab72a9d3b1f0e0e08befbf37b705f98
 
 Last test
 [owner] = 0x02e7b3a6df356dfb79f03a529338bf016e0c17ac9119550e372f588a6539f5e0
-[lp] = 0x06a3b558bf1cb4fecb06dfd45d2beff177e987e7fa2d5153ada2c0d46929f856
-[pp] = 0x07197792bf540020bef49288e7d5672323d70d771b180d2749dd73bb6e09a42a
-[cb] = 0x0180427bc4f3979f020f420f8553fdc66ee1f717eb210ff45785504383c683db
+[lp] = 0x05ca47318e0944568798ba035759a03fb342868ddcdc0b42658b5a867ec84312
+[pp] = 0x006bd4c7071bb87a4d415cd25443b9bdea7142838b5e384e7c14c495606e8cb4
+[cb] = 0x06a128f1655d480b435f71d079978ec762826c7649984888d4dadc0bdaad7697
 [ll] = 0
-[gt] = 0
-[if] = 0x05881db4d75635c4fb87937a949c97ec043f09f8e1cbf707bbf6fb8ddfe39334
-[czcore] = 0x005d741be0d38a8d00783a92398a4974ad8ff00b5200dc7425dd0c609ba04b1a
-[controller] = 0x05df14cf516b502d23e8c4d5e334fdc964f404fc8aa84f83c817ffc1067e113e
-[setttings] = 0x05a48da1535268d3a3aed53a43a3bd536d1b163d55d17acf4cc2d05779ff78fb
-[usdc] = 0x03a3327567af3bddd5c9220de23acdb5ba31c877bc0720405b5c397343252bf3
-[czt] = 0x065bf5a69d677cb1d6d80f7d9571e0757016108b84a69feacc9621604f7fc761
-[weth] = 0x07e291d96f773f00946f54c64361c8898a46ae5b5fe3097ea8b6b2aed2f1759f
-[oracle] = 0x0229f0309fd362128aaa0a7f5fb81cbdc8ff550e76b68c7fb5581d55a751f9b2
-[trusted] = 0x04243792febe2b1f7927166863b09870ff0f1d98ef7e8f5d428dcfc5d3f07adc
+[gt] = 0x043b51d5eaf7702b52f0b46898e3b975cd4917cc504690d95b2006395acb7156
+[if] = 0x06fa7cbd8aba94a06996ead080d10e9345fa43d0907c2378452ff5cbe0d82b53
+[czcore] = 0x04e57c36d3c70611b43d71001a21140f61244f6d1a90a5312b293035c7383843
+[controller] = 0x0442a75c697910a72b4ff7c66559aa787ad1411c8534cf515ccfe6fe1570d239
+[setttings] = 0x065f513367f61d1cba5f3653da730654d0511fd583ec4c62d63ec342fcd948ca
+[usdc] = 0x035483f86d8c773d6f17e4ba89fdcbceea8d3b5d691e1ddee7234b0882f961fa
+[czt] = 0x05e7e3b278ce4ba334ef52ad9e0a72fe9ac6fef07ebf70951529b87954fcec26
+[weth] = 0x072a7ed0e04e1b4c8adec5dd69264cde4178eae9d7c10bb88bc1f6dc9669b4c1
+[oracle] = 0x0716733353307e15dc8cdbea2a2b84229ab72a9d3b1f0e0e08befbf37b705f98
+[trusted] = 0x0090fa01b5c3ae4b8df6b7d34cfdc6298130932be7017721927f72ddeade9f3d
 
 # check transactions / testing
 starknet tx_status --hash 0x3d4689e0ec1af5cb1c79b9cdf0819400b6635838e9b2ddc5b80b4fda009d084
