@@ -25,7 +25,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_pt
     oracle_name.write(name)
     oracle_symbol.write(symbol)
     oracle_decimals.write(18)
-    oracle_price.write(3000000000000000)
+    oracle_price.write(3000000000000000000000)
     return ()
 end
 
