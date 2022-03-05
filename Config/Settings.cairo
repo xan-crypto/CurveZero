@@ -1,25 +1,25 @@
 # Settings contract
-# all numbers stored / passed into contract must be Math64x61 type
+# all numbers stored / passed into contract must be Math10xx6 type
 
 # imports
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import (TrustedAddy)
-from Functions.Math64x61 import (Math64x61_add)
+from Functions.Math10xx6 import (Math10xx6_add)
 
 ##################################################################
 # constants 
-const Math64x61_FRACT_PART = 2 ** 61
-const Math64x61_ONE = 1 * Math64x61_FRACT_PART
-const origination_fee_total = 2305843009213694
-const origination_fee_split = 2**60
-const accrued_interest_split_1 = 2190550858753009254
-const accrued_interest_split_2 = 69175290276410819
-const accrued_interest_split_3 = 46116860184273879
-const utilization_total = 2075258708292324557
+const Math10xx6_FRACT_PART = 10 * *8
+const Math10xx6_ONE = 1 * Math10xx6_FRACT_PART
+const origination_fee_total = 100000
+const origination_fee_split = 50000000
+const accrued_interest_split_1 = 95000000
+const accrued_interest_split_2 = 3000000
+const accrued_interest_split_3 = 2000000
+const utilization_total = 90000000
 const insurance_shortfall = 23058430092136940
-const ltv = 1383505805528216371
+const ltv = 1000000
 
 ##################################################################
 # addy of the deployer
@@ -32,25 +32,25 @@ end
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(deployer : felt):
     deployer_addy.write(deployer)
     # set initial amounts for becoming pp - NB NB change this later
-    pp_token_requirement.write((1000 * Math64x61_ONE, 1000 * Math64x61_ONE))
+    pp_token_requirement.write((1000 * Math10xx6_ONE, 1000 * Math10xx6_ONE))
     # 7 day lockup period
-    lockup_period.write(0 * 604800 * Math64x61_ONE)
+    lockup_period.write(0 * 604800 * Math10xx6_ONE)
     # origination fee and split 10bps and 50/50 PP IF
     origination_fee.write((origination_fee_total, origination_fee_split, origination_fee_split))
     # accrued interest split between LP IF and GT - 95/3/2
     accrued_interest_split.write((accrued_interest_split_1, accrued_interest_split_2, accrued_interest_split_3))
     # min loan and max loan amounts
-    min_max_loan.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
+    min_max_loan.write((10**2*Math10xx6_ONE - 1, 10**4*Math10xx6_ONE + 1))
     # min deposit and max deposit from LPs accepted
-    min_max_deposit.write((10**2*Math64x61_ONE - 1, 10**4*Math64x61_ONE + 1))
+    min_max_deposit.write((10**2*Math10xx6_ONE - 1, 10**4*Math10xx6_ONE + 1))
     # utilization start and stop levels
     utilization.write(utilization_total)
     # min number of PPs for pricing
-    min_pp_accepted.write(1*Math64x61_ONE)
+    min_pp_accepted.write(1*Math10xx6_ONE)
     # insurance shortfall ratio to lp capital
     insurance_shortfall_ratio.write(insurance_shortfall)    
     # max loan term - 1 year initially
-    max_loan_term.write(366 * 86400 * Math64x61_ONE)   
+    max_loan_term.write(366 * 86400 * Math10xx6_ONE)   
     # weth ltv
     weth_ltv.write(ltv)  
     return ()
@@ -160,9 +160,9 @@ end
 @external
 func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt, pp_split : felt, if_split : felt):
     check_caller_is_controller()
-    let (temp1) = Math64x61_add(pp_split,if_split)
+    let (temp1) = Math10xx6_add(pp_split,if_split)
     with_attr error_message("PP split and IF split should sum to 1"):
-        assert temp1 = Math64x61_ONE
+        assert temp1 = Math10xx6_ONE
     end
     origination_fee.write((fee,pp_split,if_split))
     return ()
@@ -185,10 +185,10 @@ end
 @external
 func set_accrued_interest_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_split : felt, if_split : felt, gt_split : felt):
     check_caller_is_controller()
-    let (temp1) = Math64x61_add(lp_split,if_split)
-    let (temp2) = Math64x61_add(temp1,gt_split)
+    let (temp1) = Math10xx6_add(lp_split,if_split)
+    let (temp2) = Math10xx6_add(temp1,gt_split)
     with_attr error_message("LP split and IF split and GT split should sum to 1"):
-        assert temp2 = Math64x61_ONE
+        assert temp2 = Math10xx6_ONE
     end
     accrued_interest_split.write((lp_split,if_split,gt_split))
     return ()
