@@ -1,5 +1,5 @@
 # CZCore contract
-# all numbers passed into contract must be Math64x61 type
+# all numbers passed into contract must be Math10xx8 type
 # all interactions with reserves or state should flow through here
 
 %lang starknet
@@ -7,7 +7,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256)
 from InterfaceAll import (TrustedAddy,Controller,Erc20)
-from Functions.Math64x61 import Math64x61_toUint256 
+from Functions.Math10xx8 import Math10xx8_toUint256 
 
 ##################################################################
 # addy of the deployer
@@ -177,7 +177,7 @@ end
 func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     authorised_callers()
     is_paused()
-    let (amount_unit) = Math64x61_toUint256(amount)
+    let (amount_unit) = Math10xx8_toUint256(amount)
     Erc20.ERC20_transferFrom(erc_addy,sender=sender,recipient=recipient,amount=amount_unit)
     return ()
 end
@@ -186,7 +186,7 @@ end
 func erc20_transfer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, recipient: felt, amount: felt):
     authorised_callers()
     is_paused()
-    let (amount_unit) = Math64x61_toUint256(amount)
+    let (amount_unit) = Math10xx8_toUint256(amount)
     Erc20.ERC20_transfer(erc_addy,recipient=recipient,amount=amount_unit)
     return ()
 end 
