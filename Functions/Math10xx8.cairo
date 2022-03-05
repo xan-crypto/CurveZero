@@ -1,5 +1,4 @@
 %lang starknet
-
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.pow import pow
@@ -300,13 +299,13 @@ end
 # Calculates the natural logarithm of x: ln(x)
 # x must be greater than zero
 func Math10xx8_ln {range_check_ptr} (x: felt) -> (res: felt):
-    const ln_2 = 1598288580650331957
+    const ln_2 = 69314718
     let (log2_x) = Math10xx8_log2(x)
     let (product) = Math10xx8_mul(log2_x, ln_2)
     return (product)
 end
 
-# Returns block ts in 64.61 format
+# Returns block ts in 10xx8 format
 func Math10xx8_ts {syscall_ptr : felt*,range_check_ptr} () -> (res: felt):
     let (block_ts) = get_block_timestamp()
     tempvar res = block_ts * Math10xx8_ONE
