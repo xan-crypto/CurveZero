@@ -6,7 +6,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_nn
-from Functions.Math64x61 import Math64x61_mul, Math64x61_div, Math64x61_sub, Math64x61_add
+from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_add
 from InterfaceAll import TrustedAddy, Settings, CZCore
 
 ##################################################################
@@ -190,9 +190,9 @@ func run_distribution{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     run_distribution(czcore_addy,stake_total,reward_total,index-1)
     let (user) = CZCore.get_staker_index(czcore_addy, index-1)
     let (stake, reward, old_user) = CZCore.get_staker_details(czcore_addy, user)
-    let (temp1) = Math64x61_mul(reward_total, stake)
-    let (temp2) = Math64x61_div(temp1,stake_total)
-    let (reward_new) = Math64x61_add(temp2, reward)
+    let (temp1) = Math10xx8_mul(reward_total, stake)
+    let (temp2) = Math10xx8_div(temp1,stake_total)
+    let (reward_new) = Math10xx8_add(temp2, reward)
     CZCore.set_staker_details(user,stake,reward_new,1)
     return ()
 end
