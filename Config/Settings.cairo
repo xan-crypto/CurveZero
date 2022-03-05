@@ -10,7 +10,7 @@ from Functions.Math10xx6 import (Math10xx6_add)
 
 ##################################################################
 # constants 
-const Math10xx6_FRACT_PART = 10 * *8
+const Math10xx6_FRACT_PART = 10 ** 8
 const Math10xx6_ONE = 1 * Math10xx6_FRACT_PART
 const origination_fee_total = 100000
 const origination_fee_split = 50000000
