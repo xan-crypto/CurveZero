@@ -28,7 +28,7 @@ from Functions.Math10xx8 import Math10xx8_add
 from Functions.Checks import check_is_owner, check_is_controller
 
 ####################################################################################
-# @dev constant for the constructor
+# @dev constants for the constructor
 # Number are all in Math10xx8 format
 ####################################################################################
 const Math10xx8_FRACT_PART = 10 ** 8
@@ -143,7 +143,7 @@ func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 end
 
 ####################################################################################
-# @dev view / set lock up period for both LP capital
+# @dev view / set lock up period for LP capital
 # @param / @return 
 # - the lockup period in seconds and Math10xx8 
 ####################################################################################
@@ -195,6 +195,7 @@ end
 ####################################################################################
 # @dev view / set accrued interest split between LP IF and GT
 # accrued interest is rewarded to below only on full loan repayment
+# splits should sum to 1
 # @param / @return 
 # - LP split
 # - IF split
