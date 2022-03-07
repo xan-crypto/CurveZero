@@ -346,7 +346,7 @@ end
 
 ####################################################################################
 # @dev view / set max loan term
-# this is to reduce risk, by only pricing loans that are less than x
+# this is to reduce risk, by only pricing/accepting loans that are less than x years for example
 # @param / @return 
 # - max loan term in seconds and in Math10xx8
 ####################################################################################
@@ -369,7 +369,7 @@ end
 
 ####################################################################################
 # @dev view / set WETH ltv
-# this is the loan you can take give your WETH collateral
+# this is the loan you can take given your WETH collateral
 # e.g. at 0.6 in Math10xx8 for every 1000 USD of WETH collateral you can only take a loan of 600 USDC max
 # @param / @return 
 # - WETH ltv
