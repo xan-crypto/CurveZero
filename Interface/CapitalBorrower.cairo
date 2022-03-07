@@ -135,7 +135,7 @@ end
 # system will function with any number of PPs as long as the number of PPs is above or equal to the min required in the Settings contract
 # - the pp dataset which takes the following format
 # [ signed_hash_loanID_r , signed_hash_loanID_s , signed_hash_rate_r , signed_hash_rate_s , rate , pp_pub , ..... ]
-# the signed unique loan ID prevents a replay attack where someone submits historic princing on the PPs behalf
+# the signed unique loan ID prevents a replay attack where someone submits historic pricing on the PPs behalf
 # we validate that the pp_pub matches the set of all valid PPs per the PriceProvider contract, any others are kicked out
 # we validate that the PP signed both the unique loan ID and the rate
 # if any of the signatures dont match or if the total valid PPs are below min, the loan creation will fail
@@ -356,8 +356,8 @@ end
 ####################################################################################
 # @dev allow a user to refinance an existing loan 
 # user can increase the notional, increase collateral, change the end date, this requires new PP pricing data
-# cant use repay and then create since this requires the user to have the USDC to repay
-# refinancing allows new loan creation without needing to close the old loan
+# cant use repay and then create loan since this requires the user to have the USDC to repay, which they might not have
+# refinancing allows new loan creation/rolling without needing to close the old loan
 # @param input is 
 # - the unique loan id for this particular loan as created by the frontend, and passed to the PPs for signing
 # - the new notional of the loan in USDC (must be greater than notional + accrued interest)
@@ -446,17 +446,17 @@ end
 # @dev process pp data
 # this is an internal function
 # it iterates thru pp_data and checks if pp_pub is a valid PP per CZCore, it removes those that are not valid
-# that it checks that all signature of remaining are valid
+# then it checks that all signatures of remaining PPs are valid
 # lastly calculates the median rate and winning pp_pub that will receive the origination fee
 # @param input is 
 # - the unhashed unique loan id
 # - the pp data len for array manipulation
-# - the total pp data set (num pp submissions x 6)
+# - the total pp data set (num pp submissions x 6 data points expected)
 # @return
 # - the median rate for the loan (this is similar to chainlink oracles, get x prices and take median as result)
-# this ensures that even is 4/9 PPs are malicious the loan will still price correcly since median would be sensible
-# this is worse case since it assume all malicious in the same direction
-# - the pp_pub of the winning PP (the one that was the median) - needed to pay the origination fee
+# this ensures that even if 4/9 PPs are malicious, the loan will still price correcly since median would be sensible
+# this is worse case since it assume all malicious inputs are in the same direction
+# - the pp_pub of the winning PP (the one that was the median) - needed in order to pay the origination fee
 # - rate array len which is used to check that there was sufficient valid PPs above the required min
 ####################################################################################
 func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(loan_id : felt, pp_data_len: felt, pp_data : felt*) -> (median_rate: felt, winning_pp : felt, rate_array_len : felt):
@@ -604,9 +604,9 @@ end
 # - array length (same array passed, need original + reduced one for recursion)
 # - array (same array passed, need original + reduced one for recursion)
 # @return
-# - array length
-# - sorted array
-# - array length
+# - rate array length
+# - rate array
+# - index array length
 # - index array
 ####################################################################################
 func sort_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(x_len : felt, x : felt*, y_len : felt, y : felt*) -> (z_len : felt, z : felt*, i_len : felt, i : felt*):
