@@ -202,7 +202,7 @@ end
 # - the lp tokens held by the user
 # - the USDC value of those tokens
 # - the current lockup period of the deposit
-# the lockup is needed to prevent reward attacks where users deposit USDC / mints lp tokens prior to a know cash inflow from borrowers
+# the lockup is needed to prevent reward attacks where users deposit USDC / mints lp tokens prior to a known cash inflow from borrowers
 # see the litepaper for more detail, lockup will likely be 7-14 days at most
 # this was based on cost vs reward analysis which reduces this attack vector
 ####################################################################################
