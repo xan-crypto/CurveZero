@@ -18,6 +18,16 @@ func check_is_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return()
 end
 
+# check if controller
+func check_is_controller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(controller : felt):
+    alloc_locals
+    let (caller) = get_caller_address()
+    with_attr error_message("Only controller can access this."):
+        assert caller = controller
+    end
+    return()
+end
+
 # check system not below min is ratio
 func check_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(capital_total : felt, insolvency_total :felt, min_is_ratio :felt):
     alloc_locals
