@@ -20,7 +20,7 @@
 # - CZT addy
 # - WETH addy
 # - Oracle addy
-# Owner can get all of the above except the Owner which is set by the constructor
+# Owner can set all of the above except the Owner which is set by the constructor
 # @author xan-crypto
 ####################################################################################
 
