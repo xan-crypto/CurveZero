@@ -1,7 +1,12 @@
-# LP contract
-# all numbers passed into contract must be Math10xx8 type
-# events include event_lp_token
-# functions include mint_lp_token, burn_lp_token, value_lp_token
+# @title LiquidityProvider contract
+# @dev all numbers passed into contract must be Math10xx8 type
+# Users can
+# - mint lp tokens by depositing USDC
+# - burn lp token by withdrawing USDC 
+# - value what their lp tokens are worth in USDC
+# This contract addy will be stored in the TrustedAddy contract
+# This contract talks directly to the CZCore contract
+# @author xan-crypto
 
 # imports
 %lang starknet
