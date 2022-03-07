@@ -5,7 +5,7 @@
 # - view their current status to see if they are a valid pricing provider
 # - promote themselves to become a pricing provider by locking both LP and CZT (native curvezero) tokens
 # - demote themselves from pricing provider and uplocking both their LP and CZT tokens
-# Princing provider LP and CZT token requirements are stored in Settings contract and can be updated by controller
+# Pricing provider LP and CZT token requirements are stored in Settings contract and can be updated by controller
 # This contract addy will be stored in the TrustedAddy contract
 # This contract talks directly to the CZCore contract
 # @author xan-crypto
