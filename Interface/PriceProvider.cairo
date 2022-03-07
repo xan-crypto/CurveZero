@@ -1,9 +1,16 @@
-# PP contract
-# all numbers passed into contract must be Math10xx8 type
-# events include event_pp_status
-# functions include view_pp_status, promote_pp_status, demote_pp_status
+####################################################################################
+# @title PriceProvider contract
+# @dev all numbers passed into contract must be Math10xx8 type
+# Users can
+# - view their current status to see if they are a valid pricing provider
+# - promote themselves to become a pricing provider by locking both LP and CZT (native curvezero) tokens
+# - demote themselves from pricing provider and uplocking both their LP and CZT tokens
+# Princing provider LP and CZT token requirements are stored in Settings contract and can be updated by controller
+# This contract addy will be stored in the TrustedAddy contract
+# This contract talks directly to the CZCore contract
+# @author xan-crypto
+####################################################################################
 
-# imports
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn_le
@@ -11,8 +18,11 @@ from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20
 from Functions.Checks import check_is_owner, check_user_balance
 
-##################################################################
-# addy of the owner
+####################################################################################
+# @dev storage for the addy of the owner
+# this is needed so that the owner can point this contract to the TrustedAddy contract
+# this allows for upgradability of this contract
+####################################################################################
 @storage_var
 func owner_addy() -> (addy : felt):
 end
@@ -29,8 +39,10 @@ func get_owner_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return (addy)
 end
 
-##################################################################
-# trusted addy where contract addys are stored, only owner can change this
+####################################################################################
+# @dev storage for the trusted addy contract
+# the TrustedAddy contract stores all the contract addys
+####################################################################################
 @storage_var
 func trusted_addy() -> (addy : felt):
 end
@@ -49,14 +61,22 @@ func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return ()
 end
 
-##################################################################
-# emit PP events for reporting / dashboard to monitor system
+####################################################################################
+# @dev emit PP events for reporting / dashboard to monitor system
+# TODO check that this reports correctly for negative / reductions
+####################################################################################
 @event
 func event_pp_status(addy : felt, pp_status : felt, lp_change : felt, czt_change : felt):
 end
 
-##################################################################
-# view the PP status of a user
+####################################################################################
+# @dev this allows a user to view their pricing provider status
+# @param input is the user addy
+# @return 
+# - number of lp tokens locked up
+# - number of CZT tokens locked up
+# - users current pricing provider status 0 - not pp 1 - valid pp
+####################################################################################
 @view
 func view_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt) -> (lp_token : felt, czt_token : felt, status : felt):
     let (_trusted_addy) = trusted_addy.read()
@@ -65,11 +85,14 @@ func view_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check
     return (lp_locked, czt_locked, pp_status)
 end
 
-# promote user to PP
+####################################################################################
+# @dev this allows a user to promote themselves to a pricing provider
+# user must have the min LP and CZT tokens per the requirement in Settings contract
+####################################################################################
 @external
 func promote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}():
     alloc_locals
-    # check if status not 1 already - existing pp
+    # @dev check if status not 1 already - existing pp
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
@@ -78,7 +101,7 @@ func promote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_ch
         assert pp_status = 0
     end
     
-    # check that user has eno LP tokens
+    # @dev check that user has eno LP tokens
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (lp_require, czt_require) = Settings.get_pp_token_requirement(settings_addy)    
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
@@ -86,22 +109,25 @@ func promote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_ch
         assert_nn_le(lp_require, lp_user)
     end
     
-    # check that user has eno CZT tokens
+    # @dev check that user has eno CZT tokens
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
     let (czt_require_erc) = check_user_balance(user, czt_addy, czt_require)
-    # transfer the CZT, promote PP
+    # @dev transfer the CZT, promote PP
     CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, czt_require_erc)
     CZCore.set_pp_status(czcore_addy, user, lp_user, lp_require, czt_require, lockup, 1)
-    # event
+    # @dev emit event
     event_pp_status.emit(addy=user, pp_status=1, lp_change=lp_require, czt_change=czt_require)  
     return()
 end
 
-# demote user from PP
+####################################################################################
+# @dev this allows a user to demote themselves from a pricing provider and unlock their tokens
+# user unlock will be the tokens they locked at the time and not the current requirement in Settings contract
+####################################################################################
 @external
 func demote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}():
     alloc_locals
-    # check if status not 0 already - not a pp
+    # @dev check if status not 0 already - not a pp
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
@@ -110,15 +136,15 @@ func demote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_che
         assert pp_status = 1
     end
     
-    # check that czcore has eno CZT tokens
+    # @dev check that czcore has eno CZT tokens
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
     let (czt_locked_erc) = check_user_balance(czcore_addy, czt_addy, czt_locked)
 
-    # transfer the CZT, demote PP
+    # @dev transfer the CZT, demote PP
     CZCore.erc20_transfer(czcore_addy, czt_addy, user, czt_locked_erc)
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
     CZCore.set_pp_status(czcore_addy, user, lp_user, lp_locked, czt_locked, lockup, 0)
-    # event
+    # @dev emit event
     event_pp_status.emit(addy=user, pp_status=0, lp_change=lp_locked, czt_change=czt_locked)  
     return()
 end
