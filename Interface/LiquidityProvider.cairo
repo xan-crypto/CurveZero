@@ -129,7 +129,7 @@ end
 
 # @dev burn LP tokens from user and withdraw USDC
 # @param input is the lp tokens user wants to burn
-# @return the USDC this has been withdrawn for user
+# @return the USDC that has been withdrawn for the user
 @external
 func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_token : felt) -> (usdc_withdraw : felt):
     alloc_locals
