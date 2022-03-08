@@ -13,6 +13,8 @@
 # - view the insurance shortfall ratio, beyond which LP/GT changes are locked pending resolution
 # - view the min max loan term
 # - view the WETH ltv for loan creation
+# - view the WETH liquidation ratio for loan liquidation
+# - view the liquidation fee
 # Controller can set all of the above, with defaults set on initialization 
 # Controller will be a multisig wallet 
 # This contract addy will be stored in the TrustedAddy contract
