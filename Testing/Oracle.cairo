@@ -1,5 +1,12 @@
-%lang starknet
+####################################################################################
+# @title Oracle contract
+# @dev this contract is a dummy test contract for oracle pricing on WETH
+# we use this for testing only
+# this contract is not apart of CurveZero
+# @author xan-crypto
+####################################################################################
 
+%lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_not_zero
