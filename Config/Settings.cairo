@@ -41,6 +41,8 @@ const accrued_interest_split_3 = 2000000
 const utilization_total = 90000000
 const insurance_shortfall = 1000000
 const ltv = 60000000
+const liquidation_rato = 110000000
+const liquidation_fee = 2500000
 
 ####################################################################################
 # @dev storage for the addy of the owner
@@ -76,6 +78,10 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     max_loan_term.write(366 * 86400 * Math10xx8_ONE)   
     # @dev weth ltv
     weth_ltv.write(ltv)  
+    # @dev weth liquidation ratio
+    weth_liquidation_ratio.write(liquidation_rato)  
+    # @dev liquidation fee
+    liquidation_fee.write(liquidation_fee)      
     return ()
 end
 
@@ -388,5 +394,78 @@ end
 func set_weth_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(ltv : felt):
     check_caller_is_controller()
     weth_ltv.write(ltv)
+    return ()
+end
+
+####################################################################################
+# @dev view / set WETH ltv
+# this is the loan you can take given your WETH collateral
+# e.g. at 0.6 in Math10xx8 for every 1000 USD of WETH collateral you can only take a loan of 600 USDC max
+# @param / @return 
+# - WETH ltv
+####################################################################################
+@storage_var
+func weth_ltv() -> (res : felt):
+end
+
+@view
+func get_weth_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (ltv : felt):
+    let (res) = weth_ltv.read()
+    return (res)
+end
+
+@external
+func set_weth_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(ltv : felt):
+    check_caller_is_controller()
+    weth_ltv.write(ltv)
+    return ()
+end
+
+####################################################################################
+# @dev view / set WETH liquidation ratio
+# this is the amount below which a loan can be liquidated by a loan liquidator
+# e.g. at 110% -> 1.1 in Math10xx8, we take the accrued notional x 1.1 and if the collateral value is below this
+# then any one can call liquidate on the loan in return for a fee
+# @param / @return 
+# - WETH liquidation ratio
+####################################################################################
+@storage_var
+func weth_liquidation_ratio() -> (res : felt):
+end
+
+@view
+func get_weth_liquidation_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (ratio : felt):
+    let (res) = weth_liquidation_ratio.read()
+    return (res)
+end
+
+@external
+func set_weth_liquidation_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(ratio : felt):
+    check_caller_is_controller()
+    weth_liquidation_ratio.write(ratio)
+    return ()
+end
+
+####################################################################################
+# @dev view / set liquidation fee
+# this is the fee that the loan liquidator earns from liquidating the loan
+# initially this fee will be set at 2.5%, so $25 on a $1000 liquidation
+# @param / @return 
+# - liquidation fee
+####################################################################################
+@storage_var
+func liquidation_fee() -> (res : felt):
+end
+
+@view
+func get_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (fee : felt):
+    let (res) = liquidation_fee.read()
+    return (res)
+end
+
+@external
+func set_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt):
+    check_caller_is_controller()
+    liquidation_fee.write(fee)
     return ()
 end
