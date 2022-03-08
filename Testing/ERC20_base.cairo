@@ -1,5 +1,12 @@
-%lang starknet
+####################################################################################
+# @title ERC20_base contract
+# @dev this contract is a copy and edit of Henri - starknet-erc721
+# we use this for spinning up dummy USDC CZT and WETH for testing
+# this contract is not apart of CurveZero, more details can be found here https://github.com/l-henri
+# @author l-henri
+####################################################################################
 
+%lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_not_zero
