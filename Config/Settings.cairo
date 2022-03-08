@@ -83,7 +83,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     # @dev weth liquidation ratio
     weth_liquidation_ratio.write(liquidation_rato)  
     # @dev liquidation fee
-    liquidation_fee.write(liquidation_fee)      
+    weth_liquidation_fee.write(liquidation_fee)      
     return ()
 end
 
@@ -432,18 +432,18 @@ end
 # - liquidation fee
 ####################################################################################
 @storage_var
-func liquidation_fee() -> (res : felt):
+func weth_liquidation_fee() -> (res : felt):
 end
 
 @view
 func get_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (fee : felt):
-    let (res) = liquidation_fee.read()
+    let (res) = weth_liquidation_fee.read()
     return (res)
 end
 
 @external
 func set_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt):
     check_caller_is_controller()
-    liquidation_fee.write(fee)
+    weth_liquidation_fee.write(fee)
     return ()
 end
