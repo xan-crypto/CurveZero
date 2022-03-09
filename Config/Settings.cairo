@@ -2,6 +2,8 @@
 # @title Settings contract
 # @dev all numbers passed into contract must be Math10xx8 type
 # Users can
+# - view the owner addy
+# - view the TrustedAddy contract address where all contract addys are stored
 # - view the token requirements to become a PP
 # - view LP capital lockup period
 # - view loan origination fee and split between PP/IF
@@ -15,8 +17,8 @@
 # - view the WETH ltv for loan creation
 # - view the WETH liquidation ratio for loan liquidation
 # - view the liquidation fee
-# Controller can set all of the above, with defaults set on initialization 
-# Controller will be a multisig wallet 
+# Owner can set all of the above (excluding the owner addy), with defaults set on initialization 
+# Owner will be the same addy as the controller and will be a multisig wallet 
 # This contract addy will be stored in the TrustedAddy contract
 # This contract responds to all contracts but listens to changes from Controller contract only
 # @author xan-crypto
@@ -27,7 +29,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import (TrustedAddy)
 from Functions.Math10xx8 import Math10xx8_add
-from Functions.Checks import check_is_owner, check_is_controller
+from Functions.Checks import check_is_owner
 
 ####################################################################################
 # @dev constants for the constructor
@@ -53,6 +55,12 @@ const liquidation_fee = 2500000
 ####################################################################################
 @storage_var
 func owner_addy() -> (addy : felt):
+end
+
+@view
+func get_owner_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
+    let (addy) = owner_addy.read()
+    return (addy)
 end
 
 @constructor
@@ -87,12 +95,6 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     return ()
 end
 
-@view
-func get_owner_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
-    let (addy) = owner_addy.read()
-    return (addy)
-end
-
 ####################################################################################
 # @dev storage for the trusted addy contract
 # the TrustedAddy contract stores all the contract addys
@@ -116,17 +118,6 @@ func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 ####################################################################################
-# @dev check caller is controller 
-# internal function
-####################################################################################
-func check_caller_is_controller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (_trusted_addy) = trusted_addy.read()
-    let (controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
-    check_is_controller(controller_addy)
-    return ()
-end
-
-####################################################################################
 # @dev view / set current requirement to become PP
 # Locking up LP and CZT tokens aligns PP with the protocol, malicious activity can result in slashing
 # @param / @return 
@@ -145,7 +136,8 @@ end
 
 @external
 func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_require : felt, cz_require : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     pp_token_requirement.write((lp_require,cz_require))
     return ()
 end
@@ -167,7 +159,8 @@ end
 
 @external
 func set_lockup_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lockup : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     lockup_period.write(lockup)
     return ()
 end
@@ -191,10 +184,11 @@ end
 
 @external
 func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt, pp_split : felt, if_split : felt):
-    check_caller_is_controller()
-    let (temp1) = Math10xx8_add(pp_split,if_split)
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    let (sum_splits) = Math10xx8_add(pp_split,if_split)
     with_attr error_message("PP split and IF split should sum to 1"):
-        assert temp1 = Math10xx8_ONE
+        assert sum_splits = Math10xx8_ONE
     end
     origination_fee.write((fee,pp_split,if_split))
     return ()
@@ -221,11 +215,12 @@ end
 
 @external
 func set_accrued_interest_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_split : felt, if_split : felt, gt_split : felt):
-    check_caller_is_controller()
-    let (temp1) = Math10xx8_add(lp_split,if_split)
-    let (temp2) = Math10xx8_add(temp1,gt_split)
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    let (sum_partial) = Math10xx8_add(lp_split,if_split)
+    let (sum_full) = Math10xx8_add(sum_partial,gt_split)
     with_attr error_message("LP split and IF split and GT split should sum to 1"):
-        assert temp2 = Math10xx8_ONE
+        assert sum_full = Math10xx8_ONE
     end
     accrued_interest_split.write((lp_split,if_split,gt_split))
     return ()
@@ -250,7 +245,8 @@ end
 
 @external
 func set_min_max_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_loan : felt, max_loan : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     min_max_loan.write((min_loan,max_loan))
     return ()
 end
@@ -274,7 +270,8 @@ end
 
 @external
 func set_min_max_deposit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_deposit : felt, max_deposit : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     min_max_deposit.write((min_deposit,max_deposit))
     return ()
 end
@@ -298,7 +295,8 @@ end
 
 @external
 func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(stop : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     utilization.write(stop)
     return ()
 end
@@ -321,7 +319,8 @@ end
 
 @external
 func set_min_pp_accepted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_pp : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     min_pp_accepted.write(min_pp)
     return ()
 end
@@ -347,7 +346,8 @@ end
 
 @external
 func set_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(is_ratio : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     insurance_shortfall_ratio.write(is_ratio)
     return ()
 end
@@ -370,7 +370,8 @@ end
 
 @external
 func set_max_loan_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(max_term : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     max_loan_term.write(max_term)
     return ()
 end
@@ -394,7 +395,8 @@ end
 
 @external
 func set_weth_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(ltv : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     weth_ltv.write(ltv)
     return ()
 end
@@ -419,7 +421,8 @@ end
 
 @external
 func set_weth_liquidation_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(ratio : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     weth_liquidation_ratio.write(ratio)
     return ()
 end
@@ -443,7 +446,8 @@ end
 
 @external
 func set_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt):
-    check_caller_is_controller()
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     weth_liquidation_fee.write(fee)
     return ()
 end
