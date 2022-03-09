@@ -3,6 +3,8 @@
 # @dev all numbers passed into contract must be Math10xx8 type
 # all interactions with reserves or state should flow through here
 # the Interface contracts can
+# - get the owner addy
+# - get/set the TrustedAddy contract address where all contract addys are stored
 # - transfer erc20 tokens from user to CZCore
 # - transfer erc20 tokens to addy from CZCore
 # - get/set a users LP tokens and lockup period
