@@ -1,3 +1,32 @@
+####################################################################################
+# @title Math10xx8 contract
+# @dev this is the math library that we use for CurveZero
+# there is still quite large risk of overflow errors, we to check and refine this NB NB NB
+# ideally we can switch this out with a native safe math library for cairo once developed
+# Functions include
+# - assert within Math10xx8 range 
+# - convert Math10xx8 to felt
+# - convert from felt to Math10xx8
+# - convert felt to uint256
+# - convert uint256 to felt
+# - convert Math10xx8 to erc20 contract number
+# - convert erc20 contract number to Math10xx8
+# - Math10xx8 zero
+# - Math10xx8 one
+# - Math10xx8 year in seconds
+# - Math10xx8 add
+# - Math10xx8 sub
+# - Math10xx8 mul
+# - Math10xx8 div
+# - Math10xx8 power
+# - Math10xx8 power frac using x^y = exp(y*ln(x))
+# - Math10xx8 sqrt
+# - Math10xx8 exp
+# - Math10xx8 ln
+# - Math10xx8 block timestamp
+# @author xan-crypto
+####################################################################################
+
 %lang starknet
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
@@ -19,32 +48,32 @@ func Math10xx8_assert10xx8 {range_check_ptr} (x: felt):
     return ()
 end
 
-# Converts a fixed point value to a felt, truncating the fractional component
+# @dev Converts a fixed point value to a felt, truncating the fractional component
 func Math10xx8_toFelt {range_check_ptr} (x: felt) -> (res: felt):
     let (res, _) = signed_div_rem(x, Math10xx8_FRACT_PART, Math10xx8_BOUND)
     return (res)
 end
 
-# Converts a felt to a fixed point value ensuring it will not overflow
+# @dev Converts a felt to a fixed point value ensuring it will not overflow
 func Math10xx8_fromFelt {range_check_ptr} (x: felt) -> (res: felt):
     assert_le(x, Math10xx8_INT_PART)
     assert_le(-Math10xx8_INT_PART, x)
     return (x * Math10xx8_FRACT_PART)
 end
 
-# Converts a felt to a uint256 value
+# @dev Converts a felt to a uint256 value
 func Math10xx8_toUint256 (x: felt) -> (res: Uint256):
     let res = Uint256(low = x, high = 0)
     return (res)
 end
 
-# Converts a uint256 value into a felt
+# @dev Converts a uint256 value into a felt
 func Math10xx8_fromUint256 {range_check_ptr} (x: Uint256) -> (res: felt):
     assert x.high = 0
     return (x.low)
 end
 
-# Converts 10xx8 number to token number for transactions
+# @dev Converts 10xx8 number to token number for transactions
 # x is 10xx8 fixed point number and y is a positive integer for decimals
 func Math10xx8_convert_from {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
@@ -55,7 +84,7 @@ func Math10xx8_convert_from {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     return (res)
 end
 
-# Converts token number to a 10xx8 fixed point number
+# @dev Converts token number to a 10xx8 fixed point number
 # x is token number and y is a positive integer for decimals
 func Math10xx8_convert_to {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
@@ -66,22 +95,22 @@ func Math10xx8_convert_to {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     return (res)
 end
 
-# returns the constant zero
+# @dev returns the constant zero
 func Math10xx8_zero {range_check_ptr} () -> (res: felt):
     return (Math10xx8_ZERO)
 end
 
-# returns the constant one
+# @dev returns the constant one
 func Math10xx8_one {range_check_ptr} () -> (res: felt):
     return (Math10xx8_ONE)
 end
 
-# returns the constant year secounds
+# @dev returns the constant year secounds
 func Math10xx8_year {range_check_ptr} () -> (res: felt):
     return (Math10xx8_YEAR)
 end
 
-# Convenience addition method to assert no overflow before returning
+# @dev Convenience addition method to assert no overflow before returning
 func Math10xx8_add {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let res = x + y
@@ -89,7 +118,7 @@ func Math10xx8_add {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     return (res)
 end
 
-# Convenience subtraction method to assert no overflow before returning
+# @dev Convenience subtraction method to assert no overflow before returning
 func Math10xx8_sub {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     let res = x - y
@@ -97,7 +126,7 @@ func Math10xx8_sub {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     return (res)
 end
 
-# Multiples two fixed point values and checks for overflow before returning
+# @dev Multiples two fixed point values and checks for overflow before returning
 func Math10xx8_mul {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
     tempvar product = x * y
@@ -106,7 +135,7 @@ func Math10xx8_mul {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     return (res)
 end
 
-# Divides two fixed point values and checks for overflow before returning
+# @dev Divides two fixed point values and checks for overflow before returning
 # Both values may be signed (i.e. also allows for division by negative b)
 func Math10xx8_div {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
@@ -118,7 +147,7 @@ func Math10xx8_div {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     return (res = res_u * div_sign)
 end
 
-# Calclates the value of x^y and checks for overflow before returning
+# @dev Calclates the value of x^y and checks for overflow before returning
 # x is a 10xx8 fixed point value
 # y is a standard felt (int)
 func Math10xx8_pow {range_check_ptr} (x: felt, y: felt) -> (res: felt):
@@ -145,7 +174,7 @@ func Math10xx8_pow {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     end
 end
 
-# Calclates the value of x^y and checks for overflow before returning
+# @dev Calclates the value of x^y and checks for overflow before returning
 # uses x^y = exp(y*ln(x))
 # x is a 10xx8 fixed point value x>0
 # y is a 10xx8 fixed point value y>0
@@ -157,7 +186,7 @@ func Math10xx8_pow_frac {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     return (res)
 end
 
-# Calculates the square root of a fixed point value
+# @dev Calculates the square root of a fixed point value
 # x must be positive
 func Math10xx8_sqrt {range_check_ptr} (x: felt) -> (res: felt):
     alloc_locals
@@ -168,7 +197,7 @@ func Math10xx8_sqrt {range_check_ptr} (x: felt) -> (res: felt):
     return (res)
 end
 
-# Calculates the most significant bit where x is a fixed point value
+# @dev Calculates the most significant bit where x is a fixed point value
 # TODO: use binary search to improve performance
 func Math10xx8__msb {range_check_ptr} (x: felt) -> (res: felt):
     alloc_locals
@@ -183,7 +212,7 @@ func Math10xx8__msb {range_check_ptr} (x: felt) -> (res: felt):
     return (res)
 end
 
-# Calculates the binary exponent of x: 2^x
+# @dev Calculates the binary exponent of x: 2^x
 func Math10xx8_exp2 {range_check_ptr} (x: felt) -> (res: felt):
     alloc_locals
     let (exp_sign) = sign(x)
@@ -193,7 +222,7 @@ func Math10xx8_exp2 {range_check_ptr} (x: felt) -> (res: felt):
     let (exp_value) = abs_value(x)
     let (int_part, frac_part) = unsigned_div_rem(exp_value, Math10xx8_FRACT_PART)
     let (int_res) = Math10xx8_pow(2 * Math10xx8_ONE, int_part)
-    # 1.069e-7 maximum error
+    # @dev 1.069e-7 maximum error
     const a1 = 99999989
     const a2 = 69315475
     const a3 = 24013971
@@ -217,7 +246,7 @@ func Math10xx8_exp2 {range_check_ptr} (x: felt) -> (res: felt):
     end
 end
 
-# Calculates the natural exponent of x: e^x
+# @dev Calculates the natural exponent of x: e^x
 func Math10xx8_exp {range_check_ptr} (x: felt) -> (res: felt):
     alloc_locals
     const mod = 144269504
@@ -226,7 +255,7 @@ func Math10xx8_exp {range_check_ptr} (x: felt) -> (res: felt):
     return (res)
 end
 
-# Calculates the binary logarithm of x: log2(x)
+# @dev Calculates the binary logarithm of x: log2(x)
 # x must be greather than zero
 func Math10xx8_log2 {range_check_ptr} (x: felt) -> (res: felt):
     alloc_locals
@@ -234,7 +263,7 @@ func Math10xx8_log2 {range_check_ptr} (x: felt) -> (res: felt):
         return (0)
     end
     let (is_frac) = is_le(x, Math10xx8_FRACT_PART - 1)
-    # Compute negative inverse binary log if 0 < x < 1
+    # @dev Compute negative inverse binary log if 0 < x < 1
     if is_frac == 1:
         let (div) = Math10xx8_div(Math10xx8_ONE, x)
         let (res_i) = Math10xx8_log2(div)
@@ -244,7 +273,7 @@ func Math10xx8_log2 {range_check_ptr} (x: felt) -> (res: felt):
     let (b) = Math10xx8__msb(x_over_two)
     let (divisor) = pow(2, b)
     let (norm, _) = unsigned_div_rem(x, divisor)
-    # 4.233e-8 maximum error
+    # @dev 4.233e-8 maximum error
     const a1 = -342539315
     const a2 = 815480447
     const a3 = -1000713624
@@ -269,7 +298,7 @@ func Math10xx8_log2 {range_check_ptr} (x: felt) -> (res: felt):
     return (res)
 end
 
-# Calculates the natural logarithm of x: ln(x)
+# @dev Calculates the natural logarithm of x: ln(x)
 # x must be greater than zero
 func Math10xx8_ln {range_check_ptr} (x: felt) -> (res: felt):
     alloc_locals
@@ -279,7 +308,7 @@ func Math10xx8_ln {range_check_ptr} (x: felt) -> (res: felt):
     return (product)
 end
 
-# Returns block ts in 10xx8 format
+# @dev Returns block ts in 10xx8 format
 func Math10xx8_ts {syscall_ptr : felt*,range_check_ptr} () -> (res: felt):
     alloc_locals
     let (block_ts) = get_block_timestamp()
