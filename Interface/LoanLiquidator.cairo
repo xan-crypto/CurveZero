@@ -75,6 +75,7 @@ end
 
 ####################################################################################
 # @dev liquidator can call liquidate loan
+# 
 # @param input is 
 # - the user addy whose loan is to be liquidated
 ####################################################################################
@@ -104,13 +105,13 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (acrrued_notional) = Math10xx8_add(notional, accrued_interest)
     let (an_liquidation_ratio) = Math10xx8_mul(acrrued_notional, liquidation_ratio)
     let (an_liquidation_fee) = Math10xx8_mul(acrrued_notional, one_plus_liquidation_fee)
-    let (n_liquidation_fee) = Math10xx8_mul(notional, one_plus_liquidation_fee)
+    let (cashflow) = Math10xx8_sub(notional, hist_accrual)
+    let (n_liquidation_fee) = Math10xx8_mul(cashflow, one_plus_liquidation_fee)
     with_attr error_message("Loan is not valid for liquidation."):
         assert_le(value_collateral, an_liquidation_ratio)
     end
     
     # test 
-    let (zero) = Math10xx8_zero()
     let (test1) = is_in_range(value_collateral, n_liquidation_fee, an_liquidation_fee)
     let (test2) = is_in_range(value_collateral, an_liquidation_fee, an_liquidation_ratio)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
