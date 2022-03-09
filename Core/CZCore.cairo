@@ -26,6 +26,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256)
 from InterfaceAll import (TrustedAddy,Controller,Erc20)
 from Functions.Math10xx8 import Math10xx8_toUint256 
+from Functions.Checks import check_is_owner
 
 ####################################################################################
 # @dev storage for the addy of the owner
@@ -63,11 +64,8 @@ end
 
 @external
 func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
-    let (caller) = get_caller_address()
-    let (deployer) = deployer_addy.read()
-    with_attr error_message("Only deployer can change the Trusted addy."):
-        assert caller = deployer
-    end
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
     trusted_addy.write(addy)
     return ()
 end
