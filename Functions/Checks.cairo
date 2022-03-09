@@ -1,4 +1,20 @@
-# Useful functions
+####################################################################################
+# @title Checks contract
+# @dev all numbers passed into contract must be Math10xx8 type
+# this is a group of useful functions that are needed by most of the contracts
+# Functions include
+# - check if the caller is the owner
+# - check if the caller is the controller
+# - check if current insurance shortfall ratio is below min level in Settings
+# - check user has sufficient balance and return ERC-20 decimal amount
+# - check sufficient number of PPs (pricing providers) vs min in settings
+# - check sufficient collateral vs loan request
+# - check current utilization be max level from Settings
+# - check term of loan below max term
+# - check loan range within range in Settings
+# There is no owner addy or trusted addy here, these functions are imported to the relevant contracts
+# @author xan-crypto
+####################################################################################
 
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -8,7 +24,10 @@ from starkware.cairo.common.uint256 import Uint256
 from Functions.Math10xx8 import Math10xx8_div, Math10xx8_mul, Math10xx8_convert_from, Math10xx8_zero, Math10xx8_convert_to, Math10xx8_ts, Math10xx8_add, Math10xx8_fromUint256, Math10xx8_fromFelt
 from InterfaceAll import Settings, Erc20, Oracle
 
-# check if owner
+####################################################################################
+# @dev check if owner
+# @param owner addy passed from calling function
+####################################################################################
 func check_is_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt):
     alloc_locals
     let (caller) = get_caller_address()
@@ -18,7 +37,10 @@ func check_is_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return()
 end
 
-# check if controller
+####################################################################################
+# @dev check if controller
+# @param controller addy passed from calling function
+####################################################################################
 func check_is_controller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(controller : felt):
     alloc_locals
     let (caller) = get_caller_address()
@@ -28,7 +50,16 @@ func check_is_controller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     return()
 end
 
-# check system not below min is ratio
+####################################################################################
+# @dev check system below min insurance shortfall ratio
+# insurance shortfall is the total insolvent losses divided by the total capital in the system
+# and this grows the system becomes more and more insolvent, settings ratio is set at 1%
+# this stops other function like GTs taking CZT out of the system when a large loss occurs
+# @param 
+# - capital total from CZCore
+# - insolvency total which is the accumulated losses from insolvent loans
+# - min insurance shortfall ratio from settings
+####################################################################################
 func check_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(capital_total : felt, insolvency_total :felt, min_is_ratio :felt):
     alloc_locals
     if capital_total == 0:  
@@ -42,7 +73,16 @@ func check_insurance_shortfall_ratio{syscall_ptr : felt*, pedersen_ptr : HashBui
     return()
 end
 
-# check user has sufficient funds and return erc amount
+####################################################################################
+# @dev check user has sufficient funds and return erc amount
+# @param 
+# - caller / users address
+# - the erc20 addy, can be used for WETH USDC and CZT as long as same contract type
+# - amount of token in Math10xx8 terms
+# @return 
+# - the amount of token in erc20 native contract terms
+# recall that Math10xx8 is a different decimal system to 18 decimals which is the erc20 std at the moment
+####################################################################################
 func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(caller : felt, erc_addy: felt, amount : felt) -> (amount_erc : felt):
     alloc_locals
     let (caller_balance_unit : Uint256) = Erc20.ERC20_balanceOf(erc_addy, caller)
@@ -55,7 +95,12 @@ func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     return(amount_erc)
 end
 
-# check eno pp for pricing, settings has min_pp
+####################################################################################
+# @dev check eno pp for pricing, settings has min_pp
+# @param 
+# - settings addy so that we can get min pp accepted
+# - number of PPs in current pricing request
+####################################################################################
 func check_min_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, num_pp : felt):
     alloc_locals
     let (convert_num_pp) = Math10xx8_fromFelt(num_pp)
@@ -66,7 +111,14 @@ func check_min_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return()
 end
 
-# test sufficient collateral to proceed vs notional of loan
+####################################################################################
+# @dev test sufficient collateral to proceed vs notional of loan
+# @param 
+# - oracle addy so that we can get price and decimals
+# - settings addy so that we can get ltc for WETH
+# - notional of loan in Math10xx8
+# - WETH collateral units in Math10xx8 1 WETH is 10**8
+####################################################################################
 func check_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(oracle_addy : felt, settings_addy : felt, notional : felt, collateral : felt):
     alloc_locals
     let (price_erc) = Oracle.get_oracle_price(oracle_addy)
@@ -81,7 +133,15 @@ func check_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     return()
 end
 
-# check below utilization level post loan
+####################################################################################
+# @dev check below utilization level post loan
+# we check if the new loan would tip the system over the max util level
+# @param 
+# - settings addy so that we can get max utilization
+# - notional of loan in Math10xx8
+# - current total loans
+# - current total capital
+####################################################################################
 func check_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, notional : felt, loan_total : felt, capital_total : felt):
     alloc_locals
     let (stop) = Settings.get_utilization(settings_addy)
@@ -93,7 +153,13 @@ func check_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return()
 end
 
-# check end time less than setting max loan time
+####################################################################################
+# @dev check end time less than setting max loan term and greater than current time
+# @param 
+# - settings addy so that we can get max loan term
+# - block ts is the current timestamp of the last block in Math10xx8
+# - the end time of the loan
+####################################################################################
 func check_max_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, block_ts : felt, end_ts : felt):
     alloc_locals
     let (max_term) = Settings.get_max_loan_term(settings_addy)
@@ -104,7 +170,12 @@ func check_max_term{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return()
 end
 
-# check loan amount within correct ranges
+####################################################################################
+# @dev check loan amount within correct ranges
+# @param 
+# - settings addy so that we can get loan ranges
+# - notional of loan in Math10xx8
+####################################################################################
 func check_loan_range{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, notional : felt):
     alloc_locals
     let (min_loan,max_loan) = Settings.get_min_max_loan(settings_addy)
