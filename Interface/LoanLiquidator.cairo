@@ -172,16 +172,18 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
         event_loan_liquidate.emit(user)
         return()
+
     else:
+        # receive the USDC
+        let (ll_amount_receive) = Math10xx8_div(collateral_value, one_plus_liquidation_fee)
+        let (ll_amount_receive_erc) = check_user_balance(liquidator, usdc_addy, ll_amount_receive)
+        CZCore.erc20_transferFrom(czcore_addy, usdc_addy, liquidator, czcore_addy, ll_amount_receive_erc)
+        # send the WETH
+        let (ll_amount_send_erc) = check_user_balance(czcore_addy, weth_addy, collateral)
+        CZCore.erc20_transfer(czcore_addy, weth_addy, liquidator, ll_amount_send_erc)
+
+        # @dev update CZCore and loan  
         if (test_option2) == 1:
-            # receive the USDC
-            let (ll_amount_receive) = Math10xx8_div(collateral_value, one_plus_liquidation_fee)
-            let (ll_amount_receive_erc) = check_user_balance(liquidator, usdc_addy, ll_amount_receive)
-            CZCore.erc20_transferFrom(czcore_addy, usdc_addy, liquidator, czcore_addy, ll_amount_receive_erc)
-            # send the WETH
-            let (ll_amount_send_erc) = check_user_balance(czcore_addy, weth_addy, collateral)
-            CZCore.erc20_transfer(czcore_addy, weth_addy, liquidator, ll_amount_send_erc)
-            # @dev update CZCore and loan  
             let (residual) = Math10xx8_sub(ll_amount_receive, loan_cashflow)
             let (new_capital_total) = Math10xx8_add(capital_total, residual)
             CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, reward_total)
@@ -189,14 +191,6 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
             event_loan_liquidate.emit(user)
             return()
         else:
-            # receive the USDC
-            let (ll_amount_receive) = Math10xx8_div(collateral_value, one_plus_liquidation_fee)
-            let (ll_amount_receive_erc) = check_user_balance(liquidator, usdc_addy, ll_amount_receive)
-            CZCore.erc20_transferFrom(czcore_addy, usdc_addy, liquidator, czcore_addy, ll_amount_receive_erc)
-            # send the WETH
-            let (ll_amount_send_erc) = check_user_balance(czcore_addy, weth_addy, collateral)
-            CZCore.erc20_transfer(czcore_addy, weth_addy, liquidator, ll_amount_send_erc)
-            # @dev update CZCore and loan  
             let (residual) = Math10xx8_sub(loan_cashflow, ll_amount_receive)
             let (new_capital_total) = Math10xx8_sub(capital_total, residual)
             let (new_insolvency_total) = Math10xx8_add(insolvency_total, residual)
