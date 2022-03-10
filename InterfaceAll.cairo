@@ -1,10 +1,21 @@
-# put all interfaces here
+####################################################################################
+# @title InterfaceAll contract
+# @dev put all interfaces here
+# Interfaces include
+# - TrustedAddy
+# - CZCore
+# - Controller
+# - Erc20
+# - Settings
+# - Oracle
+# - CapitalBorrower
+# @author xan-crypto
+####################################################################################
 
 %lang starknet
 from starkware.cairo.common.uint256 import (Uint256)
 
-##################################################################
-# interface to trusted addy contract
+# @dev interface to trusted addy contract
 @contract_interface
 namespace TrustedAddy:
     func get_lp_addy() -> (addy : felt):
@@ -35,8 +46,7 @@ namespace TrustedAddy:
     end
 end
 
-##################################################################
-# interfaces to CZCore contract
+# @dev interfaces to CZCore contract
 @contract_interface
 namespace CZCore:
     func get_lp_balance(user : felt) -> (lp_user : felt, lockup: felt):
@@ -45,14 +55,8 @@ namespace CZCore:
     end
     func get_cz_state() -> (lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
     end
-    func set_lp_capital_total(lp_amount : felt, capital_amount : felt):
-    end
-    func set_captal_loan_reward_total(capital_amount : felt, loan_amount : felt, reward_amount : felt):
-    end    
-    func set_loan_total(loan_amount : felt):
-    end    
-    func set_reward_total():
-    end    
+    func set_cz_state(lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
+    end 
     func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
     end
     func erc20_transfer(erc_addy : felt, recipient: felt, amount: felt):
@@ -79,16 +83,14 @@ namespace CZCore:
     end  
 end
 
-##################################################################
-# interface to controller contract
+# @dev interface to controller contract
 @contract_interface
 namespace Controller:
     func get_paused() -> (addy : felt):
     end
 end
 
-##################################################################
-# need interface to the ERC-20 USDC/CZ contract that lives/will live on starknet, this is for USDC/CZ deposits and withdrawals
+# @dev need interface to the ERC-20 USDC/CZ contract that lives/will live on starknet, this is for USDC/CZ deposits and withdrawals
 # use the transfer from function to send the token from sender to recipient
 @contract_interface
 namespace Erc20:
@@ -102,54 +104,35 @@ namespace Erc20:
     end    
 end
 
-##################################################################
-# interface for the settings contract
+# @dev interface for the settings contract
 @contract_interface
 namespace Settings:
     func get_pp_token_requirement() -> (lp_require : felt, cz_require : felt):
     end    
-    func set_pp_token_requirement(lp_require : felt, cz_require : felt):
-    end
     func get_lockup_period() -> (lockup : felt):
-    end
-    func set_lockup_period(lockup : felt):
     end
     func get_origination_fee() -> (fee : felt, pp_split : felt, if_split : felt):
     end
-    func set_origination_fee(fee : felt, pp_split : felt, if_split : felt):
-    end    
     func get_accrued_interest_split() -> (lp_split : felt, if_split : felt, gt_split : felt):
     end
-    func set_accrued_interest_split(lp_split : felt, if_split : felt, gt_split : felt):
-    end     
     func get_min_max_loan() -> (min_loan : felt, max_loan : felt):
-    end
-    func set_min_max_loan(min_loan : felt, max_loan : felt):
-    end       
+    end   
     func get_min_max_deposit() -> (min_deposit : felt, max_deposit : felt):
     end
-    func set_min_max_deposit(min_deposit : felt, max_deposit : felt):
-    end    
     func get_utilization() -> (stop : felt):
-    end
-    func set_utilization(stop : felt):
-    end       
+    end   
     func get_min_pp_accepted() -> (min_pp : felt):
-    end
-    func set_min_pp_accepted(min_pp : felt):
-    end       
+    end  
     func get_insurance_shortfall_ratio() -> (insurance_shortfall_ratio : felt):
     end
-    func set_insurance_shortfall_ratio(insurance_shortfall_ratio : felt):
-    end    
     func get_max_loan_term() -> (max_term : felt):
     end
-    func set_max_loan_term(max_term : felt):
-    end  
     func get_weth_ltv() -> (ltv : felt):
     end
-    func set_weth_ltv(ltv : felt):
-    end  
+    func get_weth_liquidation_ratio() -> (ratio : felt):
+    end
+    func get_weth_liquidation_fee() -> (fee : felt):
+    end
 end
 
 ##################################################################
