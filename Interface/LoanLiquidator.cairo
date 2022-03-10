@@ -10,16 +10,12 @@
 
 %lang starknet
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.math import assert_nn, assert_nn_le
 from starkware.cairo.common.math_cmp import is_in_range
-from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
-from starkware.cairo.common.hash import hash2
-from starkware.cairo.common.signature import verify_ecdsa_signature
-from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20, Oracle, CapitalBorrower
-from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_pow_frac, Math10xx8_sub, Math10xx8_add, Math10xx8_ts, Math10xx8_one, Math10xx8_year, Math10xx8_convert_from, Math10xx8_zero
-from Functions.Checks import check_is_owner, check_min_pp, check_ltv, check_utilization, check_max_term, check_loan_range, check_user_balance
+from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_sub, Math10xx8_add, Math10xx8_one, Math10xx8_convert_from, Math10xx8_convert_to
+from Functions.Checks import check_is_owner, check_user_balance
 
 ####################################################################################
 # @dev storage for the addy of the owner
