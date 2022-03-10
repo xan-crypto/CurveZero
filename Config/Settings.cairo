@@ -439,13 +439,13 @@ func weth_liquidation_fee() -> (res : felt):
 end
 
 @view
-func get_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (fee : felt):
+func get_weth_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (fee : felt):
     let (res) = weth_liquidation_fee.read()
     return (res)
 end
 
 @external
-func set_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt):
+func set_weth_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
     weth_liquidation_fee.write(fee)
