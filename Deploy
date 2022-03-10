@@ -1,3 +1,16 @@
+####################################################################################
+# @title Deploy
+# @dev used for recording the deploy process and latest contract addyys
+# Includes
+# - Current testing approach
+# - Compile all
+# - Deploy all
+# - Latest test addys
+# - Transaction / call / invoke formats
+# - PP data for testing loans
+# @author xan-crypto
+####################################################################################
+
 # new approach
 1) compile all
 2) deploy all contracts but TrustedAddy goes last + addys into constructor
