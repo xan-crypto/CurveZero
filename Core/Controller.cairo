@@ -33,7 +33,7 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(owner : felt):
-    owner_addy.write(deployer)
+    owner_addy.write(owner)
     return ()
 end
 
