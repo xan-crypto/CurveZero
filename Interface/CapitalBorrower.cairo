@@ -195,7 +195,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # @dev update CZCore
     CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, start_ts, end_ts, median_rate, 0, 1)
     let (new_loan_total) = Math10xx8_add(loan_total, notional_with_fee)
-    CZCore.set_loan_total(czcore_addy, new_loan_total)
+    CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
     # @dev emit event
     event_loan_change.emit(addy=user, has_loan=1, notional=notional_with_fee, collateral=collateral, start_ts=start_ts, end_ts=end_ts, rate=median_rate, hist_accrual=0)
     return ()
@@ -256,10 +256,10 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         let (test) = is_le(repay, loan_total_after_accrual)
         if test == 1:
             let (new_loan_total) = Math10xx8_sub(loan_total_after_accrual, repay)
-            CZCore.set_captal_loan_reward_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
+            CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
         else:
             let (new_loan_total) = Math10xx8_zero()
-            CZCore.set_captal_loan_reward_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
+            CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
         end
         CZCore.set_cb_loan(czcore_addy, user, 0, 0, collateral, 0, 0, 0, 0, 0)
         decrease_collateral(collateral)
@@ -267,7 +267,7 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         return ()
     else:
         let (new_loan_total) = Math10xx8_sub(loan_total, repay)
-        CZCore.set_loan_total(czcore_addy, new_loan_total)
+        CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
         CZCore.set_cb_loan(czcore_addy, user, 1, new_notional, collateral, new_start_ts, end_ts, rate, total_accrual, 0)
         # @dev emit event
         event_loan_change.emit(addy=user, has_loan=has_loan, notional=new_notional, collateral=collateral, start_ts=new_start_ts, end_ts=end_ts, rate=rate, hist_accrual=total_accrual)
@@ -436,7 +436,7 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     # @dev update CZCore
     CZCore.set_cb_loan(czcore_addy, user, 1, new_notional_with_fee, collateral, start_ts, end_ts, median_rate, total_accrual, 0)
     let (new_loan_total) = Math10xx8_add(loan_total, change_notional_with_fee)
-    CZCore.set_loan_total(czcore_addy, new_loan_total)
+    CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
     # @dev emit event
     event_loan_change.emit(addy=user, has_loan=has_loan, notional=new_notional_with_fee, collateral=collateral, start_ts=start_ts, end_ts=end_ts, rate=median_rate, hist_accrual=total_accrual)
     return ()
