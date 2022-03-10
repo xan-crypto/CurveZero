@@ -80,14 +80,14 @@ end
 # - loan total reduces by the cashflow actually given to user
 # - accrued interest + hist accrual is distributed to LP/IF/GT
 # - user loan set to zero
-# option 2 - notional + liquidation fee <= value of collateral < accrued notional + liquidation fee
+# option 2 - cashflow + liquidation fee <= value of collateral < accrued notional + liquidation fee
 # - no capital loss actual accrued interest loss
 # - no collateral remains, user gets nothing back
 # - liquidator gets all collateral, returns collateral value / 1.025 in USDC
 # - loan total reduces by the cashflow actually given to user
 # - USDC returned - cashflow gets added to the capital total with no distribution to others
 # - user loan set to zero
-# option 3 - 0 <= value of collateral < notional + liquidation fee
+# option 3 - 0 <= value of collateral < cashflow + liquidation fee
 # - actual capital loss actual accrued interest loss
 # - no collateral remains, user gets nothing back
 # - liquidator gets all collateral, returns collateral value / 1.025 in USDC
@@ -128,14 +128,14 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (accrued_notional_liquidation_ratio) = Math10xx8_mul(acrrued_notional, liquidation_ratio)
     let (accrued_notional_liquidation_fee) = Math10xx8_mul(acrrued_notional, one_plus_liquidation_fee)
     let (loan_cashflow) = Math10xx8_sub(notional, hist_accrual)
-    let (notional_liquidation_fee) = Math10xx8_mul(cashflow, one_plus_liquidation_fee)
+    let (loan_cashflow_liquidation_fee) = Math10xx8_mul(cashflow, one_plus_liquidation_fee)
     with_attr error_message("Loan is not valid for liquidation."):
         assert_le(collateral_value, accrued_notional_liquidation_ratio)
     end
     
     # option 1 & 2... if neither then option 3 
     let (test_option1) = is_in_range(collateral_value, accrued_notional_liquidation_fee, accrued_notional_liquidation_ratio)
-    let (test_option2) = is_in_range(collateral_value, notional_liquidation_fee, accrued_notional_liquidation_fee)
+    let (test_option2) = is_in_range(collateral_value, loan_cashflow_liquidation_fee, accrued_notional_liquidation_fee)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
     let (total_accrual) = Math10xx8_add(hist_accrual, accrued_interest)
