@@ -285,11 +285,11 @@ func cz_state() -> (res : (felt, felt, felt, felt, felt)):
 end
 
 ####################################################################################
-# @dev get cz state
-# @return
+# @dev get / set cz state
+# @param @return
 # - total lp tokens in issue
 # - total USDC reserves
-# - total loans made 
+# - total loans made (represents cashflow, actual money out of the protocol / not accrued interest)
 # - total loss on insolvent loans
 # - total current rewards accrued
 ####################################################################################
@@ -301,38 +301,10 @@ func get_cz_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
 end
 
 @external
-func set_lp_capital_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_amount : felt, capital_amount : felt):
-    lp_caller()
+func set_cz_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
+    authorised_callers()
     is_paused()
-    let (res) = cz_state.read()
-    cz_state.write((lp_amount,capital_amount,res[2],res[3],res[4]))
-    return ()
-end
-
-@external
-func set_loan_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loan_amount : felt):
-    cb_caller()
-    is_paused()
-    let (res) = cz_state.read()
-    cz_state.write((res[0], res[1], loan_amount, res[3], res[4]))
-    return ()
-end
-
-@external
-func set_captal_loan_reward_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(capital_amount : felt, loan_amount : felt, reward_amount : felt):
-    cb_caller()
-    is_paused()
-    let (res) = cz_state.read()
-    cz_state.write((res[0],capital_amount,loan_amount,res[3],reward_amount))
-    return ()
-end
-
-@external
-func set_reward_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    controller_caller()
-    is_paused()
-    let (res) = cz_state.read()
-    cz_state.write((res[0],res[1],res[2],res[3],0))
+    cz_state.write((lp_total, capital_total, loan_total, insolvency_total, reward_total))
     return ()
 end
 
