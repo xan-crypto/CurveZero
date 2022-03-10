@@ -121,7 +121,7 @@ func distribute_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (stake_total,index) = CZCore.get_staker_total(czcore_addy)
     run_distribution(czcore_addy,stake_total,reward_total,index)
     # @dev set CZCore reward_total to 0
-    CZCore.set_reward_total(czcore_addy)
+    CZCore.set_cz_state(czcore_addy, lp_total, capital_total, loan_total, insolvency_total, 0)
     return ()
 end
 
