@@ -92,6 +92,7 @@ func Math10xx8_convert_to {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     let (power_partial) = Math10xx8_pow(Math10xx8_TEN, y)
     let (power, _) = unsigned_div_rem(power_partial, Math10xx8_ONE)
     let (res, _) = unsigned_div_rem(partial, power)
+    Math10xx8_assert10xx8(res)
     return (res)
 end
 
@@ -183,6 +184,7 @@ func Math10xx8_pow_frac {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     let (ln_x) = Math10xx8_ln(x)
     let (y_ln_x) = Math10xx8_mul(y,ln_x)
     let (res) = Math10xx8_exp(y_ln_x)
+    Math10xx8_assert10xx8(res)
     return (res)
 end
 
@@ -252,6 +254,7 @@ func Math10xx8_exp {range_check_ptr} (x: felt) -> (res: felt):
     const mod = 144269504
     let (bin_exp) = Math10xx8_mul(x, mod)
     let (res) = Math10xx8_exp2(bin_exp)
+    Math10xx8_assert10xx8(res)
     return (res)
 end
 
@@ -304,8 +307,9 @@ func Math10xx8_ln {range_check_ptr} (x: felt) -> (res: felt):
     alloc_locals
     const ln_2 = 69314718
     let (log2_x) = Math10xx8_log2(x)
-    let (product) = Math10xx8_mul(log2_x, ln_2)
-    return (product)
+    let (res) = Math10xx8_mul(log2_x, ln_2)
+    Math10xx8_assert10xx8(res)
+    return (res)
 end
 
 # @dev Returns block ts in 10xx8 format
@@ -313,5 +317,6 @@ func Math10xx8_ts {syscall_ptr : felt*,range_check_ptr} () -> (res: felt):
     alloc_locals
     let (block_ts) = get_block_timestamp()
     tempvar res = block_ts * Math10xx8_ONE
+    Math10xx8_assert10xx8(res)
     return (res)
 end
