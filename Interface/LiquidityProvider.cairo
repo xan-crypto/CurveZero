@@ -104,7 +104,7 @@ func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     # @dev transfer the USDC, mint the lp token and update variables
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, usdc_deposit_erc)
     let (new_lp_total, lp_issuance) = lp_update(lp_total, usdc_deposit, new_capital_total, capital_total)
-    CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
+    CZCore.set_cz_state(czcore_addy, new_lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
     let (new_lp_user) = Math10xx8_add(lp_user, lp_issuance)
     let (new_lockup) = Math10xx8_add(block_ts, lockup_period)
@@ -187,7 +187,7 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 
     # @dev transfer the USDC, burn the lp token and update variables
     CZCore.erc20_transfer(czcore_addy, usdc_addy, user, capital_redeem_erc)
-    CZCore.set_lp_capital_total(czcore_addy, new_lp_total, new_capital_total)
+    CZCore.set_cz_state(czcore_addy, new_lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
     let (new_lp_user) = Math10xx8_sub(lp_user, lp_token)
     CZCore.set_lp_balance(czcore_addy, user, new_lp_user, lockup)
     # @dev emit event
