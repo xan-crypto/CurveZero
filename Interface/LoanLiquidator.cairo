@@ -11,6 +11,7 @@
 %lang starknet
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.math_cmp import is_in_range
+from starkware.cairo.common.math import assert_le
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20, Oracle, CapitalBorrower
@@ -128,7 +129,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (accrued_notional_liquidation_ratio) = Math10xx8_mul(acrrued_notional, liquidation_ratio)
     let (accrued_notional_liquidation_fee) = Math10xx8_mul(acrrued_notional, one_plus_liquidation_fee)
     let (loan_cashflow) = Math10xx8_sub(notional, hist_accrual)
-    let (loan_cashflow_liquidation_fee) = Math10xx8_mul(cashflow, one_plus_liquidation_fee)
+    let (loan_cashflow_liquidation_fee) = Math10xx8_mul(loan_cashflow, one_plus_liquidation_fee)
     with_attr error_message("Loan is not valid for liquidation."):
         assert_le(collateral_value, accrued_notional_liquidation_ratio)
     end
@@ -144,7 +145,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     
     if (test_option1) == 1:
         # receive the USDC
-        let (ll_amount_receive) = acrrued_notional
+        let ll_amount_receive = acrrued_notional
         let (ll_amount_receive_erc) = check_user_balance(liquidator, usdc_addy, ll_amount_receive)
         CZCore.erc20_transferFrom(czcore_addy, usdc_addy, liquidator, czcore_addy, ll_amount_receive_erc)
         # send the WETH
@@ -167,7 +168,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         # @dev update CZCore and loan  
         let (new_capital_total) = Math10xx8_add(capital_total, accrued_interest_lp)
         let (new_reward_total) = Math10xx8_add(reward_total, accrued_interest_gt)
-        CZCore.set_captal_loan_reward_total(czcore_addy, new_capital_total, new_loan_total, new_reward_total)
+        CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
         CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
         event_loan_liquidate.emit(user)
         return()
@@ -183,7 +184,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
             # @dev update CZCore and loan  
             let (residual) = Math10xx8_sub(ll_amount_receive, loan_cashflow)
             let (new_capital_total) = Math10xx8_add(capital_total, residual)
-            CZCore.set_captal_loan_reward_total(czcore_addy, new_capital_total, new_loan_total, reward_total)
+            CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, reward_total)
             CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
             event_loan_liquidate.emit(user)
             return()
@@ -198,10 +199,9 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
             # @dev update CZCore and loan  
             let (residual) = Math10xx8_sub(loan_cashflow, ll_amount_receive)
             let (new_capital_total) = Math10xx8_sub(capital_total, residual)
-            CZCore.set_captal_loan_reward_total(czcore_addy, new_capital_total, new_loan_total, reward_total)
-            CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
             let (new_insolvency_total) = Math10xx8_add(insolvency_total, residual)
-            CZCore.set_insolvency(czcore_addy, new_insolvency_total)
+            CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, new_insolvency_total, reward_total)
+            CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
             event_loan_liquidate.emit(user)
             return()
         end
