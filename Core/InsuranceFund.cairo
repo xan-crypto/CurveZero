@@ -84,6 +84,7 @@ func insurance_fund_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     let (decimals) = Erc20.ERC20_decimals(usdc_addy)
     let (balance) = Math10xx8_convert_to(balance_erc, decimals)
     return(balance)
+end
 
 ####################################################################################
 # @dev this triggers an insurance payout to CZCore
