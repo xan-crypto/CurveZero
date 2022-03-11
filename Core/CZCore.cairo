@@ -75,14 +75,7 @@ end
 # below functions are all specific to CZCore so no need to move to Checks contract
 # functions below include
 # - check if system is currently paused
-# - check if caller is the LiquidityProvider contract
-# - check if caller is the PricingProvider contract
-# - check if caller is the CapitalBorrower contract
-# - check if caller is the LoanLiquidator contract
-# - check if caller is the GovenanceToken contract
-# - check if caller is the InsuranceFund contract
-# - check if caller is the Controller contract
-# - check if caller is authorised i.e. either LP, PP, CB, LL, GT or IF contract
+# - check if caller is authorised i.e. either LP, PP, CB, LL, GT, IF or Controller contract
 ####################################################################################
 func is_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (_trusted_addy) = trusted_addy.read()
@@ -90,76 +83,6 @@ func is_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     let (paused) = Controller.get_paused(controller_addy)
     with_attr error_message("System is paused."):
         assert paused = 0
-    end
-    return()
-end
-
-func lp_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_lp_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    return()
-end
-
-func pp_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_pp_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    return()
-end
-
-func cb_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_cb_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    return()
-end
-
-func ll_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_ll_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    return()
-end
-
-func gt_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_gt_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    return()
-end
-
-func if_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_if_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
-    end
-    return()
-end
-
-func controller_caller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (caller) = get_caller_address()
-    let (_trusted_addy) = trusted_addy.read()
-    let (authorised_caller) = TrustedAddy.get_controller_addy(_trusted_addy)
-    with_attr error_message("Not authorised caller."):
-        assert caller = authorised_caller
     end
     return()
 end
@@ -174,6 +97,7 @@ func authorised_callers{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (ll_addy) = TrustedAddy.get_ll_addy(_trusted_addy)
     let (gt_addy) = TrustedAddy.get_gt_addy(_trusted_addy)
     let (if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
+    let (controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
     if caller == lp_addy:
     	return()
     end
@@ -190,6 +114,9 @@ func authorised_callers{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     	return()
     end
     if caller == if_addy:
+    	return()
+    end
+    if caller == controller_addy:
     	return()
     end
     with_attr error_message("Not in list of authorised callers."):
@@ -262,7 +189,7 @@ end
 ####################################################################################
 @external
 func set_lp_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, amount : felt, lockup : felt):
-    lp_caller()
+    authorised_callers()
     is_paused()
     lp_balances.write(user,(amount,lockup))
     return ()
@@ -342,7 +269,7 @@ end
 @external
 func set_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         user : felt, lp_user : felt, lp_amount : felt, cz_amount : felt, lockup : felt, promote : felt):
-    pp_caller()
+    authorised_callers()
     is_paused()
     if promote == 1:
         # @dev promote user to pp and lock lp and cz tokens
@@ -400,7 +327,7 @@ end
 ####################################################################################
 @external
 func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, new : felt):
-    cb_caller()
+    authorised_callers()
     # @dev new loans not allowed when system paused, repay refinancing inc dec collateral still allowed
     if new == 1:
     	is_paused()
@@ -439,7 +366,7 @@ end
 ####################################################################################
 @external
 func set_staker_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(index:felt,user : felt):
-    gt_caller()
+    authorised_callers()
     is_paused()
     staker_index.write(index,user)
     return ()
@@ -479,7 +406,7 @@ end
 ####################################################################################
 @external
 func set_staker_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, gt_token : felt, unclaimed_reward : felt):
-    gt_caller()
+    authorised_callers()
     is_paused()
     staker_details.write(user,(gt_token,unclaimed_reward,1))
     return ()
@@ -512,7 +439,7 @@ end
 ####################################################################################
 @external
 func set_staker_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(stake_total : felt, index : felt):
-    gt_caller()
+    authorised_callers()
     is_paused()
     staker_total.write((stake_total,index))
     return ()
