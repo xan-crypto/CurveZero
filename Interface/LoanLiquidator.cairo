@@ -3,6 +3,7 @@
 # @dev all numbers passed into contract must be Math10xx8 type
 # Loan liquidators can
 # - call liquidate on a loan/user, if valid call the loan gets liquidated and liquidation fee paid to the caller
+# liquidation fee is set at 2.5% of the liquidated notional
 # This contract addy will be stored in the TrustedAddy contract
 # This contract talks directly to the CZCore contract
 # @author xan-crypto
@@ -64,27 +65,29 @@ end
 ####################################################################################
 # @dev emit LL events to build/maintain the loan book for liquidation/monitoring/dashboard
 # all we need to emit is the user addy that got liquidated, we can then remove this loan from the loan book
+# we emit the event in the same format as the CB events to make data consumption consistent for the off chain LL
 # recall the loan book is monitored by all liquidators looking for liquidation opportunities
 ####################################################################################
 @event
-func event_loan_liquidate(addy : felt):
+func event_loan_liquidate(addy : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt):
 end
 
 ####################################################################################
 # @dev liquidator can call liquidate loan
 # the are a couple of paths depending on the value of the users collateral
-# a loan is only valid for liquidation if the value of the collateral is below the accrued notional x liquidation ratio (accrued notional is current value of loan outstanding)
+# a loan is only valid for liquidation if the value of the collateral is below the accrued notional x liquidation ratio 
+# accrued notional is current value of loan outstanding and the liquidation ratio is effectively a safty margin to avoid losses on liquidation
 # option 1 - accrued notional + liquidation fee <= value of collateral < accrued notional x liquidation ratio
 # - no capital loss no accrued interest loss
-# - excess colateral can be sent to the user
-# - liquidator gets accrued notional x liquidation fee in WETH, returns accrued notional in USDC
-# - loan total reduces by the cashflow actually given to user
+# - excess colateral can be returned back to the user
+# - liquidator gets accrued notional x liquidation fee in WETH, returns accrued notional in USDC, diff is their fee
+# - loan total reduces by the cashflow actually given to user NB NB (loan total is cashflow out of protocol, Accrued interest is not cashflow out)
 # - accrued interest + hist accrual is distributed to LP/IF/GT
 # - user loan set to zero
 # option 2 - cashflow + liquidation fee <= value of collateral < accrued notional + liquidation fee
-# - no capital loss actual accrued interest loss
+# - no capital loss actual accrued interest loss, LPs lose some of the accrued interest earned but not actual capital
 # - no collateral remains, user gets nothing back
-# - liquidator gets all collateral, returns collateral value / 1.025 in USDC
+# - liquidator gets all collateral, returns collateral value / 1.025 in USDC, diff is their fee
 # - loan total reduces by the cashflow actually given to user
 # - USDC returned - cashflow gets added to the capital total with no distribution to others
 # - user loan set to zero
@@ -93,8 +96,8 @@ end
 # - no collateral remains, user gets nothing back
 # - liquidator gets all collateral, returns collateral value / 1.025 in USDC
 # - loan total reduces by the cashflow actually given to user
-# - cashflow - USDC received gets sub from the capital total
-# - cashflow - USDC received gets added to the insolvency total total
+# - cashflow - USDC received gets sub from the capital total, actual capital loss captured here
+# - cashflow - USDC received gets added to the insolvency total, this is the number that needs to be repaid to make LPs whole
 # - user loan set to zero
 # @param input is 
 # - the user addy whose loan is to be liquidated
@@ -134,7 +137,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         assert_le(collateral_value, accrued_notional_liquidation_ratio)
     end
     
-    # option 1 & 2... if neither then option 3 
+    # @dev option 1 & 2... if neither then option 3 
     let (test_option1) = is_in_range(collateral_value, accrued_notional_liquidation_fee, accrued_notional_liquidation_ratio)
     let (test_option2) = is_in_range(collateral_value, loan_cashflow_liquidation_fee, accrued_notional_liquidation_fee)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
@@ -144,7 +147,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (new_loan_total) = Math10xx8_sub(loan_total, loan_cashflow)
     
     if (test_option1) == 1:
-        # receive the USDC
+        # @dev receive the USDC
         let ll_amount_receive = acrrued_notional
         let (ll_amount_receive_erc) = check_user_balance(liquidator, usdc_addy, ll_amount_receive)
         CZCore.erc20_transferFrom(czcore_addy, usdc_addy, liquidator, czcore_addy, ll_amount_receive_erc)
@@ -170,7 +173,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         let (new_reward_total) = Math10xx8_add(reward_total, accrued_interest_gt)
         CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
         CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
-        event_loan_liquidate.emit(user)
+        event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0)
         return()
 
     else:
@@ -188,7 +191,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
             let (new_capital_total) = Math10xx8_add(capital_total, residual)
             CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, reward_total)
             CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
-            event_loan_liquidate.emit(user)
+            event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0)
             return()
         else:
             let (residual) = Math10xx8_sub(loan_cashflow, ll_amount_receive)
@@ -196,7 +199,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
             let (new_insolvency_total) = Math10xx8_add(insolvency_total, residual)
             CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, new_insolvency_total, reward_total)
             CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
-            event_loan_liquidate.emit(user)
+            event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0)
             return()
         end
     end
