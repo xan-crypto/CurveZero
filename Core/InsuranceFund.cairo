@@ -74,7 +74,7 @@ end
 # @return 
 # - the amount in USDC 
 ####################################################################################
-@external
+@view
 func insurance_fund_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (balance : felt):
     alloc_locals
     let (_trusted_addy) = trusted_addy.read()
