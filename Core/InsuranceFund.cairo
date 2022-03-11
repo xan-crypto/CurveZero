@@ -14,7 +14,8 @@ from starkware.cairo.common.math import assert_le
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Erc20
-from Functions.Math10xx8 import Math10xx8_sub, Math10xx8_add, Math10xx8_convert_to, Math10xx8_fromUint256
+from starkware.cairo.common.uint256 import Uint256
+from Functions.Math10xx8 import Math10xx8_sub, Math10xx8_add, Math10xx8_convert_to, Math10xx8_fromUint256, Math10xx8_toUint256
 from Functions.Checks import check_is_owner, check_user_balance
 
 ####################################################################################
@@ -74,7 +75,7 @@ end
 # - the amount in USDC 
 ####################################################################################
 @external
-func insurance_fund_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+func insurance_fund_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (balance : felt):
     alloc_locals
     let (_trusted_addy) = trusted_addy.read()
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
@@ -109,7 +110,8 @@ func insurance_fund_payout{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     # @dev check that the IF has sufficient USDC reserves to make the payout
     let (payout_erc) = check_user_balance(if_addy, usdc_addy, payout)
-    Erc20.ERC20_transfer(usdc_addy, czcore_addy, payout_erc)
+    let (payout_unit) = Math10xx8_toUint256(payout_erc)
+    Erc20.ERC20_transfer(usdc_addy, czcore_addy, payout_unit)
     # @dev update CZCore
     let (new_capital_total) = Math10xx8_add(capital_total, payout)
     let (new_insolvency_total) = Math10xx8_sub(insolvency_total, payout)
