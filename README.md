@@ -23,7 +23,7 @@ Community building - 0%<br>
 04 Feb 2022 - First contract deployed on StarkNet Goerli test net<br>
 16 Feb 2022 - First loan created and accrued compound interest correctly valued<br>
 05 Mar 2022 - Lend borrow functional, including token transfers, PP price validation and dummy price oracles<br>
-12 Mar 2022 - Loan liquidation and insurance fund working as expected<br>
+12 Mar 2022 - First loan liquidation and insurance fund payout working as expected<br>
 
 **Our Mantras**:<br>
 Make the protocol better<br>
