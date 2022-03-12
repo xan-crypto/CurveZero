@@ -133,6 +133,10 @@ namespace Settings:
     end
     func get_weth_liquidation_fee() -> (fee : felt):
     end
+    func get_liquidation_settlement() -> (period: felt):
+    end
+    func get_pp_slash_percentage() -> (percentage: felt):
+    end
 end
 
 ##################################################################
