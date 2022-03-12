@@ -76,7 +76,7 @@ end
 # @dev liquidator can call liquidate loan
 # the are a couple of paths depending on the value of the users collateral
 # a loan is only valid for liquidation if the value of the collateral is below the accrued notional x liquidation ratio 
-# or is the current ts > end ts + liquidation settlement period
+# or if the current ts > end ts + liquidation settlement period
 # accrued notional is current value of loan outstanding and the liquidation ratio is effectively a safty margin to avoid losses on liquidation
 # option 1 - accrued notional + liquidation fee <= value of collateral < accrued notional x liquidation ratio
 # - no capital loss no accrued interest loss
