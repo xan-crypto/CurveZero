@@ -16,7 +16,9 @@
 # - view the min max loan term
 # - view the WETH ltv for loan creation
 # - view the WETH liquidation ratio for loan liquidation
-# - view the liquidation fee
+# - view the WETH liquidation fee
+# - view the liquidate settlement period, period after end ts that a loan is liquidated
+# - view the pp slash percentage
 # Owner can set all of the above (excluding the owner addy), with defaults set on initialization 
 # Owner will be the same addy as the controller and will be a multisig wallet 
 # This contract addy will be stored in the TrustedAddy contract
@@ -47,6 +49,8 @@ const insurance_shortfall = 1000000
 const ltv = 60000000
 const liquidation_rato = 110000000
 const liquidation_fee = 2500000
+const liquidation_period = 60480000000000
+const pp_slash_amount = 50000000
 
 ####################################################################################
 # @dev storage for the addy of the owner
@@ -91,7 +95,11 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     # @dev weth liquidation ratio
     weth_liquidation_ratio.write(liquidation_rato)  
     # @dev liquidation fee
-    weth_liquidation_fee.write(liquidation_fee)      
+    weth_liquidation_fee.write(liquidation_fee)  
+    # @dev liquidation settlement period
+    liquidation_settlement.write(liquidation_period)
+   # @dev pp slash percentage
+    pp_slash_percentage.write(pp_slash_amount)
     return ()
 end
 
@@ -449,5 +457,57 @@ func set_weth_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (owner) = owner_addy.read()
     check_is_owner(owner)
     weth_liquidation_fee.write(fee)
+    return ()
+end
+
+####################################################################################
+# @dev view / set post end of loan liquidation timeframe
+# if a user does not repay the loan at maturity, we wait 7 days and then liquidate the loan
+# the liquidate settlement period thus ensures that capital is recycled
+# it also prevents an attack vector where someone borrows for 1wk to get a low rate and then keeps the loan open for 5 years
+# this would effectively be a way to arbitrage the system (1wk rate but for 5 years)
+# @param / @return 
+# - liquidation fee
+####################################################################################
+@storage_var
+func liquidation_settlement() -> (res : felt):
+end
+
+@view
+func get_liquidation_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (period : felt):
+    let (res) = liquidation_settlement.read()
+    return (res)
+end
+
+@external
+func set_liquidation_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(period : felt):
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    liquidation_settlement.write(period)
+    return ()
+end
+
+####################################################################################
+# @dev view / set the PP slash percentage
+# this is the amount of LP and CZT tokens that are taken from the PP if slashed
+# slashing will occur if there is some malicious behaviour and is called by controller
+# @param / @return 
+# - slash
+####################################################################################
+@storage_var
+func pp_slash_percentage() -> (res : felt):
+end
+
+@view
+func get_pp_slash_percentage{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (percentage : felt):
+    let (res) = pp_slash_percentage.read()
+    return (res)
+end
+
+@external
+func set_pp_slash_percentage{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(percentage : felt):
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    pp_slash_percentage.write(percentage)
     return ()
 end
