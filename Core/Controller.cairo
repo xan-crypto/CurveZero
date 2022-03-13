@@ -10,7 +10,6 @@
 # - distribute rewards from CZCore to stakers, they can they claim that using the GovenanceToken contract
 # - slash PP if anomalous behaviour detected, move funds to insurance fund
 # - slash GT holders if liquidity gap, move funds to insurance fund 
-# - trigger insurance fund pay out to CZCore to sure up insolvency shortfall
 # This contract addy will be stored in the TrustedAddy contract
 # @author xan-crypto
 ####################################################################################
