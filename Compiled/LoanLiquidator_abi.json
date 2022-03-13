@@ -1,0 +1,98 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "get_owner_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_trusted_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_trusted_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "data": [
+            {
+                "name": "addy",
+                "type": "felt"
+            },
+            {
+                "name": "has_loan",
+                "type": "felt"
+            },
+            {
+                "name": "notional",
+                "type": "felt"
+            },
+            {
+                "name": "collateral",
+                "type": "felt"
+            },
+            {
+                "name": "start_ts",
+                "type": "felt"
+            },
+            {
+                "name": "end_ts",
+                "type": "felt"
+            },
+            {
+                "name": "rate",
+                "type": "felt"
+            },
+            {
+                "name": "hist_accrual",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "event_loan_liquidate",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "name": "user",
+                "type": "felt"
+            }
+        ],
+        "name": "liquidate_loan",
+        "outputs": [],
+        "type": "function"
+    }
+]
