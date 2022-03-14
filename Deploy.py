@@ -5,7 +5,7 @@
 # compiles all contracts and returns contract addys
 ####################################################################################
 
-import subprocess
+import subprocess, time
 
 # compile all
 files = [
@@ -50,6 +50,7 @@ files = [
 last = files[-1]
 
 for file in files:
+    time.sleep(30)
     if file == files[-1]: process = subprocess.Popen(last, stdout=subprocess.PIPE, universal_newlines=True)
     else: process = subprocess.Popen(file,stdout=subprocess.PIPE,universal_newlines=True)
     while True:
