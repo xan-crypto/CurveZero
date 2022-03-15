@@ -43,21 +43,26 @@ const Math10xx8_TEN = 10 * Math10xx8_FRACT_PART
 const Math10xx8_YEAR = 31557600 * Math10xx8_FRACT_PART
 
 func Math10xx8_assert10xx8 {range_check_ptr} (x: felt):
-    assert_le(x, Math10xx8_BOUND)
-    assert_le(-Math10xx8_BOUND, x)
+    with_attr error_message(Out of range."):
+        assert_le(x, Math10xx8_BOUND)
+        assert_le(-Math10xx8_BOUND, x)
+    end
     return ()
 end
 
 # @dev Converts a fixed point value to a felt, truncating the fractional component
 func Math10xx8_toFelt {range_check_ptr} (x: felt) -> (res: felt):
+    Math10xx8_assert10xx8(x)
     let (res, _) = signed_div_rem(x, Math10xx8_FRACT_PART, Math10xx8_BOUND)
     return (res)
 end
 
 # @dev Converts a felt to a fixed point value ensuring it will not overflow
 func Math10xx8_fromFelt {range_check_ptr} (x: felt) -> (res: felt):
-    assert_le(x, Math10xx8_INT_PART)
-    assert_le(-Math10xx8_INT_PART, x)
+    with_attr error_message(Out of range."):
+        assert_le(x, Math10xx8_INT_PART)
+        assert_le(-Math10xx8_INT_PART, x)
+    end
     return (x * Math10xx8_FRACT_PART)
 end
 
@@ -122,6 +127,12 @@ end
 # @dev Convenience subtraction method to assert no overflow before returning
 func Math10xx8_sub {range_check_ptr} (x: felt, y: felt) -> (res: felt):
     alloc_locals
+    # starknet cli returns 1-2 = -1, voyager explorer returns 1-2 = overflow
+    # not sure what to trust, have raised question with starkware
+    # in meanwhile hard asset y <= x
+    with_attr error_message(y should be less or equal to x."):
+        assert_le(y, x)
+    end
     let res = x - y
     Math10xx8_assert10xx8(res)
     return (res)
