@@ -27,6 +27,8 @@ for file in files:
     while True:
         return_code = process.poll()
         if return_code is not None:
+            for output in process.stdout.readlines():
+                print(output.strip())
             print('Return code:', return_code, file[1])
             break
 
