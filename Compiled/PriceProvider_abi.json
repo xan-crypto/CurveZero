@@ -1,0 +1,108 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "get_owner_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_trusted_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_trusted_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "data": [
+            {
+                "name": "addy",
+                "type": "felt"
+            },
+            {
+                "name": "pp_status",
+                "type": "felt"
+            },
+            {
+                "name": "lp_change",
+                "type": "felt"
+            },
+            {
+                "name": "czt_change",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "event_pp_status",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "name": "user",
+                "type": "felt"
+            }
+        ],
+        "name": "view_pp_status",
+        "outputs": [
+            {
+                "name": "lp_token",
+                "type": "felt"
+            },
+            {
+                "name": "czt_token",
+                "type": "felt"
+            },
+            {
+                "name": "status",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "promote_pp_status",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "demote_pp_status",
+        "outputs": [],
+        "type": "function"
+    }
+]
