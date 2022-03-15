@@ -29,8 +29,9 @@
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
+from starkware.cairo.common.math_cmp import is_in_range
 from InterfaceAll import (TrustedAddy)
-from Functions.Math10xx8 import Math10xx8_add
+from Functions.Math10xx8 import Math10xx8_add, Math10xx8_one
 from Functions.Checks import check_is_owner
 
 ####################################################################################
@@ -506,8 +507,14 @@ end
 
 @external
 func set_pp_slash_percentage{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(percentage : felt):
+    alloc_locals
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (one) = Math10xx8_one()
+    let (test_range) = is_in_range(percentage, 0, one)
+    with_attr error_message("Slash perecent not in required range."):
+        assert test_range = 1
+    end
     pp_slash_percentage.write(percentage)
     return ()
 end
