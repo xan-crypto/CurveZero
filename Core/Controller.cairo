@@ -18,9 +18,10 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_nn, assert_le
+from starkware.cairo.common.math_cmp import is_in_range
 from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_add, Math10xx8_sub, Math10xx8_one
 from InterfaceAll import TrustedAddy, Settings, CZCore
-from Functions.Checks import check_is_owner
+from Functions.Checks import check_is_owner, check_user_balance
 
 ####################################################################################
 # @dev storage for the addy of the owner
