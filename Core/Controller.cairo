@@ -18,7 +18,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_nn, assert_le
-from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_add, Math10xx8_sub
+from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_add, Math10xx8_sub, Math10xx8_one
 from InterfaceAll import TrustedAddy, Settings, CZCore
 from Functions.Checks import check_is_owner
 
@@ -65,10 +65,14 @@ func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 ####################################################################################
-# @dev emit PP slash event for reporting / dashboard to monitor system
+# @dev emit PP slash / GT slash event for reporting / dashboard to monitor system
 ####################################################################################
 @event
 func event_pp_slash(addy : felt, pp_status : felt, lp_slashed : felt, czt_slashed : felt):
+end
+
+@event
+func event_gt_slash(slash_percentage : felt, stake_total : felt, new_stake_total : felt, index : felt):
 end
 
 ####################################################################################
@@ -207,4 +211,56 @@ func slash_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(
     # @dev emit event
     event_pp_slash.emit(addy=user, pp_status=0, lp_slashed=lp_slashed, czt_slashed=czt_slashed)  
     return()
+end
+
+####################################################################################
+# @dev slash GTs and send the CZT totals to the owner
+# as per above with PP slashing the AMM space on starknet is not mature enough to automate this yet
+# the tokens will be sent to the owner addy which will be a multisig and from there converted to USDC and sent to the insurance fund
+# @param 
+# - GT slash percentage
+####################################################################################
+@external
+func slash_gt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(slash_percentage : felt):
+    alloc_locals
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (one) = Math10xx8_one()
+    let (test_range) = is_in_range(slash_percentage, 0, one)
+    with_attr error_message("Slash perecent not in required range."):
+        assert test_range = 1
+    end
+    
+    # @dev remain = 1 - slash, ratio down all users and total
+    let (remain) = Math10xx8_sub(one, slash_percentage)
+    let (stake_total, index) = CZCore.get_staker_total(czcore_addy)
+    let (new_stake_total) = Math10xx8_mul(stake_total, remain)
+    CZCore.set_staker_total(czcore_addy, new_stake_total, index)
+    run_slash(czcore_addy, remain, index)
+    # @dev emit event
+    event_gt_slash.emit(slash_percentage=slash_percentage, stake_total=stake_total, new_stake_total=new_stake_total, index=index)  
+    return()
+end
+
+####################################################################################
+# @dev send out user unclaimed rewards
+# @param 
+# - CZCore addy for getting user stake/unclaimed data
+# - total stake for calculating reward ratio
+# - reward total being distributed
+# - index / count of number of stakers
+####################################################################################
+func run_slash{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(czcore_addy : felt, remain : felt, index : felt):
+    alloc_locals
+    if index == 0:
+        return()
+    end
+    run_slash(czcore_addy, remain, index-1)
+    let (user) = CZCore.get_staker_index(czcore_addy, index-1)
+    let (stake, unclaimed, old_user) = CZCore.get_staker_details(czcore_addy, user)
+    let (new_stake) = Math10xx8_mul(stake, remain)
+    CZCore.set_staker_details(user, new_stake, unclaimed, 1)
+    return ()
 end
