@@ -216,7 +216,7 @@ func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
     # @dev calc user capital to return
     if lp_user == 0:
-        return (0, 0, 0)
+        return (0, 0, lockup)
     else:
         let (lp_ratio) = Math10xx8_div(lp_user, lp_total)
         let (capital_user) = Math10xx8_mul(lp_ratio, capital_total)
