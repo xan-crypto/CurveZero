@@ -190,7 +190,7 @@ end
 # - the CZT tokens currently staked by user
 # - the reward accrued to user thats currently claimable
 ####################################################################################
-@external
+@view
 func view_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (gt_user : felt, reward : felt):
     alloc_locals
     let (_trusted_addy) = trusted_addy.read()
