@@ -13,7 +13,7 @@ https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY
 ![image](https://user-images.githubusercontent.com/62293102/153413152-6fad8e98-5e6f-4e28-b8a1-9661fc617d1d.png)
 
 **Progress**:<br>
-Protocol (cairo) - 60%<br>
+Protocol (cairo) - 65%<br>
 Services (python) - 0%<br>
 Website design - 0%<br>
 Website integration - 0%<br>
@@ -24,6 +24,7 @@ Community building - 0%<br>
 16 Feb 2022 - First loan created and accrued compound interest correctly valued<br>
 05 Mar 2022 - Lend borrow functional, including token transfers, PP price validation and dummy price oracles<br>
 12 Mar 2022 - First loan liquidation and insurance fund payout working as expected<br>
+16 Mar 2022 - Slashing PPs and GTs functioning as expected<br>
 
 **Our Mantras**:<br>
 Make the protocol better<br>
