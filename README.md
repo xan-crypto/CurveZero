@@ -24,7 +24,6 @@ Community building - 0%<br>
 16 Feb 2022 - First loan created and accrued compound interest correctly valued<br>
 05 Mar 2022 - Lend borrow functional, including token transfers, PP price validation and dummy price oracles<br>
 12 Mar 2022 - First loan liquidation and insurance fund payout working as expected<br>
-16 Mar 2022 - Slashing PPs and GTs functioning as expected<br>
 
 **Our Mantras**:<br>
 Make the protocol better<br>
