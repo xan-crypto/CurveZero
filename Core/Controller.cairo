@@ -155,7 +155,7 @@ func run_distribution{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (temp1) = Math10xx8_mul(reward_total, stake)
     let (temp2) = Math10xx8_div(temp1,stake_total)
     let (reward_new) = Math10xx8_add(temp2, unclaimed)
-    CZCore.set_staker_details(user,stake,reward_new,1)
+    CZCore.set_staker_details(czcore_addy, user, stake, reward_new)
     return ()
 end
 
@@ -262,6 +262,6 @@ func run_slash{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     let (user) = CZCore.get_staker_index(czcore_addy, index-1)
     let (stake, unclaimed, old_user) = CZCore.get_staker_details(czcore_addy, user)
     let (new_stake) = Math10xx8_mul(stake, remain)
-    CZCore.set_staker_details(user, new_stake, unclaimed, 1)
+    CZCore.set_staker_details(czcore_addy, user, new_stake, unclaimed)
     return ()
 end
