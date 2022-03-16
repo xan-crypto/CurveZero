@@ -238,7 +238,14 @@ func slash_gt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     let (remain) = Math10xx8_sub(one, slash_percentage)
     let (stake_total, index) = CZCore.get_staker_total(czcore_addy)
     let (new_stake_total) = Math10xx8_mul(stake_total, remain)
+    let (stake_slash) = Math10xx8_mul(stake_total, slash_percentage)
     CZCore.set_staker_total(czcore_addy, new_stake_total, index)
+    
+    # @dev check that czcore has eno CZT tokens and transfer
+    let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
+    let (stake_slash_erc) = check_user_balance(czcore_addy, czt_addy, stake_slash)
+    CZCore.erc20_transfer(czcore_addy, czt_addy, owner, stake_slash_erc)
+    
     run_slash(czcore_addy, remain, index)
     # @dev emit event
     event_gt_slash.emit(slash_percentage=slash_percentage, stake_total=stake_total, new_stake_total=new_stake_total, index=index)  
