@@ -186,7 +186,7 @@ func slash_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(
     end
     
     # @dev get slash percentage
-    let (settings_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (slash) = Settings.get_pp_slash_percentage(settings_addy)    
     let (lp_slashed) = Math10xx8_mul(lp_locked, slash)
     let (czt_slashed) = Math10xx8_mul(czt_locked, slash)
