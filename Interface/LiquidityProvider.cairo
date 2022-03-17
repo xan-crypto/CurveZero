@@ -66,7 +66,7 @@ end
 # TODO check that this reports correctly for negative / reductions
 ####################################################################################
 @event
-func event_lp_token(addy : felt, lp_change : felt, capital_change : felt):
+func event_lp_token(addy : felt, lp_current : felt, capital_change : felt):
 end
 
 ####################################################################################
@@ -110,7 +110,7 @@ func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (new_lockup) = Math10xx8_add(block_ts, lockup_period)
     CZCore.set_lp_balance(czcore_addy, user, new_lp_user, new_lockup)
     # @dev emit event 
-    event_lp_token.emit(addy=user, lp_change=lp_issuance, capital_change=usdc_deposit)
+    event_lp_token.emit(addy=user, lp_current=new_lp_user, capital_change=usdc_deposit)
     return (lp_issuance)
 end
 
@@ -191,7 +191,7 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (new_lp_user) = Math10xx8_sub(lp_user, lp_token)
     CZCore.set_lp_balance(czcore_addy, user, new_lp_user, lockup)
     # @dev emit event
-    event_lp_token.emit(addy=user, lp_change=-lp_token, capital_change=-capital_redeem)
+    event_lp_token.emit(addy=user, lp_current=new_lp_user, capital_change=-capital_redeem)
     return (capital_redeem)
 end
 
