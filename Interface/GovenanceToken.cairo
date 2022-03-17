@@ -74,7 +74,7 @@ end
 # TODO check that this reports correctly for negative / reductions
 ####################################################################################
 @event
-func gt_stake_unstake(addy : felt, stake : felt):
+func gt_stake_unstake(addy : felt, stake_current : felt):
 end
 
 @event
@@ -120,13 +120,13 @@ func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     if old_user == 1:
         CZCore.set_staker_total(czcore_addy, gt_total_new, index)
         # @dev emit event
-        gt_stake_unstake.emit(addy=user,stake=gt_token)
+        gt_stake_unstake.emit(addy=user, stake_current=gt_user_new)
         return()
     else:
         CZCore.set_staker_total(czcore_addy, gt_total_new, index + 1)
         CZCore.set_staker_index(czcore_addy, index, user)
         # @dev emit event
-        gt_stake_unstake.emit(addy=user,stake=gt_token)
+        gt_stake_unstake.emit(addy=user, stake_current=gt_user_new)
         return()
     end
 end
@@ -179,7 +179,7 @@ func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     CZCore.set_staker_details(czcore_addy, user, gt_user_new, reward)   
     CZCore.set_staker_total(czcore_addy, gt_total_new, index)
     # @dev emit event
-    gt_stake_unstake.emit(addy=user,stake=-gt_token)
+    gt_stake_unstake.emit(addy=user,stake_current=gt_user_new)
     return()
 end
 
