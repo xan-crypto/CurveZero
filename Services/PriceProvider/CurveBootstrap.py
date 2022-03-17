@@ -1,13 +1,13 @@
 ####################################################################################
 # @title CurveBootstrap.py
-# @dev This script will strip the native USD yield curve
-# since there is no well defined USD yield curve in crypto, below is how suggested approach to the bootstrap
-# we will use the following rates to build a 10y crypto native USD yield curve
+# @dev This script will bootstrap the crypto native USD yield curve
+# since there is no well defined USD yield curve in crypto, below is how we suggest the bootstrap process be done
+# we will use the following rates to build a 5y crypto native USD yield curve
 # - AAVE will be used for ON rate
 # - Deribit futures will be used for 0-1yr, because of the option market, the longer dated futures here should be more representative of rates
 # - deribit is also longer term vs binance / ftx which maxs out at about 6 months
-# - Post 1yr we will use a parallel shift from US treasuries, we will use 1/2/5/10 US treasury rates
-# - the parallel shift should be appropriate because the treasuries are risk free so the shape should be correct
+# - Post 1yr we will use a ratioed shift from US treasuries, we will use 0.5/1/2/3/5 US treasury rates
+# - the ratioed shift should be appropriate because the treasuries are risk free so the shape should be correct
 # - the CurveZero curve is based on over collateralisation hence there should also be no market risk
 # - by using the shift from the 1y pt we will capture the native crypto premium but maintain the risk free shape
 # @author xan-crypto
