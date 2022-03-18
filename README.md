@@ -26,7 +26,7 @@ Community building - 0%<br>
 12 Mar 2022 - First loan liquidation and insurance fund payout working as expected<br>
 18 Mar 2022 - Crypto native USD yield curve stripped from Defi/Futures/Treasury Bonds<br>
 
-![image](https://user-images.githubusercontent.com/62293102/158979708-f4c7627a-5a90-45a4-a6a9-c589859c20f7.png)
+![image](https://user-images.githubusercontent.com/62293102/158979980-92401fe5-a91c-4337-9f1b-38bd4be9b2d6.png)
 
 **Our Mantras**:<br>
 Make the protocol better<br>
