@@ -25,7 +25,6 @@ Community building - 0%<br>
 05 Mar 2022 - Lend borrow functional, including token transfers, PP price validation and dummy price oracles<br>
 12 Mar 2022 - First loan liquidation and insurance fund payout working as expected<br>
 18 Mar 2022 - Crypto native USD yield curve stripped from Defi/Futures/Treasury Bonds<br>
-
 ![image](https://user-images.githubusercontent.com/62293102/158979980-92401fe5-a91c-4337-9f1b-38bd4be9b2d6.png)
 
 **Our Mantras**:<br>
