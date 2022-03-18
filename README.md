@@ -14,7 +14,7 @@ https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY
 
 **Progress**:<br>
 Protocol (cairo) - 65%<br>
-Services (python) - 0%<br>
+Services (python) - 25%<br>
 Website design - 0%<br>
 Website integration - 0%<br>
 Community building - 0%<br>
