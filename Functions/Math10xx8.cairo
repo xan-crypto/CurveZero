@@ -14,6 +14,7 @@
 # - Math10xx8 zero
 # - Math10xx8 one
 # - Math10xx8 year in seconds
+# - Math10xx8 5 minutes in seconds
 # - Math10xx8 add
 # - Math10xx8 sub
 # - Math10xx8 mul
@@ -41,6 +42,7 @@ const Math10xx8_ZERO = 0 * Math10xx8_FRACT_PART
 const Math10xx8_ONE = 1 * Math10xx8_FRACT_PART
 const Math10xx8_TEN = 10 * Math10xx8_FRACT_PART
 const Math10xx8_YEAR = 31557600 * Math10xx8_FRACT_PART
+const Math10xx8_5MIN = 300 * Math10xx8_FRACT_PART
 
 func Math10xx8_assert10xx8 {range_check_ptr} (x: felt):
     with_attr error_message("Out of range."):
@@ -114,6 +116,11 @@ end
 # @dev returns the constant year secounds
 func Math10xx8_year {range_check_ptr} () -> (res: felt):
     return (Math10xx8_YEAR)
+end
+
+# @dev returns the constant 5mins secounds
+func Math10xx8_5min {range_check_ptr} () -> (res: felt):
+    return (Math10xx8_5MIN)
 end
 
 # @dev Convenience addition method to assert no overflow before returning
