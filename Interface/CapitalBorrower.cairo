@@ -107,8 +107,8 @@ func view_loan_detail{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (block_ts) = Math10xx8_ts()
     let (one) = Math10xx8_one()
     let (year_secs) = Math10xx8_year()
-    let (5min_secs) = Math10xx8_5min()
-    let (start_ts_buffer) = Math10xx8_add(5min_secs, start_ts)
+    let (five_min_secs) = Math10xx8_5min()
+    let (start_ts_buffer) = Math10xx8_add(five_min_secs, start_ts)
 
     if has_loan == 0:
         return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, 0)
