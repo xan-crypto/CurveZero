@@ -136,8 +136,15 @@ end
 #################################################################################### 
 @external
 func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
+    alloc_locals
     authorised_callers()
     is_paused()
+    # @dev return insufficient allownace 
+    with_attr error_message("Insufficient Allowance "):
+        let (allowance_unit) = Erc20.ERC20_allowance(sender, recipient)
+        let (allowance) = Math10xx8_fromUint256(allowance_unit)
+        assert_le(amount, allowance)
+    end
     let (amount_unit) = Math10xx8_toUint256(amount)
     Erc20.ERC20_transferFrom(erc_addy,sender=sender,recipient=recipient,amount=amount_unit)
     return ()
@@ -153,6 +160,7 @@ end
 ####################################################################################
 @external
 func erc20_transfer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, recipient: felt, amount: felt):
+    alloc_locals
     authorised_callers()
     is_paused()
     let (amount_unit) = Math10xx8_toUint256(amount)
