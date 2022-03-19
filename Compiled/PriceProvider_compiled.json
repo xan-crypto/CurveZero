@@ -145,6 +145,12 @@
     "program": {
         "attributes": [
             {
+                "end_pc": 398,
+                "name": "error_message",
+                "start_pc": 387,
+                "value": "Out of range."
+            },
+            {
                 "end_pc": 534,
                 "name": "error_message",
                 "start_pc": 533,
@@ -15658,12 +15664,12 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -15698,12 +15704,12 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -15739,12 +15745,12 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -15781,7 +15787,7 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
@@ -15802,12 +15808,12 @@
                                                 "parent_location": [
                                                     {
                                                         "end_col": 34,
-                                                        "end_line": 110,
+                                                        "end_line": 112,
                                                         "input_file": {
                                                             "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                         },
                                                         "start_col": 10,
-                                                        "start_line": 110
+                                                        "start_line": 112
                                                     },
                                                     "While handling contract interface function:"
                                                 ],
@@ -15822,7 +15828,7 @@
                                     "While expanding the reference 'syscall_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -15859,7 +15865,7 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
@@ -15873,12 +15879,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 34,
-                                                "end_line": 110,
+                                                "end_line": 112,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 110
+                                                "start_line": 112
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -15888,7 +15894,7 @@
                                     "While expanding the reference 'contract_address' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -15925,12 +15931,12 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -15967,12 +15973,12 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -16009,7 +16015,7 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
@@ -16023,12 +16029,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 34,
-                                                "end_line": 110,
+                                                "end_line": 112,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 110
+                                                "start_line": 112
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -16038,7 +16044,7 @@
                                     "While expanding the reference 'calldata_ptr_start' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -16075,12 +16081,12 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -16123,7 +16129,7 @@
                         "parent_location": [
                             {
                                 "end_col": 70,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
@@ -16137,7 +16143,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 34,
-                                                "end_line": 110,
+                                                "end_line": 112,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                 },
@@ -16151,12 +16157,12 @@
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 34,
-                                                                "end_line": 110,
+                                                                "end_line": 112,
                                                                 "input_file": {
                                                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                                 },
                                                                 "start_col": 10,
-                                                                "start_line": 110
+                                                                "start_line": 112
                                                             },
                                                             "While handling return values of"
                                                         ],
@@ -16166,7 +16172,7 @@
                                                     "While expanding the reference '__return_value_actual_size' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 110
+                                                "start_line": 112
                                             },
                                             "While handling return values of"
                                         ],
@@ -16176,7 +16182,7 @@
                                     "While expanding the reference '__return_value_ptr' in:"
                                 ],
                                 "start_col": 60,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling return value 'cz_require'"
                         ],
@@ -16220,12 +16226,12 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling return values of"
                         ],
@@ -16276,7 +16282,7 @@
                                 "parent_location": [
                                     {
                                         "end_col": 34,
-                                        "end_line": 110,
+                                        "end_line": 112,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                         },
@@ -16290,7 +16296,7 @@
                                                 "parent_location": [
                                                     {
                                                         "end_col": 34,
-                                                        "end_line": 110,
+                                                        "end_line": 112,
                                                         "input_file": {
                                                             "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                         },
@@ -16304,12 +16310,12 @@
                                                                 "parent_location": [
                                                                     {
                                                                         "end_col": 34,
-                                                                        "end_line": 110,
+                                                                        "end_line": 112,
                                                                         "input_file": {
                                                                             "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                                         },
                                                                         "start_col": 10,
-                                                                        "start_line": 110
+                                                                        "start_line": 112
                                                                     },
                                                                     "While handling contract interface function:"
                                                                 ],
@@ -16319,7 +16325,7 @@
                                                             "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                                         ],
                                                         "start_col": 10,
-                                                        "start_line": 110
+                                                        "start_line": 112
                                                     },
                                                     "While handling contract interface function:"
                                                 ],
@@ -16329,7 +16335,7 @@
                                             "While expanding the reference 'syscall_ptr' in:"
                                         ],
                                         "start_col": 10,
-                                        "start_line": 110
+                                        "start_line": 112
                                     },
                                     "While handling contract interface function:"
                                 ],
@@ -16378,7 +16384,7 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
@@ -16392,7 +16398,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 34,
-                                                "end_line": 110,
+                                                "end_line": 112,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                 },
@@ -16406,12 +16412,12 @@
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 34,
-                                                                "end_line": 110,
+                                                                "end_line": 112,
                                                                 "input_file": {
                                                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                                 },
                                                                 "start_col": 10,
-                                                                "start_line": 110
+                                                                "start_line": 112
                                                             },
                                                             "While handling contract interface function:"
                                                         ],
@@ -16421,7 +16427,7 @@
                                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 110
+                                                "start_line": 112
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -16431,7 +16437,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -16475,7 +16481,7 @@
                         "parent_location": [
                             {
                                 "end_col": 51,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
@@ -16489,12 +16495,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 34,
-                                                "end_line": 110,
+                                                "end_line": 112,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 110
+                                                "start_line": 112
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -16504,7 +16510,7 @@
                                     "While expanding the reference '__return_value_arg_lp_require' in:"
                                 ],
                                 "start_col": 41,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling return value 'lp_require'"
                         ],
@@ -16548,7 +16554,7 @@
                         "parent_location": [
                             {
                                 "end_col": 70,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
@@ -16562,12 +16568,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 34,
-                                                "end_line": 110,
+                                                "end_line": 112,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 110
+                                                "start_line": 112
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -16577,7 +16583,7 @@
                                     "While expanding the reference '__return_value_arg_cz_require' in:"
                                 ],
                                 "start_col": 60,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling return value 'cz_require'"
                         ],
@@ -16621,12 +16627,12 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -16665,13 +16671,13 @@
                                 },
                                 "parent_location": [
                                     {
-                                        "end_col": 34,
-                                        "end_line": 46,
+                                        "end_col": 38,
+                                        "end_line": 47,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
-                                        "start_col": 5,
-                                        "start_line": 46
+                                        "start_col": 9,
+                                        "start_line": 47
                                     },
                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                 ],
@@ -16708,13 +16714,13 @@
                         },
                         "parent_location": [
                             {
-                                "end_col": 16,
-                                "end_line": 46,
+                                "end_col": 20,
+                                "end_line": 47,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
-                                "start_col": 15,
-                                "start_line": 46
+                                "start_col": 19,
+                                "start_line": 47
                             },
                             "While expanding the reference 'x' in:"
                         ],
@@ -16739,13 +16745,13 @@
                     },
                     "hints": [],
                     "inst": {
-                        "end_col": 33,
-                        "end_line": 46,
+                        "end_col": 37,
+                        "end_line": 47,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
-                        "start_col": 18,
-                        "start_line": 46
+                        "start_col": 22,
+                        "start_line": 47
                     }
                 },
                 "391": {
@@ -16765,13 +16771,13 @@
                     },
                     "hints": [],
                     "inst": {
-                        "end_col": 34,
-                        "end_line": 46,
+                        "end_col": 38,
+                        "end_line": 47,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
-                        "start_col": 5,
-                        "start_line": 46
+                        "start_col": 9,
+                        "start_line": 47
                     }
                 },
                 "393": {
@@ -16791,13 +16797,13 @@
                     },
                     "hints": [],
                     "inst": {
-                        "end_col": 31,
-                        "end_line": 47,
+                        "end_col": 35,
+                        "end_line": 48,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
-                        "start_col": 15,
-                        "start_line": 47
+                        "start_col": 19,
+                        "start_line": 48
                     }
                 },
                 "395": {
@@ -16824,13 +16830,13 @@
                         },
                         "parent_location": [
                             {
-                                "end_col": 34,
-                                "end_line": 47,
+                                "end_col": 38,
+                                "end_line": 48,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
-                                "start_col": 33,
-                                "start_line": 47
+                                "start_col": 37,
+                                "start_line": 48
                             },
                             "While expanding the reference 'x' in:"
                         ],
@@ -16855,13 +16861,13 @@
                     },
                     "hints": [],
                     "inst": {
-                        "end_col": 35,
-                        "end_line": 47,
+                        "end_col": 39,
+                        "end_line": 48,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
-                        "start_col": 5,
-                        "start_line": 47
+                        "start_col": 9,
+                        "start_line": 48
                     }
                 },
                 "398": {
@@ -16882,12 +16888,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 14,
-                        "end_line": 48,
+                        "end_line": 50,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 48
+                        "start_line": 50
                     }
                 },
                 "399": {
@@ -16908,12 +16914,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 22,
-                        "end_line": 72,
+                        "end_line": 77,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 72
+                        "start_line": 77
                     }
                 },
                 "401": {
@@ -16934,36 +16940,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 44,
-                        "end_line": 71,
+                        "end_line": 76,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 44,
-                                "end_line": 71,
+                                "end_line": 76,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 19,
-                                        "end_line": 73,
+                                        "end_line": 78,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "start_col": 5,
-                                        "start_line": 73
+                                        "start_line": 78
                                     },
                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                 ],
                                 "start_col": 29,
-                                "start_line": 71
+                                "start_line": 76
                             },
                             "While expanding the reference 'range_check_ptr' in:"
                         ],
                         "start_col": 29,
-                        "start_line": 71
+                        "start_line": 76
                     }
                 },
                 "402": {
@@ -16984,12 +16990,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 18,
-                        "end_line": 73,
+                        "end_line": 78,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 13,
-                        "start_line": 73
+                        "start_line": 78
                     }
                 },
                 "403": {
@@ -17010,12 +17016,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 19,
-                        "end_line": 73,
+                        "end_line": 78,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 73
+                        "start_line": 78
                     }
                 },
                 "404": {
@@ -17037,12 +17043,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 79,
+                        "end_line": 84,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 79
+                        "start_line": 84
                     }
                 },
                 "406": {
@@ -17064,36 +17070,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 45,
-                        "end_line": 78,
+                        "end_line": 83,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 36,
-                                "end_line": 154,
+                                "end_line": 165,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 50,
-                                        "end_line": 80,
+                                        "end_line": 85,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "start_col": 19,
-                                        "start_line": 80
+                                        "start_line": 85
                                     },
                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                 ],
                                 "start_col": 21,
-                                "start_line": 154
+                                "start_line": 165
                             },
                             "While expanding the reference 'range_check_ptr' in:"
                         ],
                         "start_col": 30,
-                        "start_line": 78
+                        "start_line": 83
                     }
                 },
                 "407": {
@@ -17115,12 +17121,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 46,
-                        "end_line": 80,
+                        "end_line": 85,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 33,
-                        "start_line": 80
+                        "start_line": 85
                     }
                 },
                 "409": {
@@ -17142,24 +17148,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 64,
-                        "end_line": 78,
+                        "end_line": 83,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 49,
-                                "end_line": 80,
+                                "end_line": 85,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 48,
-                                "start_line": 80
+                                "start_line": 85
                             },
                             "While expanding the reference 'y' in:"
                         ],
                         "start_col": 57,
-                        "start_line": 78
+                        "start_line": 83
                     }
                 },
                 "410": {
@@ -17181,12 +17187,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 50,
-                        "end_line": 80,
+                        "end_line": 85,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 19,
-                        "start_line": 80
+                        "start_line": 85
                     }
                 },
                 "412": {
@@ -17209,12 +17215,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 64,
-                        "end_line": 81,
+                        "end_line": 86,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 51,
-                        "start_line": 81
+                        "start_line": 86
                     }
                 },
                 "414": {
@@ -17237,12 +17243,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 65,
-                        "end_line": 81,
+                        "end_line": 86,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 27,
-                        "start_line": 81
+                        "start_line": 86
                     }
                 },
                 "416": {
@@ -17273,36 +17279,36 @@
                         "parent_location": [
                             {
                                 "end_col": 65,
-                                "end_line": 81,
+                                "end_line": 86,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 36,
-                                        "end_line": 131,
+                                        "end_line": 142,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "parent_location": [
                                             {
                                                 "end_col": 45,
-                                                "end_line": 82,
+                                                "end_line": 87,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 17,
-                                                "start_line": 82
+                                                "start_line": 87
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
                                         "start_col": 21,
-                                        "start_line": 131
+                                        "start_line": 142
                                     },
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 27,
-                                "start_line": 81
+                                "start_line": 86
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -17331,24 +17337,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 55,
-                        "end_line": 78,
+                        "end_line": 83,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 32,
-                                "end_line": 82,
+                                "end_line": 87,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 31,
-                                "start_line": 82
+                                "start_line": 87
                             },
                             "While expanding the reference 'x' in:"
                         ],
                         "start_col": 48,
-                        "start_line": 78
+                        "start_line": 83
                     }
                 },
                 "418": {
@@ -17372,24 +17378,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 20,
-                        "end_line": 81,
+                        "end_line": 86,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 44,
-                                "end_line": 82,
+                                "end_line": 87,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 34,
-                                "start_line": 82
+                                "start_line": 87
                             },
                             "While expanding the reference 'multiplier' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 81
+                        "start_line": 86
                     }
                 },
                 "419": {
@@ -17413,12 +17419,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 45,
-                        "end_line": 82,
+                        "end_line": 87,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 17,
-                        "start_line": 82
+                        "start_line": 87
                     }
                 },
                 "421": {
@@ -17443,12 +17449,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 31,
-                        "end_line": 83,
+                        "end_line": 88,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 83
+                        "start_line": 88
                     }
                 },
                 "423": {
@@ -17473,24 +17479,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 13,
-                        "end_line": 82,
+                        "end_line": 87,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 16,
-                                "end_line": 84,
+                                "end_line": 89,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 13,
-                                "start_line": 84
+                                "start_line": 89
                             },
                             "While expanding the reference 'res' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 82
+                        "start_line": 87
                     }
                 },
                 "424": {
@@ -17515,12 +17521,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 84,
+                        "end_line": 89,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 84
+                        "start_line": 89
                     }
                 },
                 "425": {
@@ -17542,12 +17548,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 132,
+                        "end_line": 143,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 132
+                        "start_line": 143
                     }
                 },
                 "427": {
@@ -17569,12 +17575,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 28,
-                        "end_line": 133,
+                        "end_line": 144,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 23,
-                        "start_line": 133
+                        "start_line": 144
                     }
                 },
                 "428": {
@@ -17597,7 +17603,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 36,
-                        "end_line": 131,
+                        "end_line": 142,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
@@ -17611,12 +17617,12 @@
                                 "parent_location": [
                                     {
                                         "end_col": 82,
-                                        "end_line": 134,
+                                        "end_line": 145,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "start_col": 20,
-                                        "start_line": 134
+                                        "start_line": 145
                                     },
                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                 ],
@@ -17626,7 +17632,7 @@
                             "While expanding the reference 'range_check_ptr' in:"
                         ],
                         "start_col": 21,
-                        "start_line": 131
+                        "start_line": 142
                     }
                 },
                 "429": {
@@ -17649,24 +17655,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 20,
-                        "end_line": 133,
+                        "end_line": 144,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 42,
-                                "end_line": 134,
+                                "end_line": 145,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 35,
-                                "start_line": 134
+                                "start_line": 145
                             },
                             "While expanding the reference 'product' in:"
                         ],
                         "start_col": 13,
-                        "start_line": 133
+                        "start_line": 144
                     }
                 },
                 "430": {
@@ -17689,12 +17695,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 64,
-                        "end_line": 134,
+                        "end_line": 145,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 44,
-                        "start_line": 134
+                        "start_line": 145
                     }
                 },
                 "432": {
@@ -17717,12 +17723,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 81,
-                        "end_line": 134,
+                        "end_line": 145,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 66,
-                        "start_line": 134
+                        "start_line": 145
                     }
                 },
                 "434": {
@@ -17745,12 +17751,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 82,
-                        "end_line": 134,
+                        "end_line": 145,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 20,
-                        "start_line": 134
+                        "start_line": 145
                     }
                 },
                 "436": {
@@ -17781,7 +17787,7 @@
                         "parent_location": [
                             {
                                 "end_col": 82,
-                                "end_line": 134,
+                                "end_line": 145,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
@@ -17795,12 +17801,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 31,
-                                                "end_line": 135,
+                                                "end_line": 146,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 5,
-                                                "start_line": 135
+                                                "start_line": 146
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -17810,7 +17816,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 20,
-                                "start_line": 134
+                                "start_line": 145
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -17839,24 +17845,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 13,
-                        "end_line": 134,
+                        "end_line": 145,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 30,
-                                "end_line": 135,
+                                "end_line": 146,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 27,
-                                "start_line": 135
+                                "start_line": 146
                             },
                             "While expanding the reference 'res' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 134
+                        "start_line": 145
                     }
                 },
                 "438": {
@@ -17880,12 +17886,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 31,
-                        "end_line": 135,
+                        "end_line": 146,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 135
+                        "start_line": 146
                     }
                 },
                 "440": {
@@ -17909,24 +17915,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 13,
-                        "end_line": 134,
+                        "end_line": 145,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 16,
-                                "end_line": 136,
+                                "end_line": 147,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 13,
-                                "start_line": 136
+                                "start_line": 147
                             },
                             "While expanding the reference 'res' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 134
+                        "start_line": 145
                     }
                 },
                 "441": {
@@ -17950,12 +17956,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 136,
+                        "end_line": 147,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 136
+                        "start_line": 147
                     }
                 },
                 "442": {
@@ -17977,12 +17983,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 142,
+                        "end_line": 153,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 142
+                        "start_line": 153
                     }
                 },
                 "444": {
@@ -18004,7 +18010,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 36,
-                        "end_line": 141,
+                        "end_line": 152,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
@@ -18018,12 +18024,12 @@
                                 "parent_location": [
                                     {
                                         "end_col": 29,
-                                        "end_line": 143,
+                                        "end_line": 154,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "start_col": 17,
-                                        "start_line": 143
+                                        "start_line": 154
                                     },
                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                 ],
@@ -18033,7 +18039,7 @@
                             "While expanding the reference 'range_check_ptr' in:"
                         ],
                         "start_col": 21,
-                        "start_line": 141
+                        "start_line": 152
                     }
                 },
                 "445": {
@@ -18055,24 +18061,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 55,
-                        "end_line": 141,
+                        "end_line": 152,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 28,
-                                "end_line": 143,
+                                "end_line": 154,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 27,
-                                "start_line": 143
+                                "start_line": 154
                             },
                             "While expanding the reference 'y' in:"
                         ],
                         "start_col": 48,
-                        "start_line": 141
+                        "start_line": 152
                     }
                 },
                 "446": {
@@ -18094,12 +18100,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 29,
-                        "end_line": 143,
+                        "end_line": 154,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 17,
-                        "start_line": 143
+                        "start_line": 154
                     }
                 },
                 "448": {
@@ -18122,24 +18128,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 13,
-                        "end_line": 143,
+                        "end_line": 154,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 13,
-                                "end_line": 143,
+                                "end_line": 154,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 143
+                                "start_line": 154
                             },
                             "While auto generating local variable for 'div'."
                         ],
                         "start_col": 10,
-                        "start_line": 143
+                        "start_line": 154
                     }
                 },
                 "449": {
@@ -18169,7 +18175,7 @@
                         "parent_location": [
                             {
                                 "end_col": 29,
-                                "end_line": 143,
+                                "end_line": 154,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
@@ -18183,12 +18189,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 29,
-                                                "end_line": 144,
+                                                "end_line": 155,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 22,
-                                                "start_line": 144
+                                                "start_line": 155
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -18198,7 +18204,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 17,
-                                "start_line": 143
+                                "start_line": 154
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -18226,24 +18232,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 55,
-                        "end_line": 141,
+                        "end_line": 152,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 28,
-                                "end_line": 144,
+                                "end_line": 155,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 27,
-                                "start_line": 144
+                                "start_line": 155
                             },
                             "While expanding the reference 'y' in:"
                         ],
                         "start_col": 48,
-                        "start_line": 141
+                        "start_line": 152
                     }
                 },
                 "451": {
@@ -18266,12 +18272,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 29,
-                        "end_line": 144,
+                        "end_line": 155,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 22,
-                        "start_line": 144
+                        "start_line": 155
                     }
                 },
                 "453": {
@@ -18295,12 +18301,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 47,
-                        "end_line": 145,
+                        "end_line": 156,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 23,
-                        "start_line": 145
+                        "start_line": 156
                     }
                 },
                 "455": {
@@ -18332,7 +18338,7 @@
                         "parent_location": [
                             {
                                 "end_col": 29,
-                                "end_line": 144,
+                                "end_line": 155,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
@@ -18346,12 +18352,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 67,
-                                                "end_line": 146,
+                                                "end_line": 157,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 22,
-                                                "start_line": 146
+                                                "start_line": 157
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -18361,7 +18367,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 22,
-                                "start_line": 144
+                                "start_line": 155
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -18391,24 +18397,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 20,
-                        "end_line": 145,
+                        "end_line": 156,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 44,
-                                "end_line": 146,
+                                "end_line": 157,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 37,
-                                "start_line": 146
+                                "start_line": 157
                             },
                             "While expanding the reference 'product' in:"
                         ],
                         "start_col": 13,
-                        "start_line": 145
+                        "start_line": 156
                     }
                 },
                 "457": {
@@ -18433,36 +18439,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 13,
-                        "end_line": 143,
+                        "end_line": 154,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 13,
-                                "end_line": 143,
+                                "end_line": 154,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 49,
-                                        "end_line": 146,
+                                        "end_line": 157,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "start_col": 46,
-                                        "start_line": 146
+                                        "start_line": 157
                                     },
                                     "While expanding the reference 'div' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 143
+                                "start_line": 154
                             },
                             "While auto generating local variable for 'div'."
                         ],
                         "start_col": 10,
-                        "start_line": 143
+                        "start_line": 154
                     }
                 },
                 "458": {
@@ -18487,12 +18493,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 66,
-                        "end_line": 146,
+                        "end_line": 157,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 51,
-                        "start_line": 146
+                        "start_line": 157
                     }
                 },
                 "460": {
@@ -18517,12 +18523,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 67,
-                        "end_line": 146,
+                        "end_line": 157,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 22,
-                        "start_line": 146
+                        "start_line": 157
                     }
                 },
                 "462": {
@@ -18555,7 +18561,7 @@
                         "parent_location": [
                             {
                                 "end_col": 67,
-                                "end_line": 146,
+                                "end_line": 157,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
@@ -18569,12 +18575,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 33,
-                                                "end_line": 147,
+                                                "end_line": 158,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 5,
-                                                "start_line": 147
+                                                "start_line": 158
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -18584,7 +18590,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 22,
-                                "start_line": 146
+                                "start_line": 157
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -18615,24 +18621,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 15,
-                        "end_line": 146,
+                        "end_line": 157,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 32,
-                                "end_line": 147,
+                                "end_line": 158,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 27,
-                                "start_line": 147
+                                "start_line": 158
                             },
                             "While expanding the reference 'res_u' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 146
+                        "start_line": 157
                     }
                 },
                 "464": {
@@ -18658,12 +18664,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 33,
-                        "end_line": 147,
+                        "end_line": 158,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 147
+                        "start_line": 158
                     }
                 },
                 "466": {
@@ -18689,12 +18695,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 35,
-                        "end_line": 148,
+                        "end_line": 159,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 19,
-                        "start_line": 148
+                        "start_line": 159
                     }
                 },
                 "467": {
@@ -18720,12 +18726,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 36,
-                        "end_line": 148,
+                        "end_line": 159,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 148
+                        "start_line": 159
                     }
                 },
                 "468": {
@@ -18747,12 +18753,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 155,
+                        "end_line": 166,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 155
+                        "start_line": 166
                     }
                 },
                 "470": {
@@ -18774,7 +18780,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 36,
-                        "end_line": 154,
+                        "end_line": 165,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
@@ -18788,12 +18794,12 @@
                                 "parent_location": [
                                     {
                                         "end_col": 29,
-                                        "end_line": 156,
+                                        "end_line": 167,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "start_col": 22,
-                                        "start_line": 156
+                                        "start_line": 167
                                     },
                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                 ],
@@ -18803,7 +18809,7 @@
                             "While expanding the reference 'range_check_ptr' in:"
                         ],
                         "start_col": 21,
-                        "start_line": 154
+                        "start_line": 165
                     }
                 },
                 "471": {
@@ -18825,24 +18831,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 55,
-                        "end_line": 154,
+                        "end_line": 165,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 28,
-                                "end_line": 156,
+                                "end_line": 167,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 27,
-                                "start_line": 156
+                                "start_line": 167
                             },
                             "While expanding the reference 'y' in:"
                         ],
                         "start_col": 48,
-                        "start_line": 154
+                        "start_line": 165
                     }
                 },
                 "472": {
@@ -18864,12 +18870,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 29,
-                        "end_line": 156,
+                        "end_line": 167,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 22,
-                        "start_line": 156
+                        "start_line": 167
                     }
                 },
                 "474": {
@@ -18899,7 +18905,7 @@
                         "parent_location": [
                             {
                                 "end_col": 29,
-                                "end_line": 156,
+                                "end_line": 167,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
@@ -18913,12 +18919,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 33,
-                                                "end_line": 157,
+                                                "end_line": 168,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 21,
-                                                "start_line": 157
+                                                "start_line": 168
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -18928,7 +18934,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 22,
-                                "start_line": 156
+                                "start_line": 167
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -18956,24 +18962,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 55,
-                        "end_line": 154,
+                        "end_line": 165,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 32,
-                                "end_line": 157,
+                                "end_line": 168,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 31,
-                                "start_line": 157
+                                "start_line": 168
                             },
                             "While expanding the reference 'y' in:"
                         ],
                         "start_col": 48,
-                        "start_line": 154
+                        "start_line": 165
                     }
                 },
                 "476": {
@@ -18996,12 +19002,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 33,
-                        "end_line": 157,
+                        "end_line": 168,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 21,
-                        "start_line": 157
+                        "start_line": 168
                     }
                 },
                 "478": {
@@ -19025,12 +19031,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 7,
-                        "end_line": 158,
+                        "end_line": 169,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 158
+                        "start_line": 169
                     }
                 },
                 "480": {
@@ -19061,36 +19067,36 @@
                         "parent_location": [
                             {
                                 "end_col": 33,
-                                "end_line": 157,
+                                "end_line": 168,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 36,
-                                        "end_line": 154,
+                                        "end_line": 165,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "parent_location": [
                                             {
                                                 "end_col": 31,
-                                                "end_line": 159,
+                                                "end_line": 170,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 9,
-                                                "start_line": 159
+                                                "start_line": 170
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
                                         "start_col": 21,
-                                        "start_line": 154
+                                        "start_line": 165
                                     },
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 21,
-                                "start_line": 157
+                                "start_line": 168
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -19119,12 +19125,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 30,
-                        "end_line": 159,
+                        "end_line": 170,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 17,
-                        "start_line": 159
+                        "start_line": 170
                     }
                 },
                 "483": {
@@ -19148,12 +19154,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 31,
-                        "end_line": 159,
+                        "end_line": 170,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 159
+                        "start_line": 170
                     }
                 },
                 "484": {
@@ -19177,12 +19183,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 22,
-                        "end_line": 161,
+                        "end_line": 172,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 8,
-                        "start_line": 161
+                        "start_line": 172
                     }
                 },
                 "486": {
@@ -19207,12 +19213,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 7,
-                        "end_line": 161,
+                        "end_line": 172,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 161
+                        "start_line": 172
                     }
                 },
                 "488": {
@@ -19244,36 +19250,36 @@
                         "parent_location": [
                             {
                                 "end_col": 33,
-                                "end_line": 157,
+                                "end_line": 168,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 36,
-                                        "end_line": 154,
+                                        "end_line": 165,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "parent_location": [
                                             {
                                                 "end_col": 46,
-                                                "end_line": 162,
+                                                "end_line": 173,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 21,
-                                                "start_line": 162
+                                                "start_line": 173
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
                                         "start_col": 21,
-                                        "start_line": 154
+                                        "start_line": 165
                                     },
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 21,
-                                "start_line": 157
+                                "start_line": 168
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -19303,24 +19309,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 46,
-                        "end_line": 154,
+                        "end_line": 165,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 36,
-                                "end_line": 162,
+                                "end_line": 173,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 35,
-                                "start_line": 162
+                                "start_line": 173
                             },
                             "While expanding the reference 'x' in:"
                         ],
                         "start_col": 39,
-                        "start_line": 154
+                        "start_line": 165
                     }
                 },
                 "490": {
@@ -19345,24 +19351,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 157,
+                        "end_line": 168,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 45,
-                                "end_line": 162,
+                                "end_line": 173,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 38,
-                                "start_line": 162
+                                "start_line": 173
                             },
                             "While expanding the reference 'exp_val' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 157
+                        "start_line": 168
                     }
                 },
                 "491": {
@@ -19387,12 +19393,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 46,
-                        "end_line": 162,
+                        "end_line": 173,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 21,
-                        "start_line": 162
+                        "start_line": 173
                     }
                 },
                 "493": {
@@ -19418,48 +19424,48 @@
                     "hints": [],
                     "inst": {
                         "end_col": 36,
-                        "end_line": 154,
+                        "end_line": 165,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 46,
-                                "end_line": 162,
+                                "end_line": 173,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 36,
-                                        "end_line": 141,
+                                        "end_line": 152,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "parent_location": [
                                             {
                                                 "end_col": 49,
-                                                "end_line": 163,
+                                                "end_line": 174,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 16,
-                                                "start_line": 163
+                                                "start_line": 174
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
                                         "start_col": 21,
-                                        "start_line": 141
+                                        "start_line": 152
                                     },
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 21,
-                                "start_line": 162
+                                "start_line": 173
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
                         "start_col": 21,
-                        "start_line": 154
+                        "start_line": 165
                     }
                 },
                 "494": {
@@ -19485,12 +19491,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 43,
-                        "end_line": 163,
+                        "end_line": 174,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 30,
-                        "start_line": 163
+                        "start_line": 174
                     }
                 },
                 "496": {
@@ -19516,24 +19522,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 162,
+                        "end_line": 173,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 48,
-                                "end_line": 163,
+                                "end_line": 174,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 45,
-                                "start_line": 163
+                                "start_line": 174
                             },
                             "While expanding the reference 'num' in:"
                         ],
                         "start_col": 14,
-                        "start_line": 162
+                        "start_line": 173
                     }
                 },
                 "497": {
@@ -19559,12 +19565,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 49,
-                        "end_line": 163,
+                        "end_line": 174,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 16,
-                        "start_line": 163
+                        "start_line": 174
                     }
                 },
                 "499": {
@@ -19590,12 +19596,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 49,
-                        "end_line": 163,
+                        "end_line": 174,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 163
+                        "start_line": 174
                     }
                 },
                 "500": {
@@ -19627,7 +19633,7 @@
                         "parent_location": [
                             {
                                 "end_col": 33,
-                                "end_line": 157,
+                                "end_line": 168,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
@@ -19641,12 +19647,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 55,
-                                                "end_line": 165,
+                                                "end_line": 176,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 27,
-                                                "start_line": 165
+                                                "start_line": 176
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -19656,7 +19662,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 21,
-                                "start_line": 157
+                                "start_line": 168
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -19686,24 +19692,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 157,
+                        "end_line": 168,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 51,
-                                "end_line": 165,
+                                "end_line": 176,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 44,
-                                "start_line": 165
+                                "start_line": 176
                             },
                             "While expanding the reference 'exp_val' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 157
+                        "start_line": 168
                     }
                 },
                 "502": {
@@ -19728,12 +19734,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 54,
-                        "end_line": 165,
+                        "end_line": 176,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 53,
-                        "start_line": 165
+                        "start_line": 176
                     }
                 },
                 "504": {
@@ -19758,12 +19764,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 55,
-                        "end_line": 165,
+                        "end_line": 176,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 27,
-                        "start_line": 165
+                        "start_line": 176
                     }
                 },
                 "506": {
@@ -19790,24 +19796,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 23,
-                        "end_line": 165,
+                        "end_line": 176,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 23,
-                                "end_line": 165,
+                                "end_line": 176,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 20,
-                                "start_line": 165
+                                "start_line": 176
                             },
                             "While auto generating local variable for 'rem'."
                         ],
                         "start_col": 20,
-                        "start_line": 165
+                        "start_line": 176
                     }
                 },
                 "507": {
@@ -19841,36 +19847,36 @@
                         "parent_location": [
                             {
                                 "end_col": 55,
-                                "end_line": 165,
+                                "end_line": 176,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 36,
-                                        "end_line": 154,
+                                        "end_line": 165,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                         },
                                         "parent_location": [
                                             {
                                                 "end_col": 48,
-                                                "end_line": 166,
+                                                "end_line": 177,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
                                                 "start_col": 22,
-                                                "start_line": 166
+                                                "start_line": 177
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
                                         "start_col": 21,
-                                        "start_line": 154
+                                        "start_line": 165
                                     },
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 27,
-                                "start_line": 165
+                                "start_line": 176
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -19902,24 +19908,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 46,
-                        "end_line": 154,
+                        "end_line": 165,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 37,
-                                "end_line": 166,
+                                "end_line": 177,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 36,
-                                "start_line": 166
+                                "start_line": 177
                             },
                             "While expanding the reference 'x' in:"
                         ],
                         "start_col": 39,
-                        "start_line": 154
+                        "start_line": 165
                     }
                 },
                 "509": {
@@ -19946,24 +19952,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 18,
-                        "end_line": 165,
+                        "end_line": 176,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 47,
-                                "end_line": 166,
+                                "end_line": 177,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 39,
-                                "start_line": 166
+                                "start_line": 177
                             },
                             "While expanding the reference 'half_exp' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 165
+                        "start_line": 176
                     }
                 },
                 "510": {
@@ -19990,12 +19996,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 48,
-                        "end_line": 166,
+                        "end_line": 177,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 22,
-                        "start_line": 166
+                        "start_line": 177
                     }
                 },
                 "512": {
@@ -20023,24 +20029,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 18,
-                        "end_line": 166,
+                        "end_line": 177,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 51,
-                                "end_line": 167,
+                                "end_line": 178,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 43,
-                                "start_line": 167
+                                "start_line": 178
                             },
                             "While expanding the reference 'half_pow' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 166
+                        "start_line": 177
                     }
                 },
                 "513": {
@@ -20068,12 +20074,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 52,
-                        "end_line": 167,
+                        "end_line": 178,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 19,
-                        "start_line": 167
+                        "start_line": 178
                     }
                 },
                 "515": {
@@ -20102,12 +20108,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 7,
-                        "end_line": 168,
+                        "end_line": 179,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 168
+                        "start_line": 179
                     }
                 },
                 "517": {
@@ -20136,12 +20142,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 37,
-                        "end_line": 169,
+                        "end_line": 180,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 169
+                        "start_line": 180
                     }
                 },
                 "519": {
@@ -20170,24 +20176,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 15,
-                        "end_line": 167,
+                        "end_line": 178,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 22,
-                                "end_line": 170,
+                                "end_line": 181,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 17,
-                                "start_line": 170
+                                "start_line": 181
                             },
                             "While expanding the reference 'res_p' in:"
                         ],
                         "start_col": 10,
-                        "start_line": 167
+                        "start_line": 178
                     }
                 },
                 "520": {
@@ -20216,12 +20222,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 23,
-                        "end_line": 170,
+                        "end_line": 181,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 170
+                        "start_line": 181
                     }
                 },
                 "521": {
@@ -20250,24 +20256,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 46,
-                        "end_line": 154,
+                        "end_line": 165,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 43,
-                                "end_line": 172,
+                                "end_line": 183,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 42,
-                                "start_line": 172
+                                "start_line": 183
                             },
                             "While expanding the reference 'x' in:"
                         ],
                         "start_col": 39,
-                        "start_line": 154
+                        "start_line": 165
                     }
                 },
                 "522": {
@@ -20296,12 +20302,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 44,
-                        "end_line": 172,
+                        "end_line": 183,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 21,
-                        "start_line": 172
+                        "start_line": 183
                     }
                 },
                 "524": {
@@ -20331,12 +20337,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 35,
-                        "end_line": 173,
+                        "end_line": 184,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 173
+                        "start_line": 184
                     }
                 },
                 "526": {
@@ -20366,24 +20372,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 172,
+                        "end_line": 183,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 20,
-                                "end_line": 174,
+                                "end_line": 185,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                 },
                                 "start_col": 17,
-                                "start_line": 174
+                                "start_line": 185
                             },
                             "While expanding the reference 'res' in:"
                         ],
                         "start_col": 14,
-                        "start_line": 172
+                        "start_line": 183
                     }
                 },
                 "527": {
@@ -20413,12 +20419,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 21,
-                        "end_line": 174,
+                        "end_line": 185,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 174
+                        "start_line": 185
                     }
                 },
                 "528": {
@@ -21225,7 +21231,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 44,
-                        "end_line": 71,
+                        "end_line": 76,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                         },
@@ -21278,7 +21284,7 @@
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
                         "start_col": 29,
-                        "start_line": 71
+                        "start_line": 76
                     }
                 },
                 "551": {
@@ -21496,7 +21502,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 45,
-                                                "end_line": 78,
+                                                "end_line": 83,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Math10xx8.cairo"
                                                 },
@@ -21513,7 +21519,7 @@
                                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                                 ],
                                                 "start_col": 30,
-                                                "start_line": 78
+                                                "start_line": 83
                                             },
                                             "While expanding the reference 'range_check_ptr' in:"
                                         ],
@@ -34347,7 +34353,7 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
@@ -34400,7 +34406,7 @@
                                     "While trying to update the implicit return value 'syscall_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -34444,7 +34450,7 @@
                         "parent_location": [
                             {
                                 "end_col": 34,
-                                "end_line": 110,
+                                "end_line": 112,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/InterfaceAll.cairo"
                                 },
@@ -34497,7 +34503,7 @@
                                     "While trying to update the implicit return value 'range_check_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 110
+                                "start_line": 112
                             },
                             "While handling contract interface function:"
                         ],
@@ -46311,6 +46317,10 @@
                 "members": {},
                 "size": 0,
                 "type": "struct"
+            },
+            "InterfaceAll.Erc20.ERC20_ALLOWANCE_SELECTOR": {
+                "type": "const",
+                "value": 1214219596760124345539461129400300791432083269959349031244744221745565724075
             },
             "InterfaceAll.Erc20.ERC20_BALANCEOF_SELECTOR": {
                 "type": "const",

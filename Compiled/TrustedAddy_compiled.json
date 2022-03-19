@@ -57717,6 +57717,10 @@
                 "size": 0,
                 "type": "struct"
             },
+            "InterfaceAll.Erc20.ERC20_ALLOWANCE_SELECTOR": {
+                "type": "const",
+                "value": 1214219596760124345539461129400300791432083269959349031244744221745565724075
+            },
             "InterfaceAll.Erc20.ERC20_BALANCEOF_SELECTOR": {
                 "type": "const",
                 "value": 873959712803994665773906675436759453896798459963544659082819942060718636940

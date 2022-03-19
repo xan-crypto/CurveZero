@@ -52,7 +52,7 @@
                 "type": "felt"
             },
             {
-                "name": "stake",
+                "name": "stake_current",
                 "type": "felt"
             }
         ],
@@ -115,6 +115,7 @@
                 "type": "felt"
             }
         ],
+        "stateMutability": "view",
         "type": "function"
     },
     {

@@ -52,7 +52,7 @@
                 "type": "felt"
             },
             {
-                "name": "lp_change",
+                "name": "lp_current",
                 "type": "felt"
             },
             {

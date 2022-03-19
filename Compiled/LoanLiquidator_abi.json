@@ -85,6 +85,33 @@
         "type": "event"
     },
     {
+        "data": [
+            {
+                "name": "liquidator",
+                "type": "felt"
+            },
+            {
+                "name": "addy",
+                "type": "felt"
+            },
+            {
+                "name": "type",
+                "type": "felt"
+            },
+            {
+                "name": "interest_loss",
+                "type": "felt"
+            },
+            {
+                "name": "capital_loss",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "event_liquidate_details",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "name": "user",
