@@ -102,6 +102,8 @@ namespace Erc20:
     end
     func ERC20_decimals() -> (decimals: felt):
     end    
+    func ERC20_allowance(owner: felt, spender: felt) -> (remaining: Uint256):
+    end   
 end
 
 # @dev interface for the settings contract
