@@ -121,7 +121,7 @@ func view_loan_detail{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
             let (accrued_notional) = Math10xx8_mul(notional, accrual)
             let (accrued_interest) = Math10xx8_sub(accrued_notional, notional)
             let (test_accrued_interest) = is_nn(accrued_interest)
-            if test_accrued_interest = 1:
+            if test_accrued_interest == 1:
                 return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest)
             else:
                 return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, 0)
