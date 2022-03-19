@@ -14,7 +14,6 @@
 # - Math10xx8 zero
 # - Math10xx8 one
 # - Math10xx8 year in seconds
-# - Math10xx8 5 minutes in seconds
 # - Math10xx8 add
 # - Math10xx8 sub
 # - Math10xx8 mul
@@ -116,11 +115,6 @@ end
 # @dev returns the constant year secounds
 func Math10xx8_year {range_check_ptr} () -> (res: felt):
     return (Math10xx8_YEAR)
-end
-
-# @dev returns the constant 5mins secounds
-func Math10xx8_5min {range_check_ptr} () -> (res: felt):
-    return (Math10xx8_5MIN)
 end
 
 # @dev Convenience addition method to assert no overflow before returning
