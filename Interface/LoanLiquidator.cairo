@@ -189,7 +189,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
             CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
             CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
             event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0)
-            event_liquidate_details(liquidator, user, 1, 0, 0)
+            event_liquidate_details.emit(liquidator, user, 1, 0, 0)
             return()
         else:      
 
@@ -209,7 +209,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
                 CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, reward_total)
                 CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
                 event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0)
-                event_liquidate_details(liquidator, user, 2, total_loss, 0)
+                event_liquidate_details.emit(liquidator, user, 2, total_loss, 0)
                 return()
             else:
                 let (residual) = Math10xx8_sub(loan_cashflow, ll_amount_receive)
@@ -218,7 +218,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
                 CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, new_insolvency_total, reward_total)
                 CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
                 event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0)
-                event_liquidate_details(liquidator, user, 3, total_loss-residual, residual)
+                event_liquidate_details.emit(liquidator, user, 3, total_loss-residual, residual)
                 return()
             end
         end
