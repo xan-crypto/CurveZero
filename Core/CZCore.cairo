@@ -24,6 +24,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256)
+from starkware.cairo.common.math import assert_le
 from InterfaceAll import (TrustedAddy,Controller,Erc20)
 from Functions.Math10xx8 import Math10xx8_toUint256, Math10xx8_fromUint256
 from Functions.Checks import check_is_owner
@@ -141,7 +142,7 @@ func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     is_paused()
     # @dev return insufficient allownace 
     with_attr error_message("Insufficient Allowance "):
-        let (allowance_unit) = Erc20.ERC20_allowance(sender, recipient)
+        let (allowance_unit) = Erc20.ERC20_allowance(erc_addy, sender, recipient)
         let (allowance) = Math10xx8_fromUint256(allowance_unit)
         assert_le(amount, allowance)
     end
