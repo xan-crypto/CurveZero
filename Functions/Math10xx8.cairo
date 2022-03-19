@@ -41,7 +41,6 @@ const Math10xx8_ZERO = 0 * Math10xx8_FRACT_PART
 const Math10xx8_ONE = 1 * Math10xx8_FRACT_PART
 const Math10xx8_TEN = 10 * Math10xx8_FRACT_PART
 const Math10xx8_YEAR = 31557600 * Math10xx8_FRACT_PART
-const Math10xx8_5MIN = 300 * Math10xx8_FRACT_PART
 
 func Math10xx8_assert10xx8 {range_check_ptr} (x: felt):
     with_attr error_message("Out of range."):
