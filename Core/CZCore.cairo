@@ -25,7 +25,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import (Uint256)
 from InterfaceAll import (TrustedAddy,Controller,Erc20)
-from Functions.Math10xx8 import Math10xx8_toUint256 
+from Functions.Math10xx8 import Math10xx8_toUint256, Math10xx8_fromUint256
 from Functions.Checks import check_is_owner
 
 ####################################################################################
