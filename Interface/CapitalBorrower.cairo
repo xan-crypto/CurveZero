@@ -18,14 +18,14 @@
 %lang starknet
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.math import assert_nn, assert_nn_le
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math_cmp import is_le, is_nn
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.signature import verify_ecdsa_signature
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20, Oracle
-from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_pow_frac, Math10xx8_sub, Math10xx8_add, Math10xx8_ts, Math10xx8_one, Math10xx8_year, Math10xx8_convert_from, Math10xx8_zero, Math10xx8_5min 
+from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_pow_frac, Math10xx8_sub, Math10xx8_add, Math10xx8_ts, Math10xx8_one, Math10xx8_year, Math10xx8_convert_from, Math10xx8_zero
 from Functions.Checks import check_is_owner, check_min_pp, check_ltv, check_utilization, check_max_term, check_loan_range, check_user_balance
 
 ####################################################################################
@@ -107,14 +107,12 @@ func view_loan_detail{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (block_ts) = Math10xx8_ts()
     let (one) = Math10xx8_one()
     let (year_secs) = Math10xx8_year()
-    let (five_min_secs) = Math10xx8_5min()
-    let (start_ts_buffer) = Math10xx8_add(five_min_secs, start_ts)
 
     if has_loan == 0:
         return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, 0)
     else:
         # @dev there is a rare case where block time can be before the start time, in that case return 0 accrued interest
-        let (test) = is_le(start_ts_buffer, block_ts)
+        let (test) = is_le(start_ts, block_ts)
         if test == 1:
             let (diff_ts) = Math10xx8_sub(block_ts, start_ts)
             let (year_frac) = Math10xx8_div(diff_ts, year_secs)
@@ -122,7 +120,12 @@ func view_loan_detail{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
             let (accrual) = Math10xx8_pow_frac(one_plus_rate, year_frac)
             let (accrued_notional) = Math10xx8_mul(notional, accrual)
             let (accrued_interest) = Math10xx8_sub(accrued_notional, notional)
-            return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest)
+            let (test_accrued_interest) = is_nn(accrued_interest)
+            if test_accrued_interest = 1:
+                return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest)
+            else:
+                return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, 0)
+            end
         else:
             return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, 0)
         end
@@ -484,6 +487,9 @@ func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let median_rate = ordered[median]    
     let winning_position = index[median]
     let winning_pp = pp_pub_array[winning_position]
+    with_attr error_message("Median rate must be greater than or equal to zero."):
+        assert_nn(median_rate)
+    end
     return(median_rate, winning_pp, rate_array_len)
 end
 
