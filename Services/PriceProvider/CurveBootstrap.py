@@ -22,7 +22,7 @@ import time
 import investpy
 from matplotlib import pyplot as plt
 
-# aave ON rate on USDC - get from graphql
+# @dev aave ON rate on USDC - get from graphql
 def get_aave_on(_yc):
     query = """ query {reserves(where: {id: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb480xb53c1a33016b2dc2ff3653530bff1848a515c8c5"}) {name averageStableRate stableBorrowRate variableBorrowRate}} """
     response = requests.request('post', 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2',json={'query': query})
@@ -30,7 +30,7 @@ def get_aave_on(_yc):
     _yc = _yc.append({'source': 'aave','type': 'on','term': 1,'rate': int(response['data']['reserves'][0]['variableBorrowRate']) / 10 ** 27}, ignore_index=True)
     return _yc
 
-# deribit for the futs
+# @dev deribit for the futs
 def get_deribit_futs(_yc):
     deribit = ccxt.deribit({'rateLimit': 100, 'options': {'adjustForTimeDifference': True}, 'enableRateLimit': True})
     tickers = deribit.public_get_get_instruments({'currency':'BTC','kind':'future', 'expired': False})['result']
@@ -41,14 +41,14 @@ def get_deribit_futs(_yc):
             price = deribit.public_get_ticker({'instrument_name':ticker['instrument_name']})
             mid_price = (float(price['result']['best_bid_price']) + float(price['result']['best_ask_price']))*0.5
             term = (float(ticker['expiration_timestamp'])/1000-now)/86400
-            # to prevent distorts vs ON from aave
+            # @dev to prevent distorts vs ON from aave
             if term > 60:
                 rate = (mid_price/index)**(365/term)-1
                 _yc = _yc.append({'source': 'deribit','type': 'futs','term': term,'rate': rate}, ignore_index=True)
     _yc = _yc.sort_values(by='term')
     return _yc
 
-# investing for treasury bonds
+# @dev investing for treasury bonds
 def get_investing_tbonds(_yc):
     tb = investpy.bonds.get_bonds_overview('united states', as_json=False)
     index = tb.loc[tb.name=='U.S. 5Y'].index[0]
@@ -58,7 +58,7 @@ def get_investing_tbonds(_yc):
     for i,row in tb.iterrows():
         if row['name'][-1] == 'M': tb.at[i, 'term'] = int(row['name'][-3:-1])/12*365
         elif row['name'][-1] == 'Y': tb.at[i, 'term'] = int(row['name'][-3:-1])*365
-    # find base line for interpolation
+    # @dev find base line for extrapolation
     base = np.interp(_yc.iloc[-1]['term'], tb['term'].values, tb['last'].values)
     multiplier = _yc.iloc[-1]['rate']/base
     for i,row in tb.iterrows():
@@ -74,10 +74,11 @@ def bootstrap_yc():
     _yc['yfrac'] = _yc.term / 365
     return _yc
 
-# plot curve
+# @dev plot curve
 yc = bootstrap_yc()
 plt.plot(yc.yfrac.values, yc.rate.values)
 plt.axis([0,5,0,0.1])
 plt.ylabel('rate')
 plt.xlabel('year')
 plt.show()
+print(yc)
