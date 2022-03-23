@@ -19,8 +19,8 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_nn, assert_le
 from starkware.cairo.common.math_cmp import is_in_range
-from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_add, Math10xx8_sub, Math10xx8_one
-from InterfaceAll import TrustedAddy, Settings, CZCore
+from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_add, Math10xx8_sub, Math10xx8_one, Math10xx8_fromUint256, Math10xx8_convert_to
+from InterfaceAll import TrustedAddy, Settings, CZCore, Erc20
 from Functions.Checks import check_is_owner, check_user_balance
 
 ####################################################################################
@@ -271,4 +271,54 @@ func run_slash{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     let (new_stake) = Math10xx8_mul(stake, remain)
     CZCore.set_staker_details(czcore_addy, user, new_stake, unclaimed)
     return ()
+end
+
+####################################################################################
+# @dev system check, check if USDC balance sufficient for all liabilities
+# this function sums all the assets/liabilities in USDC and compare to the USDC balance on the ERC20 contract
+# @return
+# - current assets - liabilities in USDC
+# - current USDC balance
+####################################################################################
+@view
+func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (asset_liability : felt, usd_bal : felt):
+    alloc_locals
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)   
+    let (stake_total, index) = CZCore.get_staker_total(czcore_addy)
+        
+    # @dev get the total unclaimed rewards by all users    
+    let (unclaimed_total) = sum_unclaimed_rewards(czcore_addy, index)
+    # @dev we sum captal and reward and unclaimed reward and subtract loan and insolvency
+    let (temp1) = Math10xx8_add(capital_total, reward_total)
+    let (temp2) = Math10xx8_add(temp1, unclaimed_total)
+    let (temp3) = Math10xx8_sub(temp2, loan_total)
+    let (asset_liability) = Math10xx8_sub(temp3, insolvency_total)
+    
+    # @dev get USDC balance of for czcore and convert to math10xx8
+    let (decimals) = Erc20.ERC20_decimals(usdc_addy)
+    let (bal_erc_unit) = Erc20.ERC20_balanceOf(usdc_addy, czcore_addy)
+    let (bal_erc) = Math10xx8_fromUint256(bal_erc_unit)
+    let (usd_bal) = Math10xx8_convert_to(bal_erc, decimals)
+    return(asset_liability, usd_bal)
+end
+
+####################################################################################
+# @dev sums all user unclaimed rewards
+# @param 
+# - CZCore addy for getting user stake/unclaimed data
+# - index / count of number of stakers
+####################################################################################
+func sum_unclaimed_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(czcore_addy : felt, index : felt) -> (sum : felt):
+    alloc_locals
+    if index == 0:
+        return(0)
+    end
+    let (sum) = sum_unclaimed_rewards(czcore_addy, index-1)
+    let (user) = CZCore.get_staker_index(czcore_addy, index-1)
+    let (stake, unclaimed, old_user) = CZCore.get_staker_details(czcore_addy, user)
+    let (new_sum) = Math10xx8_add(sum, unclaimed)
+    return (new_sum)
 end
