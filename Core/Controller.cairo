@@ -10,6 +10,7 @@
 # - distribute rewards from CZCore to stakers, they can they claim that using the GovenanceToken contract
 # - slash PP if anomalous behaviour detected, move funds to insurance fund
 # - slash GT holders if liquidity gap, move funds to insurance fund 
+# - do a system check to compare USDC asset/liabilities to USDC balance in the ERC20 contract
 # This contract addy will be stored in the TrustedAddy contract
 # @author xan-crypto
 ####################################################################################
