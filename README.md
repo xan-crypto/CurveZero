@@ -15,9 +15,9 @@ https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY
 **Progress**:<br>
 Protocol (cairo) - 65%<br>
 Services (python) - 25%<br>
-Website design - 0%<br>
-Website integration - 0%<br>
-Community building - 0%<br>
+Website design - 10%<br>
+Website integration - 10%<br>
+Community building - 10%<br>
 
 **Key Dates**:<br>
 04 Feb 2022 - First contract deployed on StarkNet Goerli test net<br>
