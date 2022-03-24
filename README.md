@@ -18,6 +18,7 @@ Services (python) - 25%<br>
 Website design - 10%<br>
 Website integration - 10%<br>
 Community building - 10%<br>
+Audits - 0%<br>
 
 **Key Dates**:<br>
 04 Feb 2022 - First contract deployed on StarkNet Goerli test net<br>
