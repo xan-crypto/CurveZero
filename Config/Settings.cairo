@@ -40,11 +40,11 @@ from Functions.Checks import check_is_owner
 ####################################################################################
 const Math10xx8_FRACT_PART = 10 ** 8
 const Math10xx8_ONE = 1 * Math10xx8_FRACT_PART
-const origination_fee_total = 100000
+const origination_fee_total = 200000
 const origination_fee_split = 50000000
-const accrued_interest_split_1 = 95000000
-const accrued_interest_split_2 = 3000000
-const accrued_interest_split_3 = 2000000
+const accrued_interest_split_1 = 90000000
+const accrued_interest_split_2 = 5000000
+const accrued_interest_split_3 = 5000000
 const utilization_total = 90000000
 const insurance_shortfall = 1000000
 const ltv = 60000000
