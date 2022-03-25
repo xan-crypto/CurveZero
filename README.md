@@ -29,6 +29,6 @@ Audits - 0%<br>
 ![image](https://user-images.githubusercontent.com/62293102/158979980-92401fe5-a91c-4337-9f1b-38bd4be9b2d6.png)
 
 **Our Mantras**:<br>
-Make the protocol better<br>
+Make products that people love<br>
 Keep the protocol secure<br>
 Work together as a community<br>
