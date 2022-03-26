@@ -41832,13 +41832,13 @@
                 "type": "const",
                 "value": 429863190175709710013511494396305433562596190321615101538636208271530841913
             },
+            "InterfaceAll.Settings.GET_GRACE_PERIOD_SELECTOR": {
+                "type": "const",
+                "value": 481257699816176236765847151061433135063071726947243478289421032830264974817
+            },
             "InterfaceAll.Settings.GET_INSURANCE_SHORTFALL_RATIO_SELECTOR": {
                 "type": "const",
                 "value": 348678725987881872267670004526812785072940122160058720000829425071386212624
-            },
-            "InterfaceAll.Settings.GET_LIQUIDATION_SETTLEMENT_SELECTOR": {
-                "type": "const",
-                "value": 43503843076344089635787386563143620542086228624684362114241628778857723265
             },
             "InterfaceAll.Settings.GET_LOCKUP_PERIOD_SELECTOR": {
                 "type": "const",

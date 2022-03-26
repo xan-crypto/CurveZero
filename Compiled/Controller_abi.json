@@ -142,5 +142,21 @@
         "name": "slash_gt",
         "outputs": [],
         "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "system_check",
+        "outputs": [
+            {
+                "name": "asset_liability",
+                "type": "felt"
+            },
+            {
+                "name": "usd_bal",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     }
 ]

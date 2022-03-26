@@ -402,7 +402,7 @@
     },
     {
         "inputs": [],
-        "name": "get_liquidation_settlement",
+        "name": "get_grace_period",
         "outputs": [
             {
                 "name": "period",
@@ -419,7 +419,7 @@
                 "type": "felt"
             }
         ],
-        "name": "set_liquidation_settlement",
+        "name": "set_grace_period",
         "outputs": [],
         "type": "function"
     },

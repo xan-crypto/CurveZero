@@ -95,6 +95,10 @@
                 "type": "felt"
             },
             {
+                "name": "notional",
+                "type": "felt"
+            },
+            {
                 "name": "type",
                 "type": "felt"
             },
@@ -115,6 +119,10 @@
         "inputs": [
             {
                 "name": "user",
+                "type": "felt"
+            },
+            {
+                "name": "amount",
                 "type": "felt"
             }
         ],
