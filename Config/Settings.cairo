@@ -98,7 +98,7 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     # @dev liquidation fee
     weth_liquidation_fee.write(liquidation_fee)  
     # @dev liquidation settlement period
-    liquidation_settlement.write(liquidation_period)
+    grace_period.write(liquidation_period)
    # @dev pp slash percentage
     pp_slash_percentage.write(pp_slash_amount)
     return ()
@@ -462,29 +462,29 @@ func set_weth_liquidation_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 end
 
 ####################################################################################
-# @dev view / set post end of loan liquidation timeframe
+# @dev view / set grace period post end of loan 
 # if a user does not repay the loan at maturity, we wait 7 days and then liquidate the loan
-# the liquidate settlement period thus ensures that capital is recycled
+# the grace period thus ensures that capital is recycled
 # it also prevents an attack vector where someone borrows for 1wk to get a low rate and then keeps the loan open for 5 years
-# this would effectively be a way to arbitrage the system (1wk rate but for 5 years)
+# this would effectively be a way to arbitrage the system
 # @param / @return 
-# - liquidation fee
+# - period
 ####################################################################################
 @storage_var
-func liquidation_settlement() -> (res : felt):
+func grace_period() -> (res : felt):
 end
 
 @view
-func get_liquidation_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (period : felt):
-    let (res) = liquidation_settlement.read()
+func get_grace_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (period : felt):
+    let (res) = grace_period.read()
     return (res)
 end
 
 @external
-func set_liquidation_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(period : felt):
+func set_grace_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(period : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
-    liquidation_settlement.write(period)
+    grace_period.write(period)
     return ()
 end
 
