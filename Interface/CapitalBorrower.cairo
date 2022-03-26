@@ -111,21 +111,15 @@ func view_loan_detail{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     if has_loan == 0:
         return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, 0)
     else:
-        # @dev there is a rare case where block time can be before the start time, in that case return 0 accrued interest
-        let (test) = is_le(start_ts, block_ts)
-        if test == 1:
-            let (diff_ts) = Math10xx8_sub(block_ts, start_ts)
-            let (year_frac) = Math10xx8_div(diff_ts, year_secs)
-            let (one_plus_rate) = Math10xx8_add(one, rate)
-            let (accrual) = Math10xx8_pow_frac(one_plus_rate, year_frac)
-            let (accrued_notional) = Math10xx8_mul(notional, accrual)
-            let (accrued_interest) = Math10xx8_sub(accrued_notional, notional)
-            let (test_accrued_interest) = is_nn(accrued_interest)
-            if test_accrued_interest == 1:
-                return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest)
-            else:
-                return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, 0)
-            end
+        let (diff_ts) = Math10xx8_sub(block_ts, start_ts)
+        let (year_frac) = Math10xx8_div(diff_ts, year_secs)
+        let (one_plus_rate) = Math10xx8_add(one, rate)
+        let (accrual) = Math10xx8_pow_frac(one_plus_rate, year_frac)
+        let (accrued_notional) = Math10xx8_mul(notional, accrual)
+        let (accrued_interest) = Math10xx8_sub(accrued_notional, notional)
+        let (test_accrued_interest) = is_nn(accrued_interest)
+        if test_accrued_interest == 1:
+            return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest)
         else:
             return (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, 0)
         end
