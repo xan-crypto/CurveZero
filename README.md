@@ -27,6 +27,8 @@ Audits - 0%<br>
 12 Mar 2022 - First loan liquidation and insurance fund payout working as expected<br>
 18 Mar 2022 - Crypto native USD yield curve stripped from Defi/Futures/Treasury Bonds<br>
 ![image](https://user-images.githubusercontent.com/62293102/158979980-92401fe5-a91c-4337-9f1b-38bd4be9b2d6.png)
+28 Mar 2022 - First iteration of website design done<br>
+![Landing page](https://user-images.githubusercontent.com/62293102/160346863-6de7fe54-e8e0-4ac1-8b3f-60b534a37971.png)
 
 **Our Mantras**:<br>
 Make products that people love<br>
