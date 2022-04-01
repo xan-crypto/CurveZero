@@ -17,12 +17,12 @@
 # - view the WETH ltv for loan creation
 # - view the WETH liquidation ratio for loan liquidation
 # - view the WETH liquidation fee
-# - view the liquidate settlement period, period after end ts that a loan is liquidated
+# - view the grace period, period after end ts that a loan is liquidated
 # - view the pp slash percentage
 # Owner can set all of the above (excluding the owner addy), with defaults set on initialization 
 # Owner will be the same addy as the controller and will be a multisig wallet 
 # This contract addy will be stored in the TrustedAddy contract
-# This contract responds to all contracts but listens to changes from Controller contract only
+# This contract responds to all contracts but listens to changes from owner only
 # @author xan-crypto
 ####################################################################################
 
@@ -30,7 +30,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math_cmp import is_in_range
-from InterfaceAll import (TrustedAddy)
+from InterfaceAll import TrustedAddy
 from Functions.Math10xx8 import Math10xx8_add, Math10xx8_one
 from Functions.Checks import check_is_owner
 
@@ -73,11 +73,11 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     owner_addy.write(owner)
     # @dev set initial amounts for becoming pp - NB NB change this later
     pp_token_requirement.write((1000 * Math10xx8_ONE, 1000 * Math10xx8_ONE))
-    # @dev 7 day lockup period
+    # @dev 7 day lockup period - NB NB change this later
     lockup_period.write(0 * 604800 * Math10xx8_ONE)
-    # @dev origination fee and split 10bps and 50/50 PP IF
+    # @dev origination fee and split 20bps and 50/50 PP IF
     origination_fee.write((origination_fee_total, origination_fee_split, origination_fee_split))
-    # @dev accrued interest split between LP IF and GT - 95/3/2
+    # @dev accrued interest split between LP IF and GT - 90/5/5
     accrued_interest_split.write((accrued_interest_split_1, accrued_interest_split_2, accrued_interest_split_3))
     # @dev min loan and max loan amounts
     min_max_loan.write((10**2*Math10xx8_ONE - 1, 10**4*Math10xx8_ONE + 1))
@@ -153,6 +153,8 @@ end
 
 ####################################################################################
 # @dev view / set lock up period for LP capital
+# capital is locked for a short period 7 days to prevent sandwich interest repayment attacks
+# dont want an LP contributing capital a block before interest repay and then removing after
 # @param / @return 
 # - the lockup period in seconds and Math10xx8 
 ####################################################################################
@@ -177,7 +179,7 @@ end
 ####################################################################################
 # @dev view / set origination fee and split btw PP and IF
 # @param / @return 
-# - fee in % and in Math10xx8 10bps = 0.001 * 10**8
+# - fee in % and in Math10xx8 20bps = 0.002 * 10**8
 # - PP split
 # - IF split
 ####################################################################################
@@ -313,6 +315,8 @@ end
 ####################################################################################
 # @dev view / set min number of PPs for pricing
 # pricing oracles need atleast some min number of submission for the price to be accurate
+# if have 101 PP prices then 50 can be malcious on a pricing request and we still get reasonable price (median based)
+# PP that price will have stakes locked for 7 day for slashing if needed
 # @param / @return 
 # - min number of PP submission for a valid price
 ####################################################################################
