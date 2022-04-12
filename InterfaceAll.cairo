@@ -139,6 +139,8 @@ namespace Settings:
     end
     func get_pp_slash_percentage() -> (percentage: felt):
     end
+    func get_lp_yield_boost() -> (spread: felt):
+    end
 end
 
 ##################################################################
