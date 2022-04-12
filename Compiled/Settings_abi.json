@@ -445,5 +445,28 @@
         "name": "set_pp_slash_percentage",
         "outputs": [],
         "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_lp_yield_boost",
+        "outputs": [
+            {
+                "name": "spread",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "spread",
+                "type": "felt"
+            }
+        ],
+        "name": "set_lp_yield_boost",
+        "outputs": [],
+        "type": "function"
     }
 ]
