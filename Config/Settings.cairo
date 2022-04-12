@@ -19,6 +19,7 @@
 # - view the WETH liquidation fee
 # - view the grace period, period after end ts that a loan is liquidated
 # - view the pp slash percentage
+# - view the lp yield boost (this is a fixed spread over the pp oracle median to balance supply/demand)
 # Owner can set all of the above (excluding the owner addy), with defaults set on initialization 
 # Owner will be the same addy as the controller and will be a multisig wallet 
 # This contract addy will be stored in the TrustedAddy contract
@@ -52,6 +53,8 @@ const liquidation_rato = 110000000
 const liquidation_fee = 2500000
 const liquidation_period = 60480000000000
 const pp_slash_amount = 50000000
+const lp_yield_spread = 1000000
+const max_lp_yield_spread = 10000000
 
 ####################################################################################
 # @dev storage for the addy of the owner
@@ -99,8 +102,10 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     weth_liquidation_fee.write(liquidation_fee)  
     # @dev liquidation settlement period
     grace_period.write(liquidation_period)
-   # @dev pp slash percentage
+    # @dev pp slash percentage
     pp_slash_percentage.write(pp_slash_amount)
+    # @dev lp yield boost / spread
+    lp_yield_boost.write(lp_yield_spread)    
     return ()
 end
 
@@ -520,5 +525,37 @@ func set_pp_slash_percentage{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
         assert test_range = 1
     end
     pp_slash_percentage.write(percentage)
+    return ()
+end
+
+####################################################################################
+# @dev view / set the LP yield boost / spread
+# this is the spread that gets added on top of the PP oracle curve
+# we use this to balance supply and demand, we believe that attracting LP capital initially might be difficult
+# thus goverance has the ability to shift this spread higher, making it more attract for LPs to depo capital
+# the range for the spread is hard fixed from 0-10%
+# @param / @return 
+# - lp yield boost
+####################################################################################
+@storage_var
+func lp_yield_boost() -> (res : felt):
+end
+
+@view
+func get_lp_yield_boost{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (spread : felt):
+    let (res) = lp_yield_boost.read()
+    return (res)
+end
+
+@external
+func set_lp_yield_boost{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(spread : felt):
+    alloc_locals
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    let (test_range) = is_in_range(spread, 0, max_lp_yield_spread)
+    with_attr error_message("Yield boost spread not in required range."):
+        assert test_range = 1
+    end
+    lp_yield_boost.write(spread)
     return ()
 end
