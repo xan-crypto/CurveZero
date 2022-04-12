@@ -159,6 +159,8 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     
     # @dev process pp data
     let (median_rate, winning_pp, rate_array_len) = process_pp_data(loan_id, pp_data_len, pp_data)
+    let (lp_yield_boost) = Settings.get_lp_yield_boost(settings_addy)
+    let (median_rate_boost) = Math10xx8_add(median_rate, lp_yield_boost)
     
     # @dev checks
     check_min_pp(settings_addy, rate_array_len)
@@ -195,11 +197,11 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     CZCore.erc20_transfer(czcore_addy, usdc_addy, if_addy, if_fee_erc)
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
     # @dev update CZCore
-    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, start_ts, end_ts, median_rate, 0, 1)
+    CZCore.set_cb_loan(czcore_addy, user, 1, notional_with_fee, collateral, start_ts, end_ts, median_rate_boost, 0, 1)
     let (new_loan_total) = Math10xx8_add(loan_total, notional_with_fee)
     CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
     # @dev emit event
-    event_loan_change.emit(addy=user, has_loan=1, notional=notional_with_fee, collateral=collateral, start_ts=start_ts, end_ts=end_ts, rate=median_rate, hist_accrual=0)
+    event_loan_change.emit(addy=user, has_loan=1, notional=notional_with_fee, collateral=collateral, start_ts=start_ts, end_ts=end_ts, rate=median_rate_boost, hist_accrual=0)
     return ()
 end
 
@@ -394,6 +396,8 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     
     # @dev process pp data
     let (median_rate, winning_pp, rate_array_len) = process_pp_data(loan_id, pp_data_len, pp_data)
+    let (lp_yield_boost) = Settings.get_lp_yield_boost(settings_addy)
+    let (median_rate_boost) = Math10xx8_add(median_rate, lp_yield_boost)
     
     # @dev checks
     check_min_pp(settings_addy, rate_array_len)
@@ -436,11 +440,11 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, change_collateral_erc)
     end
     # @dev update CZCore
-    CZCore.set_cb_loan(czcore_addy, user, 1, new_notional_with_fee, collateral, start_ts, end_ts, median_rate, total_accrual, 0)
+    CZCore.set_cb_loan(czcore_addy, user, 1, new_notional_with_fee, collateral, start_ts, end_ts, median_rate_boost, total_accrual, 0)
     let (new_loan_total) = Math10xx8_add(loan_total, change_notional_with_fee)
     CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
     # @dev emit event
-    event_loan_change.emit(addy=user, has_loan=has_loan, notional=new_notional_with_fee, collateral=collateral, start_ts=start_ts, end_ts=end_ts, rate=median_rate, hist_accrual=total_accrual)
+    event_loan_change.emit(addy=user, has_loan=has_loan, notional=new_notional_with_fee, collateral=collateral, start_ts=start_ts, end_ts=end_ts, rate=median_rate_boost, hist_accrual=total_accrual)
     return ()
 end
 
