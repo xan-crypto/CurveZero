@@ -1,9 +1,7 @@
 # CurveZero - Fixed rate USD loan protocol
 
-**CurveZero living litepaper**: 
-https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY<br>
-**CurveZero twitter account**: 
-https://twitter.com/curve_zero
+**CurveZero living litepaper**: https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY<br>
+**CurveZero twitter account**: https://twitter.com/curve_zero
 
 **The why**: A few years back a friend of ours walked into a bank, and walked out with a 18.5% fixed rate car loan. We asked him at the time why he accepted that rate. He responded that the bank said that was the price and that he also wanted a fixed rate. Unfortunately our friend wasn't financially savvy enough to know that the right rate was probably 8-10% at the time. We come from a country where the banks are not always honest actors. This protocol exists to solve that problem.
 
