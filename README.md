@@ -1,7 +1,7 @@
 # CurveZero - Fixed rate USD loan protocol
 
 **The CurveZero living litepaper**: 
-https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY
+https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY<br>
 **CurveZero Twitter account**: 
 https://twitter.com/curve_zero
 
