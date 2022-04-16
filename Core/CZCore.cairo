@@ -298,7 +298,7 @@ end
 # functions support CB interface to create loans, repay loans, refinance loans and change collateral
 ####################################################################################
 @storage_var
-func cb_loan(user : felt) -> (res : (felt, felt, felt, felt, felt, felt, felt)):
+func cb_loan(user : felt) -> (res : (felt, felt, felt, felt, felt, felt, felt, felt)):
 end
 
 ####################################################################################
@@ -308,16 +308,17 @@ end
 # - has loan - 1 for true and 0 for false
 # - notional or loan amount
 # - collateral in weth
-# - start time of the loan in timestamp, or time of last laon change
+# - start time of the loan in timestamp, mainly for UX
+# - reval time of last loan change (start if new loan or latest repay date or latest refinancing date)
 # - end time of the loan in timestamp
 # - interest rate of the loan
 # - historic accrual which is needed post loan changes so that accurate fees can be paid to LP/IF/GT on repayment
 ####################################################################################
 @view
 func get_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> 
-        (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt):
+        (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt):
     let (res) = cb_loan.read(user=user)
-    return (res[0], res[1], res[2], res[3], res[4], res[5], res[6])
+    return (res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7])
 end
 
 ####################################################################################
@@ -335,15 +336,15 @@ end
 # if system paused should allow existing loan holders to repay or refinance or change collateral
 ####################################################################################
 @external
-func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, new : felt):
+func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, new : felt):
     authorised_callers()
     # @dev new loans not allowed when system paused, repay refinancing inc dec collateral still allowed
     if new == 1:
     	is_paused()
-    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual))
+    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual))
         return()
     else:
-    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual))
+    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual))
         return()
     end		
 end
