@@ -92,8 +92,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     min_pp_accepted.write(1*Math10xx8_ONE)
     # @dev insurance shortfall ratio to lp capital
     insurance_shortfall_ratio.write(insurance_shortfall)    
-    # @dev max loan term - 1 year initially
-    max_loan_term.write(366 * 86400 * Math10xx8_ONE)   
+    # @dev max loan term - 3 months initially
+    max_loan_term.write(92 * 86400 * Math10xx8_ONE)   
     # @dev weth ltv
     weth_ltv.write(ltv)  
     # @dev weth liquidation ratio
