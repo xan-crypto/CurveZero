@@ -71,7 +71,7 @@ end
 # type 1 - no loss, type 2 - interest loss only, type 3 - interest and capital loss
 ####################################################################################
 @event
-func event_loan_liquidate(addy : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt):
+func event_loan_liquidate(addy : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt):
 end
 @event
 func event_liquidate_details(liquidator : felt, addy : felt, notional : felt, type : felt, interest_loss : felt, capital_loss):
@@ -117,7 +117,7 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     # @dev check if user has a loan
     let (_trusted_addy) = trusted_addy.read()
     let (cb_addy) = TrustedAddy.get_cb_addy(_trusted_addy)
-    let (has_loan, notional, collateral, start_ts, end_ts, rate, hist_accrual, accrued_interest) = CapitalBorrower.view_loan_detail(cb_addy, user)
+    let (has_loan, notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, accrued_interest) = CapitalBorrower.view_loan_detail(cb_addy, user)
     with_attr error_message("User does not have an existing loan to liquidate."):
         assert has_loan = 1
     end
@@ -202,8 +202,8 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
                 let (new_capital_total) = Math10xx8_add(capital_total, accrued_interest_lp)
                 let (new_reward_total) = Math10xx8_add(reward_total, accrued_interest_gt)
                 CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
-                CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
-                event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0)
+                CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0, 0)
                 event_liquidate_details.emit(liquidator, user, acrrued_notional, 1, 0, 0)
                 return()
             else:      
@@ -222,8 +222,8 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
                     let (residual) = Math10xx8_sub(ll_amount_receive, loan_cashflow)
                     let (new_capital_total) = Math10xx8_add(capital_total, residual)
                     CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, reward_total)
-                    CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
-                    event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0)
+                    CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                    event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0, 0)
                     event_liquidate_details.emit(liquidator, user, acrrued_notional, 2, total_loss, 0)
                     return()
                 else:
@@ -231,8 +231,8 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
                     let (new_capital_total) = Math10xx8_sub(capital_total, residual)
                     let (new_insolvency_total) = Math10xx8_add(insolvency_total, residual)
                     CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, new_insolvency_total, reward_total)
-                    CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0)
-                    event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0)
+                    CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                    event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0, 0)
                     event_liquidate_details.emit(liquidator, user, acrrued_notional, 3, total_loss-residual, residual)
                     return()
                 end
@@ -251,11 +251,11 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
             # @dev update user loan  
             let (new_notional) = Math10xx8_sub(acrrued_notional, amount)
             let (new_collateral) = Math10xx8_sub(collateral, ll_amount_send)
-            CZCore.set_cb_loan(czcore_addy, user, has_loan, new_notional, new_collateral, block_ts, end_ts, rate, total_accrual, 0)            
+            CZCore.set_cb_loan(czcore_addy, user, has_loan, new_notional, new_collateral, start_ts, block_ts, end_ts, rate, total_accrual, 0)            
             # @dev update cz state
             let (new_loan_total) = Math10xx8_sub(loan_total, amount)
             CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
-            event_loan_liquidate.emit(user, has_loan, new_notional, new_collateral, block_ts, end_ts, rate, total_accrual)
+            event_loan_liquidate.emit(user, has_loan, new_notional, new_collateral, start_ts, block_ts, end_ts, rate, total_accrual)
             event_liquidate_details.emit(liquidator, user, amount, 1, 0, 0)
             return()
         end
