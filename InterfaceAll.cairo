@@ -158,6 +158,6 @@ end
 @contract_interface
 namespace CapitalBorrower:
     func view_loan_detail(user : felt) -> (
-        has_loan : felt, notional : felt, collateral : felt, start_ts : felt, end_ts : felt, rate : felt, hist_accrual, accrued_interest : felt):
+        has_loan : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual, accrued_interest : felt):
     end    
 end
