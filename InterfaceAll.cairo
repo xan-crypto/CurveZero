@@ -38,9 +38,11 @@ namespace TrustedAddy:
     end
     func get_usdc_addy() -> (addy : felt):
     end
-    func get_czt_addy() -> (addy : felt):
-    end
     func get_weth_addy() -> (addy : felt):
+    end
+    func get_lpt_addy() -> (addy : felt):
+    end
+    func get_czt_addy() -> (addy : felt):
     end
     func get_oracle_addy() -> (addy : felt):
     end
