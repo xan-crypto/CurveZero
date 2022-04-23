@@ -10,7 +10,7 @@
 # - mint/burn LP tokens for a user (erc20 tokens)
 # - get/set cz state (lp total, capital total, loan total, insolvency total, reward total)
 # - get/set accrued interest state (accrued interest total, weighted average rate, last accrual ts)
-# - get/set PP status and lp and czt token locked
+# - get/set PP status and lp and czt token locked, and lockup timestamp
 # - get/set a user loan
 # - get/set index of stakers needed for distributions
 # - get/set a users stake and unclaimed rewards
@@ -423,6 +423,7 @@ end
 # - end time of the loan in timestamp
 # - interest rate of the loan
 # - historic accrual which is needed post loan changes so that accurate fees can be paid to LP/IF/GT on repayment
+# - all repayments made to date
 ####################################################################################
 @view
 func get_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> 
@@ -435,26 +436,26 @@ end
 # @dev set the CB loan for a given user
 # @param 
 # - the user address 
-# - has loan - 1 for true and 0 for false
 # - notional or loan amount
 # - collateral in weth
 # - start time of the loan in timestamp, or time of last laon change
 # - end time of the loan in timestamp
 # - interest rate of the loan
 # - historic accrual which is needed post loan changes so that accurate fees can be paid to LP/IF/GT on repayment
-# - new flag, 1 if new loan which is not allowed when system paused 0, if existing loan which can be changed during pause
+# - total repayments made to date
+# - new flag, 1 - new loan which is not allowed when system paused, 0 - existing loan which can be changed during pause
 # if system paused should allow existing loan holders to repay or refinance or change collateral
 ####################################################################################
 @external
-func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, new : felt):
+func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, repayment : felt, new : felt):
     authorised_callers()
     # @dev new loans not allowed when system paused, repay refinancing inc dec collateral still allowed
     if new == 1:
     	is_paused()
-    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual))
+    	cb_loan.write(user, (notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, repayment))
         return()
     else:
-    	cb_loan.write(user,(has_loan, notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual))
+    	cb_loan.write(user, (notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, repayment))
         return()
     end		
 end
