@@ -17,8 +17,9 @@
 # - Controller addy
 # - Settings addy
 # - USDC addy
-# - CZT addy
 # - WETH addy
+# - LPT addy
+# - CZT addy
 # - Oracle addy
 # Owner can set all of the above except the Owner which is set by the constructor
 # @author xan-crypto
@@ -85,14 +86,19 @@ end
 func usdc_addy() -> (addy : felt):
 end
 
-# @dev addy of the ERC-20 CZT contract
-@storage_var
-func czt_addy() -> (addy : felt):
-end
-
 # @dev addy of the ERC-20 WETH contract
 @storage_var
 func weth_addy() -> (addy : felt):
+end
+
+# @dev addy of the ERC-20 LPT contract
+@storage_var
+func lpt_addy() -> (addy : felt):
+end
+
+# @dev addy of the ERC-20 CZT contract
+@storage_var
+func czt_addy() -> (addy : felt):
 end
 
 # @dev addy of the ERC-20 WETH Oracle
@@ -115,8 +121,9 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     _controller_addy : felt,
     _settings_addy : felt,
     _usdc_addy : felt,
-    _czt_addy : felt,
     _weth_addy : felt,
+    _lpt_addy : felt,
+    _czt_addy : felt,
     _oracle_addy : felt):
     owner_addy.write(_owner_addy)
     lp_addy.write(_lp_addy)
@@ -129,8 +136,9 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     controller_addy.write(_controller_addy)
     settings_addy.write(_settings_addy)
     usdc_addy.write(_usdc_addy)
-    czt_addy.write(_czt_addy)
     weth_addy.write(_weth_addy)
+    lpt_addy.write(_lpt_addy)
+    czt_addy.write(_czt_addy)
     oracle_addy.write(_oracle_addy)
     return ()
 end
@@ -275,20 +283,6 @@ func set_usdc_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_p
     return ()
 end
 
-# @dev view/set the ERC-20 CZT contract addy
-@view
-func get_czt_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
-    let (addy) = czt_addy.read()
-    return (addy)
-end
-@external
-func set_czt_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
-    let (owner) = owner_addy.read()
-    check_is_owner(owner)
-    czt_addy.write(addy)
-    return ()
-end
-
 # @dev view/set the ERC-20 WETH contract addy
 @view
 func get_weth_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
@@ -300,6 +294,34 @@ func set_weth_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_p
     let (owner) = owner_addy.read()
     check_is_owner(owner)
     weth_addy.write(addy)
+    return ()
+end
+
+# @dev view/set the ERC-20 LPT contract addy
+@view
+func get_lpt_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = lpt_addy.read()
+    return (addy)
+end
+@external
+func set_lpt_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    lpt_addy.write(addy)
+    return ()
+end
+
+# @dev view/set the ERC-20 CZT contract addy
+@view
+func get_czt_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = czt_addy.read()
+    return (addy)
+end
+@external
+func set_czt_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    czt_addy.write(addy)
     return ()
 end
 
