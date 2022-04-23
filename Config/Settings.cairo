@@ -5,7 +5,7 @@
 # - view the owner addy
 # - view the TrustedAddy contract address where all contract addys are stored
 # - view the token requirements to become a PP
-# - view LP capital lockup period
+# - view the lockup for a PP post valid price submission
 # - view loan origination fee and split between PP/IF
 # - view accrued interest split between LP/IF/GT
 # - view the min max loan in USDC
@@ -53,6 +53,7 @@ const liquidation_rato = 110000000
 const liquidation_fee = 2500000
 const liquidation_period = 60480000000000
 const pp_slash_amount = 50000000
+const pp_lockup_period = 60480000000000
 const lp_yield_spread = 1000000
 const max_lp_yield_spread = 10000000
 
@@ -76,8 +77,8 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     owner_addy.write(owner)
     # @dev set initial amounts for becoming pp - NB NB change this later
     pp_token_requirement.write((1000 * Math10xx8_ONE, 1000 * Math10xx8_ONE))
-    # @dev 7 day lockup period - NB NB change this later
-    lockup_period.write(0 * 604800 * Math10xx8_ONE)
+    # @dev set initial lock up period post of valid pricing request
+    pp_lockup.write(pp_lockup_period)
     # @dev origination fee and split 20bps and 50/50 PP IF
     origination_fee.write((origination_fee_total, origination_fee_split, origination_fee_split))
     # @dev accrued interest split between LP IF and GT - 90/5/5
@@ -157,27 +158,27 @@ func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 end
 
 ####################################################################################
-# @dev view / set lock up period for LP capital
-# capital is locked for a short period 7 days to prevent sandwich interest repayment attacks
-# dont want an LP contributing capital a block before interest repay and then removing after
+# @dev view / set lockup period for PP post valid pricing request
+# Locking up LP and CZT tokens aligns PP with the protocol, malicious activity can result in slashing 
+# Governance has the lock up period to decide on whether slashing is appropriate
 # @param / @return 
-# - the lockup period in seconds and Math10xx8 
+# - lock up period
 ####################################################################################
 @storage_var
-func lockup_period() -> (lockup : felt):
+func pp_lockup() -> (lockup : felt):
 end
 
 @view
-func get_lockup_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (lockup : felt):
-    let (res) = lockup_period.read()
+func get_pp_lockup{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (lockup : felt):
+    let (res) = pp_lockup.read()
     return (res)
 end
 
 @external
-func set_lockup_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lockup : felt):
+func set_pp_lockup{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lockup : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
-    lockup_period.write(lockup)
+    pp_lockup.write(lockup)
     return ()
 end
 
