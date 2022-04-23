@@ -49,21 +49,29 @@ end
 # @dev interfaces to CZCore contract
 @contract_interface
 namespace CZCore:
-    func get_lp_balance(user : felt) -> (lp_user : felt, lockup: felt):
+    func erc20_transferFrom(erc_addy : felt, sender : felt, recipient : felt, amount : felt):
     end
-    func set_lp_balance(user : felt, lp_user : felt, lockup : felt):
+    func erc20_transfer(erc_addy : felt, recipient : felt, amount : felt):
+    end
+    func erc20_mint(erc_addy : felt, recipient : felt, amount : felt):
+    end
+    func erc20_burn(erc_addy : felt, account : felt, amount : felt):
+    end   
+    func get_accrued_interest() -> (accrued_interest_total : felt, wt_avg_rate : felt, last_accrual_ts : felt):
+    end
+    func set_update_accrual() -> (accrued_interest_total : felt):
+    end
+    func set_update_rate(new_loan : felt, new_rate : felt, add_remove : felt) -> ():
+    end
+    func set_reduce_accrual(payment : felt) -> ():
     end
     func get_cz_state() -> (lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
     end
     func set_cz_state(lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
     end 
-    func erc20_transferFrom(erc_addy : felt, sender: felt, recipient: felt, amount: felt):
+    func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, lock_ts : felt, status : felt):
     end
-    func erc20_transfer(erc_addy : felt, recipient: felt, amount: felt):
-    end
-    func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, status : felt):
-    end
-    func set_pp_status(user : felt, lp_user : felt, lp_amount : felt, cz_amount : felt, lockup : felt, promote : felt):
+    func set_pp_status(user : felt, lp_amount : felt, cz_amount : felt, lock_ts : felt, promote : felt):
     end  
     func get_cb_loan(user : felt) -> (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt):
     end  
@@ -103,6 +111,10 @@ namespace Erc20:
     func ERC20_decimals() -> (decimals: felt):
     end    
     func ERC20_allowance(owner: felt, spender: felt) -> (remaining: Uint256):
+    end   
+    func ERC20_mint(recipient: felt, amount: Uint256) -> ():
+    end   
+    func ERC20_burn(account: felt, amount: Uint256) -> ():
     end   
 end
 
