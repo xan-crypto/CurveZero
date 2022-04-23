@@ -7,10 +7,10 @@
 # - get/set the TrustedAddy contract address where all contract addys are stored
 # - transfer erc20 tokens from user to CZCore
 # - transfer erc20 tokens to addy from CZCore
-# - mint/burn LP tokens for a user (erc20 tokens)
+# - mint/burn LP tokens for a user (erc20 tokens equivalent)
 # - get/set cz state (lp total, capital total, loan total, insolvency total, reward total)
 # - get/set accrued interest state (accrued interest total, weighted average rate, last accrual ts)
-# - get/set PP status and lp and czt token locked, and lockup timestamp
+# - get/set PP status (lp tokens locked, czt tokens locked, lockup timestamp post pricing, PP status)
 # - get/set a user loan
 # - get/set index of stakers needed for distributions
 # - get/set a users stake and unclaimed rewards
@@ -18,7 +18,7 @@
 # This contract addy will be stored in the TrustedAddy contract
 # This contract is the main contract of the CurveZero protocol
 # most other contracts can be easily swapped out, this is not true of CZCore because of the total/user state and reserves stored here
-# for CZCore upgrade new version is needed, the Settings contract can be changed to push liquidity out of the older version
+# for CZCore upgrade, a new version is needed, the Settings contract can be changed to push liquidity out of the older version
 # @author xan-crypto
 ####################################################################################
 
@@ -274,10 +274,10 @@ func set_update_rate{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     authorised_callers()
     let (ai) = accrued_interest.read()
     let (cz) = cz_state.read()
+    let (old_exposure) = Math10xx8_mul(cz[2], ai[1])
+    let (new_exposure) = Math10xx8_mul(new_loan, new_rate)
 
     if add_remove == 1:
-        let (old_exposure) = Math10xx8_mul(cz[2], ai[1])
-        let (new_exposure) = Math10xx8_mul(new_loan, new_rate)
         let (total_exposure) = Math10xx8_add(old_exposure, new_exposure)
         let (new_loan_total) = Math10xx8_add(cz[2], new_loan)
         let (new_wt_avg_rate) = Math10xx8_div(total_exposure, new_loan_total)
@@ -289,8 +289,6 @@ func set_update_rate{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         if test == 1:
             accrued_interest.write((ai[0], 0, ai[2]))
         else:
-            let (old_exposure) = Math10xx8_mul(cz[2], ai[1])
-            let (new_exposure) = Math10xx8_mul(new_loan, new_rate)
             let (total_exposure) = Math10xx8_sub(old_exposure, new_exposure)
             let (new_loan_total) = Math10xx8_sub(cz[2], new_loan)
             let (new_wt_avg_rate) = Math10xx8_div(total_exposure, new_loan_total)
@@ -465,7 +463,7 @@ end
 # as new stakers join we record these in an index so that we can iterate to list to distribute
 ####################################################################################
 @storage_var
-func staker_index(index:felt) -> (user : felt):
+func staker_index(index : felt) -> (user : felt):
 end
 
 ####################################################################################
@@ -497,7 +495,7 @@ end
 # @dev maps unique users to their stake, unclaimed rewards, old_user status
 ####################################################################################
 @storage_var
-func staker_details(user:felt) -> (res : (felt,felt,felt)):
+func staker_details(user : felt) -> (res : (felt,felt,felt)):
 end
 
 ####################################################################################
@@ -511,9 +509,9 @@ end
 # - old user status needed for indexing
 ####################################################################################
 @view
-func get_staker_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user:felt) -> (gt_token : felt, unclaimed_reward : felt, old_user:felt):
+func get_staker_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user:felt) -> (gt_token : felt, unclaimed_reward : felt, old_user : felt):
     let (res) = staker_details.read(user=user)
-    return (res[0],res[1],res[2])
+    return (res[0], res[1], res[2])
 end
 
 ####################################################################################
@@ -529,7 +527,7 @@ end
 func set_staker_details{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, gt_token : felt, unclaimed_reward : felt):
     authorised_callers()
     is_paused()
-    staker_details.write(user,(gt_token,unclaimed_reward,1))
+    staker_details.write(user,(gt_token, unclaimed_reward, 1))
     return ()
 end
 
@@ -549,7 +547,7 @@ end
 @view
 func get_staker_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (stake_total : felt, index : felt):
     let (res) = staker_total.read()
-    return (res[0],res[1])
+    return (res[0], res[1])
 end
 
 ####################################################################################
@@ -562,6 +560,6 @@ end
 func set_staker_total{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(stake_total : felt, index : felt):
     authorised_callers()
     is_paused()
-    staker_total.write((stake_total,index))
+    staker_total.write((stake_total, index))
     return ()
 end
