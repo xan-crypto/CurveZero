@@ -107,8 +107,8 @@ func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     # @dev transfer the USDC, mint the lp token and update variables
     let (new_lp_total, lp_issuance) = lp_update(lp_total, usdc_deposit, new_accrued_capital_total, accrued_capital_total)
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, usdc_deposit_erc)
-    CZCore.erc20_mint(czcore_addy, lpt_addy, user, lp_issuance)
     CZCore.set_cz_state(czcore_addy, new_lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
+    CZCore.erc20_mint(czcore_addy, lpt_addy, user, lp_issuance)
     # @dev emit event 
     event_lp_token.emit(addy=user, lp_change=lp_issuance, capital_change=usdc_deposit, type=1)
     return ()
@@ -180,8 +180,8 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 
     # @dev transfer the USDC, burn the lp token and update variables
     CZCore.erc20_burn(czcore_addy, lpt_addy, user, lp_token)
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, capital_redeem_erc)
     CZCore.set_cz_state(czcore_addy, new_lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, capital_redeem_erc)    
     # @dev emit event
     event_lp_token.emit(addy=user, lp_change=-lp_token, capital_change=-capital_redeem, type=0)
     return ()
