@@ -308,8 +308,8 @@ func set_reduce_accrual{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     alloc_locals
     authorised_callers()
     let (ai) = accrued_interest.read()
-    let (test) = is_le(ai[0], payment)
-    if test == 1:
+    let (test_accrued_less_payment) = is_le(ai[0], payment)
+    if test_accrued_less_payment == 1:
         accrued_interest.write((0, ai[1], ai[2]))
     else:
         let (new_accrued_interest_total) = Math10xx8_sub(ai[0], payment)
