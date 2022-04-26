@@ -5,6 +5,7 @@
 # - mint lp tokens by depositing USDC
 # - burn lp token by withdrawing USDC 
 # - value what their lp tokens are worth in USDC
+# - get the value of 1 lp token
 # This contract addy will be stored in the TrustedAddy contract
 # This contract talks directly to the CZCore contract
 # @author xan-crypto
@@ -195,7 +196,26 @@ end
 # - the USDC value of those tokens
 ####################################################################################
 @view
-func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_user : felt, usd_value):
+func value_user_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_user : felt, usd_value):
+    alloc_locals
+    # @dev get user lp balance
+    let (_trusted_addy) = trusted_addy.read()
+    let (lpt_addy) = TrustedAddy.get_lpt_addy(_trusted_addy)
+    let (lp_user_unit : Uint256) = Erc20.ERC20_balanceOf(lpt_addy, user)
+    let (lp_user) = Math10xx8_fromUint256(lp_user_unit)
+    # @dev calc user capital
+    let (usd_value) = value_lp_token()
+    let (capital_user) = Math10xx8_mul(usd_value, lp_user)
+    return (lp_user, capital_user)
+end
+
+####################################################################################
+# @dev values 1 LP token in USDC terms
+# @return 
+# - the USDC value of 1 lp token
+####################################################################################
+@view
+func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (usd_value):
     alloc_locals
     # @dev get variables
     let (_trusted_addy) = trusted_addy.read()
@@ -203,16 +223,10 @@ func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
     let (accrued_capital_total) = Math10xx8_add(capital_total, accrued_interest_total)
-    let (lpt_addy) = TrustedAddy.get_lpt_addy(_trusted_addy)
-    let (lp_user_unit : Uint256) = Erc20.ERC20_balanceOf(lpt_addy, user)
-    let (lp_user) = Math10xx8_fromUint256(lp_user_unit)
-
-    # @dev calc user capital to return
-    if lp_user == 0:
-        return (0, 0)
+    if lp_total == 0:
+        return (0)
     else:
-        let (lp_ratio) = Math10xx8_div(lp_user, lp_total)
-        let (capital_user) = Math10xx8_mul(lp_ratio, accrued_capital_total)
-        return (lp_user, capital_user)
+        let (usd_value) = Math10xx8_div(accrued_capital_total, lp_total)
+        return (usd_value)
     end
 end
