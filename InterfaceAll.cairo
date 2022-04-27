@@ -73,11 +73,11 @@ namespace CZCore:
     end 
     func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, lock_ts : felt, status : felt):
     end
-    func set_pp_status(user : felt, lp_amount : felt, cz_amount : felt, lock_ts : felt, promote : felt):
+    func set_pp_status(user : felt, lp_locked : felt, cz_locked : felt, lock_ts : felt, status : felt):
     end  
-    func get_cb_loan(user : felt) -> (has_loan : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, liquidate_me : felt):
+    func get_cb_loan(user : felt) -> (notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt):
     end  
-    func set_cb_loan(user : felt, has_loan : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, liquidate_me : felt, new : felt):
+    func set_cb_loan(user : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt, new : felt):
     end  
     func get_staker_index(index : felt) -> (user : felt):
     end  
