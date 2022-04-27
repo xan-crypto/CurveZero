@@ -5,7 +5,7 @@
 # - mint lp tokens by depositing USDC
 # - burn lp token by withdrawing USDC 
 # - value what their lp tokens are worth in USDC
-# - get the value of 1 lp token
+# - get the value of 1 lp token in USDC
 # This contract addy will be stored in the TrustedAddy contract
 # This contract talks directly to the CZCore contract
 # @author xan-crypto
@@ -164,7 +164,6 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     # @dev verify user has sufficient LP tokens to redeem
     let (user) = get_caller_address()
     let (lpt_addy) = TrustedAddy.get_lpt_addy(_trusted_addy)
-    let (lpt_burn_erc) = check_user_balance(user, lpt_addy, lp_token)
 
     # @dev other variables and calcs
     let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
@@ -184,7 +183,7 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     CZCore.set_cz_state(czcore_addy, new_lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
     CZCore.erc20_transfer(czcore_addy, usdc_addy, user, capital_redeem_erc)    
     # @dev emit event
-    event_lp_token.emit(addy=user, lp_change=-lp_token, capital_change=-capital_redeem, type=0)
+    event_lp_token.emit(addy=user, lp_change=lp_token, capital_change=capital_redeem, type=0)
     return ()
 end
 
