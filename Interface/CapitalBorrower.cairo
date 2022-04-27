@@ -122,9 +122,7 @@ func view_loan_detail{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
             let (diff_ts) = Math10xx8_sub(block_ts, reval_ts)
             let (year_frac) = Math10xx8_div(diff_ts, year_secs)
             let (rate_year_frac) = Math10xx8_mul(rate, year_frac)
-            let (accrual) = Math10xx8_add(one, rate_year_frac)
-            let (accrued_notional_os) = Math10xx8_mul(notional_os, accrual)
-            let (accrued_interest) = Math10xx8_sub(accrued_notional_os, notional_os)
+            let (accrued_interest) = Math10xx8_mul(notional_os, rate_year_frac)
             return (notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me, accrued_interest)
         else:
             return (notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me, 0)
@@ -338,19 +336,19 @@ end
 # if user has 10 WETH backing loan and wants to increase this to 11 WETH, they pass 1 WETH in the function below
 ####################################################################################
 @external
-func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(collateral : felt):
+func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(add_collateral : felt):
     alloc_locals
     # @dev Verify that the user has sufficient funds before call
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()    
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
-    let (collateral_erc) = check_user_balance(user, weth_addy, collateral)
+    let (add_collateral_erc) = check_user_balance(user, weth_addy, add_collateral)
     
     # @dev transfers
-    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, collateral_erc)
+    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, add_collateral_erc)
     let (notional, old_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me) = CZCore.get_cb_loan(czcore_addy, user)
-    let (new_collateral) = Math10xx8_add(collateral, old_collateral)
+    let (new_collateral) = Math10xx8_add(old_collateral, add_collateral)
     CZCore.set_cb_loan(czcore_addy, user, notional, new_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me, 0)
     # @dev emit event
     event_loan_change.emit(addy=user, notional=notional, collateral=new_collateral, start_ts=start_ts, reval_ts=reval_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual, hist_repay=hist_repay, liquidate_me=liquidate_me)  
@@ -363,7 +361,7 @@ end
 # if user has 10 WETH backing loan and wants to decrease this to 9 WETH, they pass 1 WETH in the function below
 ####################################################################################
 @external
-func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(collateral : felt):
+func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(dec_collateral : felt):
     alloc_locals
     # @dev Verify amount positive
     let (_trusted_addy) = trusted_addy.read()
@@ -372,24 +370,24 @@ func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (notional, old_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me, accrued_interest) = view_loan_detail(user)
     with_attr error_message("Collateral withdrawal should be positive and at most the user total collateral."):
-       assert_nn_le(collateral, old_collateral)
+       assert_nn_le(dec_collateral, old_collateral)
     end
     
     # @dev check withdrawal would not make loan insolvent
     let (acrrued_notional) = Math10xx8_add(notional, accrued_interest)
     let (total_acrrued_notional) = Math10xx8_add(acrrued_notional, hist_accrual)
     let (total_acrrued_notional_os) = Math10xx8_sub(total_acrrued_notional, hist_repay)
-    let (new_collateral) = Math10xx8_sub(old_collateral, collateral)
+    let (new_collateral) = Math10xx8_sub(old_collateral, dec_collateral)
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
     check_ltv(oracle_addy, settings_addy, total_acrrued_notional_os, new_collateral)
 
     # @dev test sufficient funds to repay
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
-    let (collateral_erc) = check_user_balance(czcore_addy, weth_addy, collateral)
+    let (dec_collateral_erc) = check_user_balance(czcore_addy, weth_addy, dec_collateral)
         
     # @dev transfer 
     CZCore.set_cb_loan(czcore_addy, user, notional, new_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me, 0)
-    CZCore.erc20_transfer(czcore_addy, weth_addy, user, collateral_erc)
+    CZCore.erc20_transfer(czcore_addy, weth_addy, user, dec_collateral_erc)
     # @dev emit event
     event_loan_change.emit(addy=user, notional=notional, collateral=new_collateral, start_ts=start_ts, reval_ts=reval_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual, hist_repay=hist_repay, liquidate_me=liquidate_me)
     return()
@@ -430,17 +428,18 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     with_attr error_message("Additional collateral should be greater than or equal to zero."):
         assert_nn(add_collateral)
     end
-    let (acrrued_notional) = Math10xx8_add(old_notional, accrued_interest)
-    let (total_acrrued_notional) = Math10xx8_add(acrrued_notional, hist_accrual)
-    let (total_acrrued_notional_os) = Math10xx8_sub(total_acrrued_notional, hist_repay)
-    let (notional) = Math10xx8_add(total_acrrued_notional_os, add_notional) 
-    let (collateral) = Math10xx8_add(old_collateral, add_collateral) 
-    
+
     # @dev process pp data
     let (median_rate, winning_pp, rate_array_len) = process_pp_data(loan_id, pp_data_len, pp_data)
     let (lp_yield_boost) = Settings.get_lp_yield_boost(settings_addy)
     let (median_rate_boost) = Math10xx8_add(median_rate, lp_yield_boost)
     
+    # @dev data for checks
+    let (acrrued_notional) = Math10xx8_add(old_notional, accrued_interest)
+    let (total_acrrued_notional) = Math10xx8_add(acrrued_notional, hist_accrual)
+    let (total_acrrued_notional_os) = Math10xx8_sub(total_acrrued_notional, hist_repay)
+    let (notional) = Math10xx8_add(total_acrrued_notional_os, add_notional) 
+    let (collateral) = Math10xx8_add(old_collateral, add_collateral) 
     # @dev checks
     check_min_pp(settings_addy, rate_array_len)
     let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
@@ -469,8 +468,14 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (pp_fee_erc) = Math10xx8_convert_from(pp_fee, usdc_decimals)
     let (if_fee) =  Math10xx8_mul(origination_fee, if_split)
     let (if_fee_erc) = Math10xx8_convert_from(if_fee, usdc_decimals)
-    let (new_notional_with_fee) = Math10xx8_add(notional, add_notional_with_fee)
+    
+    # @dev check attack vector where user rolls no capital + high accrued interest loan
+    let (new_total_acrrued_notional_os) = Math10xx8_add(total_acrrued_notional_os, add_notional_with_fee)
     let (total_accrual) = Math10xx8_add(hist_accrual, accrued_interest)
+    let (total_accrual_buffer) = Math10xx8_mul(total_accrual, 2*one)
+    with_attr error_message("The notional outstanding should exceed the total accrual interest in order to refinance."):
+        assert_nn_le(total_accrual_buffer, new_total_acrrued_notional_os)
+    end
 
     # @dev all transfers
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, add_collateral_erc)
@@ -480,8 +485,9 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     
     # @dev update CZCore
     let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
-    let (notional_dn) = calc_loan_repay(notional, hist_repay, notional)
+    let (notional_dn) = calc_loan_repay(old_notional, hist_repay, old_notional)
     CZCore.set_update_rate(czcore_addy, notional_dn, old_rate, 0)
+    let (new_notional_with_fee) = Math10xx8_add(old_notional, add_notional_with_fee)
     let (notional_up) = Math10xx8_sub(new_notional_with_fee, hist_repay)
     CZCore.set_update_rate(czcore_addy, notional_up, median_rate_boost, 1)
     CZCore.set_cb_loan(czcore_addy, user, new_notional_with_fee, collateral, start_ts, start_ts, end_ts, median_rate_boost, total_accrual, hist_repay, liquidate_me, 0)
@@ -511,7 +517,7 @@ func flag_loan_liquidation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     # @dev update CZCore
     CZCore.set_cb_loan(czcore_addy, user, notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, 1, 0)
     # @dev emit event
-    event_loan_change.emit(addy=user, notional=notional, collateral=collateral, start_ts=start_ts, reval_ts=reval_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual, hist_repay=hist_repay, liquidate_me=liquidate_me)
+    event_loan_change.emit(addy=user, notional=notional, collateral=collateral, start_ts=start_ts, reval_ts=reval_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual, hist_repay=hist_repay, liquidate_me=1)
     return ()
 end
 
