@@ -184,6 +184,7 @@ end
 func erc20_mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, recipient : felt, amount : felt):
     alloc_locals
     authorised_callers()
+    is_paused()
     let (amount_unit) = Math10xx8_toUint256(amount)
     Erc20.ERC20_mint(erc_addy, recipient=recipient, amount=amount_unit)
     return ()
@@ -201,6 +202,7 @@ end
 func erc20_burn{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, account : felt, amount : felt):
     alloc_locals
     authorised_callers()
+    is_paused()
     # @dev return insufficient balance
     # dupe check on balance? will this be done in the erc20 contract
     with_attr error_message("Insufficient Balance"):
@@ -389,16 +391,10 @@ end
 ####################################################################################
 @external
 func set_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        user : felt, lp_amount : felt, cz_amount : felt, lock_ts : felt, promote : felt):
+        user : felt, lp_locked : felt, cz_locked : felt, lock_ts : felt, status : felt):
     authorised_callers()
     is_paused()
-    if promote == 1:
-        # @dev promote user to pp and lock lp and cz tokens
-        pp_status.write(user, (lp_amount, cz_amount, 1, lock_ts))
-    else:
-        # @dev demote user from pp and return lp and cz tokens
-        pp_status.write(user, (0, 0, 0, 0))    
-    end    
+    pp_status.write(user, (lp_locked, cz_locked, lock_ts, status))
     return ()
 end
 
@@ -421,12 +417,12 @@ end
 # - end time of the loan in timestamp
 # - interest rate of the loan
 # - historic accrual which is needed post loan changes so that accurate fees can be paid to LP/IF/GT on repayment
-# - all repayments made to date
+# - all historic repayments made to date
 # - liquidate me flag, user can give approval to LLs to liquidate their position (cant repay and want to close now)
 ####################################################################################
 @view
 func get_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> 
-        (notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, repayment : felt, liquidate_me : felt):
+        (notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt):
     let (res) = cb_loan.read(user=user)
     return (res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8])
 end
@@ -447,15 +443,15 @@ end
 # if system paused should allow existing loan holders to repay or refinance or change collateral
 ####################################################################################
 @external
-func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, repayment : felt, liquidate_me : felt, new : felt):
+func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt, new : felt):
     authorised_callers()
     # @dev new loans not allowed when system paused, repay refinancing inc dec collateral still allowed
     if new == 1:
     	is_paused()
-    	cb_loan.write(user, (notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, repayment, liquidate_me))
+    	cb_loan.write(user, (notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me))
         return()
     else:
-    	cb_loan.write(user, (notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, repayment, liquidate_me))
+    	cb_loan.write(user, (notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me))
         return()
     end		
 end
