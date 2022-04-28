@@ -144,7 +144,7 @@ end
 # the signed unique loan ID prevents a replay attack where someone submits historic pricing on the PPs behalf
 # we validate that the pp_pub matches the set of all valid PPs per the PriceProvider contract, any others are kicked out
 # we validate that the PP signed both the unique loan ID and the rate and the end ts
-# the end ts need to be signed as well, prevents a frontend attach, where website prices a 1 month loan via PPs but then submits a 3 year loan on chain
+# the end ts needs to be signed as well, prevents a frontend attach, where website prices a 1 month loan via PPs but then submits a 3 year loan on chain
 # if any of the signatures dont match or if the total valid PPs are below min, the loan creation will fail
 # there is some risk that the front end will not pass all the PP data, hence the min PP requirement (40 total PPs min can we set at 30 for example)
 # median pricing of a sufficiently large batch will yield a reasonable result
@@ -157,9 +157,9 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
-    let (notional, a, b, c, d, e, f, g, h) = CZCore.get_cb_loan(czcore_addy, user)
+    let (old_notional, a, b, c, d, e, f, g, h) = CZCore.get_cb_loan(czcore_addy, user)
     with_attr error_message("User already has an existing loan, refinance loan instead."):
-        assert notional = 0
+        assert old_notional = 0
     end
     
     # @dev process pp data 
@@ -210,7 +210,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (new_loan_total) = Math10xx8_add(loan_total, notional_with_fee)
     CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
     # @dev emit event
-    event_loan_change.emit(addy=user, notional=notional_with_fee, collateral=collateral, start_ts=start_ts, reval_ts=start_ts, end_ts=end_ts, rate=median_rate_boost, hist_accrual=0, hist_repay=0, liquidate_me=0)
+    event_loan_change.emit(user, notional_with_fee, collateral, start_ts, start_ts, end_ts, median_rate_boost, 0, 0, 0)
     return ()
 end
 
@@ -280,7 +280,7 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
         CZCore.set_cb_loan(czcore_addy, user, notional, collateral, start_ts, new_reval_ts, end_ts, rate, total_accrual, new_repayment, liquidate_me, 0)
         # @dev emit event
-        event_loan_change.emit(addy=user, notional=notional, collateral=collateral, start_ts=start_ts, reval_ts=new_reval_ts, end_ts=end_ts, rate=rate, hist_accrual=total_accrual, hist_repay=new_repayment, liquidate_me=liquidate_me)
+        event_loan_change.emit(user, notional, collateral, start_ts, new_reval_ts, end_ts, rate, total_accrual, new_repayment, liquidate_me)
         return ()
     end
 end
@@ -343,6 +343,9 @@ func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (user) = get_caller_address()    
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
+    with_attr error_message("Collateral added should be positive."):
+       assert_nn(add_collateral)
+    end
     let (add_collateral_erc) = check_user_balance(user, weth_addy, add_collateral)
     
     # @dev transfers
@@ -351,7 +354,7 @@ func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (new_collateral) = Math10xx8_add(old_collateral, add_collateral)
     CZCore.set_cb_loan(czcore_addy, user, notional, new_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me, 0)
     # @dev emit event
-    event_loan_change.emit(addy=user, notional=notional, collateral=new_collateral, start_ts=start_ts, reval_ts=reval_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual, hist_repay=hist_repay, liquidate_me=liquidate_me)  
+    event_loan_change.emit(user, notional, new_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me)  
     return()
 end
 
@@ -389,7 +392,7 @@ func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     CZCore.set_cb_loan(czcore_addy, user, notional, new_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me, 0)
     CZCore.erc20_transfer(czcore_addy, weth_addy, user, dec_collateral_erc)
     # @dev emit event
-    event_loan_change.emit(addy=user, notional=notional, collateral=new_collateral, start_ts=start_ts, reval_ts=reval_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual, hist_repay=hist_repay, liquidate_me=liquidate_me)
+    event_loan_change.emit(user, notional, new_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me)
     return()
 end
 
@@ -405,7 +408,7 @@ end
 # - the end date of the loan in timestamp
 # - the number of data points in the PP pricing dataset
 # - the pp dataset which takes the following format
-# [ signed_hash_loanID_r , signed_hash_loanID_s , signed_hash_rate_r , signed_hash_rate_s , rate , pp_pub , ..... ]
+# [ signed_hash_loanID_r , signed_hash_loanID_s , signed_hash_endts_r , signed_hash_endts_s , signed_hash_rate_r , signed_hash_rate_s , rate , pp_pub , ..... ]
 # see create loan above for more detail
 ####################################################################################
 @external
@@ -497,7 +500,7 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     CZCore.set_cb_loan(czcore_addy, user, notional_with_fee, collateral, start_ts, start_ts, end_ts, median_rate_boost, 0, 0, 0, 0)
     CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
     # @dev emit event
-    event_loan_change.emit(addy=user, notional=notional_with_fee, collateral=collateral, start_ts=start_ts, reval_ts=start_ts, end_ts=end_ts, rate=median_rate_boost, hist_accrual=0, hist_repay=0, liquidate_me=0)
+    event_loan_change.emit(user, notional_with_fee, collateral, start_ts, start_ts, end_ts, median_rate_boost, 0, 0, 0)
     return ()
 end
 
@@ -520,7 +523,7 @@ func flag_loan_liquidation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     # @dev update CZCore
     CZCore.set_cb_loan(czcore_addy, user, notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, 1, 0)
     # @dev emit event
-    event_loan_change.emit(addy=user, notional=notional, collateral=collateral, start_ts=start_ts, reval_ts=reval_ts, end_ts=end_ts, rate=rate, hist_accrual=hist_accrual, hist_repay=hist_repay, liquidate_me=1)
+    event_loan_change.emit(user, notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, 1)
     return ()
 end
 
@@ -544,16 +547,17 @@ end
 func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(loan_id : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*) -> (median_rate : felt, winning_pp : felt, rate_array_len : felt):
     alloc_locals
     # @dev pp data should be passed as follows
-    # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
+    # [ signed_hash_loanID_r , signed_hash_loanID_s , signed_hash_endts_r , signed_hash_endts_s , signed_hash_rate_r , signed_hash_rate_s , rate , pp_pub , ..... ]
     let (loan_id_hash) = hash2{hash_ptr=pedersen_ptr}(loan_id, 0)
+    let (end_ts_hash) = hash2{hash_ptr=pedersen_ptr}(end_ts, 0)
     let (rate_array : felt*) = alloc()
     let (pp_pub_array : felt*) = alloc()
     # @dev iterate thru pp_pub and reduce total dataset where pp_pub is not valid PP
     # re enable this later
     # let (new_pp_data_len, new_pp_data) = validate_pp_data(pp_data_len,pp_data)
-    # @dev iterate thru remaining pp data - verify the pp's signature for both rate and unique loan ID.
-    # let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(new_pp_data_len, new_pp_data, loan_id_hash)
-    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash)
+    # @dev iterate thru remaining pp data - verify the pp's signature for both rate, end ts and unique loan ID.
+    # let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(new_pp_data_len, new_pp_data, loan_id_hash, end_ts_hash)
+    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash, end_ts_hash)
     # @dev order the rates and find the median
     let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
     let (median, _) = unsigned_div_rem(len_ordered, 2)
@@ -584,9 +588,9 @@ func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
         return (0, pp_data)
     end
     # @dev recursive call
-    let (pp_data_len, pp_data) = validate_pp_data(length - 6, array + 6)
+    let (pp_data_len, pp_data) = validate_pp_data(length - 8, array + 8)
     # @dev validate PP status
-    let pp_pub = array[5]
+    let pp_pub = array[7]
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (lp_token, czt_token, lock_ts, status) = CZCore.get_pp_status(czcore_addy, pp_pub)
@@ -598,9 +602,11 @@ func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
         assert [pp_data + 3 + pp_data_len] = array[3]
         assert [pp_data + 4 + pp_data_len] = array[4]
         assert [pp_data + 5 + pp_data_len] = array[5]
-        return (pp_data_len+6,pp_data)
+        assert [pp_data + 6 + pp_data_len] = array[6]
+        assert [pp_data + 7 + pp_data_len] = array[7]
+        return (pp_data_len + 8, pp_data)
     else:
-        return (pp_data_len,pp_data)
+        return (pp_data_len, pp_data)
     end
 end
 
@@ -618,7 +624,7 @@ end
 # - length of pp_pub array
 # - pp_pub array
 ####################################################################################
-func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(length : felt, array : felt*, loan_hash : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
+func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(length : felt, array : felt*, loan_hash : felt, end_hash : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
     alloc_locals
     # create arrays at last step
     if length == 0:
@@ -627,16 +633,19 @@ func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
         return (0, r_array, 0, p_array)
     end
     # recursive call
-    let (r_array_len, r_array, p_array_len, p_array) = check_pricing(length - 6, array + 6, loan_hash)
+    let (r_array_len, r_array, p_array_len, p_array) = check_pricing(length - 8, array + 8, loan_hash, end_hash)
     # validate that the PP signed both loanID and rate correctly
     let signed_loan_r = array[0]
     let signed_loan_s = array[1]
-    let signed_rate_r = array[2]
-    let signed_rate_s = array[3]
-    let rate = array[4]
-    let pp_pub = array[5]
+    let signed_end_r = array[2]
+    let signed_end_s = array[3]
+    let signed_rate_r = array[4]
+    let signed_rate_s = array[5]
+    let rate = array[6]
+    let pp_pub = array[7]
     let (rate_hash) = hash2{hash_ptr=pedersen_ptr}(rate, 0)
     verify_ecdsa_signature(message=loan_hash, public_key=pp_pub, signature_r=signed_loan_r, signature_s=signed_loan_s)    
+    verify_ecdsa_signature(message=end_hash, public_key=pp_pub, signature_r=signed_end_r, signature_s=signed_end_s)    
     verify_ecdsa_signature(message=rate_hash, public_key=pp_pub, signature_r=signed_rate_r, signature_s=signed_rate_s)
     # add to new arrays
     assert [r_array + r_array_len] = rate
