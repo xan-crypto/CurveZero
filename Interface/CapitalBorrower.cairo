@@ -82,7 +82,7 @@ end
 ####################################################################################
 # @dev query a users loan details
 # going forward we are switching to curve building using compound interest, but PPs will quote simple interest equivalent
-# main issue with using compound interest for everything is that we could not efficiently value the entire loan book cheaply
+# main issue with using compound interest for everything is that we could not efficiently value the entire loan book cheaply on starknet
 # meaning that LP accrual happened at time of cash flow vs continuously, the latter being preferred
 # @param input is 
 # - the addy of the user in question
@@ -137,15 +137,16 @@ end
 # - the notional of the loan in USDC
 # - the collateral of the loan in WETH
 # - the end date of the loan in timestamp
-# - the number of data points in the PP pricing dataset, each PP returns 6 felts, so if there is 5 PPs in total, expect 30 datapoints
+# - the number of data points in the PP pricing dataset, each PP returns 8 felts, so if there is 5 PPs in total, expect 40 datapoints
 # system will function with any number of PPs as long as the number of PPs is above or equal to the min required in the Settings contract
 # - the pp dataset takes the following format
-# [ signed_hash_loanID_r , signed_hash_loanID_s , signed_hash_rate_r , signed_hash_rate_s , rate , pp_pub , ..... ]
+# [ signed_hash_loanID_r , signed_hash_loanID_s , signed_hash_endts_r , signed_hash_endts_s , signed_hash_rate_r , signed_hash_rate_s , rate , pp_pub , ..... ]
 # the signed unique loan ID prevents a replay attack where someone submits historic pricing on the PPs behalf
 # we validate that the pp_pub matches the set of all valid PPs per the PriceProvider contract, any others are kicked out
-# we validate that the PP signed both the unique loan ID and the rate
+# we validate that the PP signed both the unique loan ID and the rate and the end ts
+# the end ts need to be signed as well, prevents a frontend attach, where website prices a 1 month loan via PPs but then submits a 3 year loan on chain
 # if any of the signatures dont match or if the total valid PPs are below min, the loan creation will fail
-# there is some risk that the front end will not pass all the PP data, hence the min PP requirement
+# there is some risk that the front end will not pass all the PP data, hence the min PP requirement (40 total PPs min can we set at 30 for example)
 # median pricing of a sufficiently large batch will yield a reasonable result
 ####################################################################################
 @external
@@ -163,7 +164,7 @@ func create_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     
     # @dev process pp data 
     # lp yield boost is set by governance and is effectively a parallel shift of the curve upward to balance supply demand / attract lp capital
-    let (median_rate, winning_pp, rate_array_len) = process_pp_data(loan_id, pp_data_len, pp_data)
+    let (median_rate, winning_pp, rate_array_len) = process_pp_data(loan_id, end_ts, pp_data_len, pp_data)
     let (lp_yield_boost) = Settings.get_lp_yield_boost(settings_addy)
     let (median_rate_boost) = Math10xx8_add(median_rate, lp_yield_boost)
     
@@ -233,8 +234,8 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     end
 
     # @dev check repay doesnt exceed loan outstanding
-    let (acrrued_notional) = Math10xx8_add(notional, accrued_interest)
-    let (total_acrrued_notional) = Math10xx8_add(acrrued_notional, hist_accrual)
+    let (total_accrual) = Math10xx8_add(hist_accrual, accrued_interest)
+    let (total_acrrued_notional) = Math10xx8_add(notional, total_accrual)
     let (total_acrrued_notional_os) = Math10xx8_sub(total_acrrued_notional, hist_repay)
     with_attr error_message("Partial repayment should be positive and at most the notional outstanding, consider using repay full."):
         assert_nn_le(repay, total_acrrued_notional_os)
@@ -251,7 +252,6 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (new_total_acrrued_notional_os) = Math10xx8_sub(total_acrrued_notional_os, repay)
     let (new_repayment) = Math10xx8_add(hist_repay, repay)
     let (new_reval_ts) = Math10xx8_ts()
-    let (total_accrual) = Math10xx8_add(hist_accrual, accrued_interest)
     # @dev update CZCore - run accrual + update wt avg rate
     let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
     let (loan_repay) = calc_loan_repay(notional, hist_repay, repay)
@@ -429,16 +429,31 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         assert_nn(add_collateral)
     end
 
+    # @dev calc repay amount as if closing loan
+    let (total_accrual) = Math10xx8_add(hist_accrual, accrued_interest)
+    let (total_acrrued_notional) = Math10xx8_add(old_notional, total_accrual)
+    let (repay) = Math10xx8_sub(total_acrrued_notional, hist_repay)
+
+    # pay out accrued interest as per a full loan repayment
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
+    let (lp_split, if_split, gt_split) = Settings.get_accrued_interest_split(settings_addy)  
+    let (if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
+    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    let (accrued_interest_lp) = Math10xx8_mul(lp_split, total_accrual)
+    let (accrued_interest_if) = Math10xx8_mul(if_split, total_accrual)
+    let (accrued_interest_gt) = Math10xx8_mul(gt_split, total_accrual)
+    let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
+    let (accrued_interest_if_erc) = Math10xx8_convert_from(accrued_interest_if, usdc_decimals) 
+    let (new_capital_total) = Math10xx8_add(capital_total, accrued_interest_lp)
+    let (new_reward_total) = Math10xx8_add(reward_total, accrued_interest_gt)
+
     # @dev process pp data
-    let (median_rate, winning_pp, rate_array_len) = process_pp_data(loan_id, pp_data_len, pp_data)
+    let (median_rate, winning_pp, rate_array_len) = process_pp_data(loan_id, end_ts, pp_data_len, pp_data)
     let (lp_yield_boost) = Settings.get_lp_yield_boost(settings_addy)
     let (median_rate_boost) = Math10xx8_add(median_rate, lp_yield_boost)
     
     # @dev data for checks
-    let (acrrued_notional) = Math10xx8_add(old_notional, accrued_interest)
-    let (total_acrrued_notional) = Math10xx8_add(acrrued_notional, hist_accrual)
-    let (total_acrrued_notional_os) = Math10xx8_sub(total_acrrued_notional, hist_repay)
-    let (notional) = Math10xx8_add(total_acrrued_notional_os, add_notional) 
+    let (notional) = Math10xx8_add(repay, add_notional) 
     let (collateral) = Math10xx8_add(old_collateral, add_collateral) 
     # @dev checks
     check_min_pp(settings_addy, rate_array_len)
@@ -446,55 +461,43 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     check_ltv(oracle_addy, settings_addy, notional, collateral)
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
     let (add_collateral_erc) = check_user_balance(user, weth_addy, add_collateral)
-    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
-    check_utilization(settings_addy, add_notional, loan_total, capital_total)
+    check_utilization(settings_addy, notional, loan_total, capital_total)
     let (start_ts) = Math10xx8_ts()
     check_max_term(settings_addy, start_ts, end_ts)
     check_loan_range(settings_addy, notional)
 
     # @dev add origination fee
     let (fee, pp_split, if_split) = Settings.get_origination_fee(settings_addy)
-    let (if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
     let (one) = Math10xx8_one()
     let (one_plus_fee) = Math10xx8_add(one, fee)
-    let (add_notional_with_fee) = Math10xx8_mul(one_plus_fee, add_notional)
-    let (origination_fee) = Math10xx8_sub(add_notional_with_fee, add_notional)
+    let (notional_with_fee) = Math10xx8_mul(one_plus_fee, notional)
+    let (origination_fee) = Math10xx8_sub(notional_with_fee, notional)
 
     # @dev calc amounts to transfer 
-    let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    let (usdc_decimals) = Erc20.ERC20_decimals(usdc_addy)
     let (add_notional_erc) = Math10xx8_convert_from(add_notional, usdc_decimals)    
     let (pp_fee) = Math10xx8_mul(origination_fee, pp_split)
     let (pp_fee_erc) = Math10xx8_convert_from(pp_fee, usdc_decimals)
     let (if_fee) =  Math10xx8_mul(origination_fee, if_split)
     let (if_fee_erc) = Math10xx8_convert_from(if_fee, usdc_decimals)
     
-    # @dev check attack vector where user rolls no capital + high accrued interest loan
-    let (new_total_acrrued_notional_os) = Math10xx8_add(total_acrrued_notional_os, add_notional_with_fee)
-    let (total_accrual) = Math10xx8_add(hist_accrual, accrued_interest)
-    let (total_accrual_buffer) = Math10xx8_mul(total_accrual, 2*one)
-    with_attr error_message("The notional outstanding should exceed the total accrual interest in order to refinance."):
-        assert_nn_le(total_accrual_buffer, new_total_acrrued_notional_os)
-    end
-
     # @dev all transfers
     CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, add_collateral_erc)
     CZCore.erc20_transfer(czcore_addy, usdc_addy, user, add_notional_erc)
     CZCore.erc20_transfer(czcore_addy, usdc_addy, winning_pp, pp_fee_erc)
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, if_addy, if_fee_erc)
-    
-    # @dev update CZCore
+    let (if_total_erc) = Math10xx8_add(if_fee_erc, accrued_interest_if_erc)
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, if_addy, if_total_erc)
+
+    # @dev accrue to current ts and then updated wt avg rate
     let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
-    let (notional_dn) = calc_loan_repay(old_notional, hist_repay, old_notional)
-    CZCore.set_update_rate(czcore_addy, notional_dn, old_rate, 0)
-    let (new_notional_with_fee) = Math10xx8_add(old_notional, add_notional_with_fee)
-    let (notional_up) = Math10xx8_sub(new_notional_with_fee, hist_repay)
-    CZCore.set_update_rate(czcore_addy, notional_up, median_rate_boost, 1)
-    CZCore.set_cb_loan(czcore_addy, user, new_notional_with_fee, collateral, start_ts, start_ts, end_ts, median_rate_boost, total_accrual, hist_repay, liquidate_me, 0)
-    let (new_loan_total) = Math10xx8_add(loan_total, add_notional_with_fee)
-    CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
+    let (loan_repay) = calc_loan_repay(old_notional, hist_repay, repay)
+    let (loan_total_dn) = Math10xx8_sub(loan_total, loan_repay)
+    let (new_loan_total) = Math10xx8_add(loan_total_dn, notional_with_fee)
+    CZCore.set_update_rate(czcore_addy, loan_repay, old_rate, 0)
+    CZCore.set_update_rate(czcore_addy, notional_with_fee, median_rate_boost, 1)
+    CZCore.set_cb_loan(czcore_addy, user, notional_with_fee, collateral, start_ts, start_ts, end_ts, median_rate_boost, 0, 0, 0, 0)
+    CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
     # @dev emit event
-    event_loan_change.emit(addy=user, notional=new_notional_with_fee, collateral=collateral, start_ts=start_ts, reval_ts=start_ts, end_ts=end_ts, rate=median_rate_boost, hist_accrual=total_accrual, hist_repay=hist_repay, liquidate_me=liquidate_me)
+    event_loan_change.emit(addy=user, notional=notional_with_fee, collateral=collateral, start_ts=start_ts, reval_ts=start_ts, end_ts=end_ts, rate=median_rate_boost, hist_accrual=0, hist_repay=0, liquidate_me=0)
     return ()
 end
 
@@ -538,7 +541,7 @@ end
 # - the pp_pub of the winning PP (the one that was the median) - needed in order to pay the origination fee
 # - rate array len which is used to check that there was sufficient valid PPs above the required min
 ####################################################################################
-func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(loan_id : felt, pp_data_len: felt, pp_data : felt*) -> (median_rate: felt, winning_pp : felt, rate_array_len : felt):
+func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(loan_id : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*) -> (median_rate : felt, winning_pp : felt, rate_array_len : felt):
     alloc_locals
     # @dev pp data should be passed as follows
     # [ signed_loanID_r , signed_loanID_s , signed_rate_r , signed_rate_s , rate , pp_pub , ..... ]
