@@ -71,9 +71,9 @@ namespace CZCore:
     end
     func set_cz_state(lp_total : felt, capital_total : felt, loan_total : felt, insolvency_total : felt, reward_total : felt):
     end 
-    func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, lock_ts : felt, status : felt):
+    func get_pp_status(user : felt) -> (lp_locked : felt, cz_locked : felt, lock_ts : felt, last_id : felt, status : felt):
     end
-    func set_pp_status(user : felt, lp_locked : felt, cz_locked : felt, lock_ts : felt, status : felt):
+    func set_pp_status(user : felt, lp_locked : felt, cz_locked : felt, lock_ts : felt, last_id : felt, status : felt):
     end  
     func get_cb_loan(user : felt) -> (notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt):
     end  
