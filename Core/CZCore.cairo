@@ -362,7 +362,7 @@ end
 # @dev the PP status by user
 ####################################################################################
 @storage_var
-func pp_status(user : felt) -> (status : (felt, felt, felt, felt)):
+func pp_status(user : felt) -> (status : (felt, felt, felt, felt, felt)):
 end
 
 ####################################################################################
@@ -375,9 +375,9 @@ end
 # - pp status 0 - not a pricing provider 1 - valid pricing provider
 ####################################################################################
 @view
-func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_locked : felt, cz_locked : felt, lock_ts : felt, status : felt):
+func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_locked : felt, cz_locked : felt, lock_ts : felt, last_id : felt, status : felt):
     let (res) = pp_status.read(user=user)
-    return (res[0],res[1],res[2],res[3])
+    return (res[0], res[1], res[2], res[3], res[4])
 end
 
 ####################################################################################
@@ -391,10 +391,10 @@ end
 ####################################################################################
 @external
 func set_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        user : felt, lp_locked : felt, cz_locked : felt, lock_ts : felt, status : felt):
+        user : felt, lp_locked : felt, cz_locked : felt, lock_ts : felt, last_id : felt, status : felt):
     authorised_callers()
     is_paused()
-    pp_status.write(user, (lp_locked, cz_locked, lock_ts, status))
+    pp_status.write(user, (lp_locked, cz_locked, lock_ts, last_id, status))
     return ()
 end
 
