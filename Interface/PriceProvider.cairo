@@ -80,11 +80,11 @@ end
 # - users current pricing provider status 0 - not pp 1 - valid pp
 ####################################################################################
 @view
-func view_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt) -> (lp_token : felt, czt_token : felt, lock_ts : felt, status : felt):
+func view_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(user : felt) -> (lp_token : felt, czt_token : felt, lock_ts : felt, last_id : felt, status : felt):
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (lp_locked, czt_locked, lock_ts, pp_status) = CZCore.get_pp_status(czcore_addy, user)
-    return (lp_locked, czt_locked, lock_ts, pp_status)
+    let (lp_locked, czt_locked, lock_ts, last_id, pp_status) = CZCore.get_pp_status(czcore_addy, user)
+    return (lp_locked, czt_locked, lock_ts, last_id, pp_status)
 end
 
 ####################################################################################
@@ -98,7 +98,7 @@ func promote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_ch
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (lp_locked, czt_locked, lock_ts, pp_status) = CZCore.get_pp_status(czcore_addy, user)
+    let (lp_locked, czt_locked, lock_ts, last_id, pp_status) = CZCore.get_pp_status(czcore_addy, user)
     with_attr error_message("User is already an existing PP."):
         assert pp_status = 0
     end
@@ -117,9 +117,9 @@ func promote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_ch
     # @dev transfer the LP tokens and CZT tokens and then promote to PP
     CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, lp_require_erc)
     CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, czt_require_erc)
-    CZCore.set_pp_status(czcore_addy, user, lp_require, czt_require, block_ts, 1)
+    CZCore.set_pp_status(czcore_addy, user, lp_require, czt_require, block_ts, last_id, 1)
     # @dev emit event
-    event_pp_status.emit(addy=user, lp_change=lp_require, czt_change=czt_require, pp_status=1)  
+    event_pp_status.emit(user, lp_require, czt_require, 1)  
     return()
 end
 
@@ -134,7 +134,7 @@ func demote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_che
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (lp_locked, czt_locked, lock_ts, pp_status) = CZCore.get_pp_status(czcore_addy, user)
+    let (lp_locked, czt_locked, lock_ts, last_id, pp_status) = CZCore.get_pp_status(czcore_addy, user)
     with_attr error_message("User is not an existing PP."):
         assert pp_status = 1
     end
@@ -152,10 +152,10 @@ func demote_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_che
     let (czt_locked_erc) = check_user_balance(czcore_addy, czt_addy, czt_locked)
 
     # @dev demote PP then transfer the tokens
-    CZCore.set_pp_status(czcore_addy, user, 0, 0, 0, 0)
+    CZCore.set_pp_status(czcore_addy, user, 0, 0, 0, 0, 0)
     CZCore.erc20_transfer(czcore_addy, lpt_addy, user, lp_locked_erc)
     CZCore.erc20_transfer(czcore_addy, czt_addy, user, czt_locked_erc)
     # @dev emit event
-    event_pp_status.emit(addy=user, lp_change=lp_locked, czt_change=czt_locked, pp_status=0)  
+    event_pp_status.emit(user, lp_locked, czt_locked, 0)  
     return()
 end
