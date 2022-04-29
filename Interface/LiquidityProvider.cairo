@@ -111,7 +111,7 @@ func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     CZCore.set_cz_state(czcore_addy, new_lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
     CZCore.erc20_mint(czcore_addy, lpt_addy, user, lp_issuance)
     # @dev emit event 
-    event_lp_token.emit(addy=user, lp_change=lp_issuance, capital_change=usdc_deposit, type=1)
+    event_lp_token.emit(user, lp_issuance, usdc_deposit, 1)
     return ()
 end
 
@@ -183,7 +183,7 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     CZCore.set_cz_state(czcore_addy, new_lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
     CZCore.erc20_transfer(czcore_addy, usdc_addy, user, capital_redeem_erc)    
     # @dev emit event
-    event_lp_token.emit(addy=user, lp_change=lp_token, capital_change=capital_redeem, type=0)
+    event_lp_token.emit(user, lp_token, capital_redeem, 0)
     return ()
 end
 
