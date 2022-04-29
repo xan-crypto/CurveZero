@@ -81,7 +81,7 @@ end
 
 ####################################################################################
 # @dev query a users loan details
-# going forward we are switching to curve building using compound interest, but PPs will quote simple interest equivalent
+# going forward we are switching to curve building using compound interest, but PPs will quote simple interest equivalents
 # main issue with using compound interest for everything is that we could not efficiently value the entire loan book cheaply on starknet
 # meaning that LP accrual happened at time of cash flow vs continuously, the latter being preferred
 # @param input is 
@@ -93,7 +93,7 @@ end
 # - the revaluation timestamp (either the loan start date or the last repayment or the last refinancing)
 # - the end timestamp
 # - the median rate at which the loan was set, given the pricing obtained by pricing providers (quoted and stored as simple interest)
-# - the historical accrual which is needed for cashflow vs loan recon, if a loan is changed, this records the historical accrual
+# - the historical accrual which is needed for cashflow vs loan recon, if a loan is changed, this records the historical accrual prior to change
 # so that the correct fees can be paid to the LP/IF/GT when the loan is closed out
 # - the total repayments made to date
 # so loan amount o/s = notional + accrued interest + hist accrual - repayment
@@ -286,7 +286,7 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 end
 
 ####################################################################################
-# @dev this function calculates the residual loan repay amount
+# @dev this function calculates the residual loan capital repay amount
 # max(0 , min(repay, notional - hist_repay))
 # need this for the wt avg rate recal and the loan total recalc
 # @param input is 
@@ -546,6 +546,12 @@ end
 ####################################################################################
 func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(loan_id : felt, end_ts : felt, pp_data_len : felt, pp_data : felt*) -> (median_rate : felt, winning_pp : felt, rate_array_len : felt):
     alloc_locals
+    # @dev used to lockup PP post valid pricing request
+    let (_trusted_addy) = trusted_addy.read()
+    let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
+    let (lockup_period) = Settings.get_lockup_period(settings_addy)  
+    let (block_ts) = Math10xx8_ts()
+    let (lockup) = Math10xx8_add(lockup_period, block_ts)  
     # @dev pp data should be passed as follows
     # [ signed_hash_loanID_r , signed_hash_loanID_s , signed_hash_endts_r , signed_hash_endts_s , signed_hash_rate_r , signed_hash_rate_s , rate , pp_pub , ..... ]
     let (loan_id_hash) = hash2{hash_ptr=pedersen_ptr}(loan_id, 0)
@@ -554,10 +560,10 @@ func process_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (pp_pub_array : felt*) = alloc()
     # @dev iterate thru pp_pub and reduce total dataset where pp_pub is not valid PP
     # re enable this later
-    # let (new_pp_data_len, new_pp_data) = validate_pp_data(pp_data_len,pp_data)
+    # let (new_pp_data_len, new_pp_data) = validate_pp_data(loan_id, pp_data_len, pp_data)
     # @dev iterate thru remaining pp data - verify the pp's signature for both rate, end ts and unique loan ID.
-    # let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(new_pp_data_len, new_pp_data, loan_id_hash, end_ts_hash)
-    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash, end_ts_hash)
+    # let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(new_pp_data_len, new_pp_data, loan_id_hash, end_ts_hash, lockup)
+    let (rate_array_len, rate_array, pp_pub_array_len, pp_pub_array) = check_pricing(pp_data_len, pp_data, loan_id_hash, end_ts_hash, lockup)
     # @dev order the rates and find the median
     let (len_ordered, ordered, len_index, index) = sort_index(rate_array_len, rate_array, rate_array_len, rate_array)
     let (median, _) = unsigned_div_rem(len_ordered, 2)
@@ -581,30 +587,35 @@ end
 # - a reduced length of valid pp_pubs
 # - a reduced dataset of valid pp submissions 
 ####################################################################################
-func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(length: felt, array : felt*) -> (pp_data_len: felt, pp_data : felt*):
+func validate_pp_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loan_id : felt, length : felt, array : felt*) -> (pp_data_len : felt, pp_data : felt*):
     alloc_locals
     if length == 0:
         let (pp_data : felt*) = alloc()
         return (0, pp_data)
     end
     # @dev recursive call
-    let (pp_data_len, pp_data) = validate_pp_data(length - 8, array + 8)
+    let (pp_data_len, pp_data) = validate_pp_data(loan_id, length - 8, array + 8)
     # @dev validate PP status
     let pp_pub = array[7]
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (lp_token, czt_token, lock_ts, status) = CZCore.get_pp_status(czcore_addy, pp_pub)
-    # @dev add to new arrays
+    let (lp_token, czt_token, lock_ts, last_id, status) = CZCore.get_pp_status(czcore_addy, pp_pub)
+    # @dev add to new arrays if valid PP and exclude dupes
     if status == 1:
-        assert [pp_data + 0 + pp_data_len] = array[0]
-        assert [pp_data + 1 + pp_data_len] = array[1]
-        assert [pp_data + 2 + pp_data_len] = array[2]
-        assert [pp_data + 3 + pp_data_len] = array[3]
-        assert [pp_data + 4 + pp_data_len] = array[4]
-        assert [pp_data + 5 + pp_data_len] = array[5]
-        assert [pp_data + 6 + pp_data_len] = array[6]
-        assert [pp_data + 7 + pp_data_len] = array[7]
-        return (pp_data_len + 8, pp_data)
+        if last_id == loan_id:
+            return (pp_data_len, pp_data)
+        else:
+            CZCore.set_pp_status(czcore_addy, pp_pub, lp_token, czt_token, lock_ts, loan_id, status)
+            assert [pp_data + 0 + pp_data_len] = array[0]
+            assert [pp_data + 1 + pp_data_len] = array[1]
+            assert [pp_data + 2 + pp_data_len] = array[2]
+            assert [pp_data + 3 + pp_data_len] = array[3]
+            assert [pp_data + 4 + pp_data_len] = array[4]
+            assert [pp_data + 5 + pp_data_len] = array[5]
+            assert [pp_data + 6 + pp_data_len] = array[6]
+            assert [pp_data + 7 + pp_data_len] = array[7]
+            return (pp_data_len + 8, pp_data)
+        end
     else:
         return (pp_data_len, pp_data)
     end
@@ -624,7 +635,7 @@ end
 # - length of pp_pub array
 # - pp_pub array
 ####################################################################################
-func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(length : felt, array : felt*, loan_hash : felt, end_hash : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
+func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(length : felt, array : felt*, loan_hash : felt, end_hash : felt, lockup : felt) -> (r_array_len : felt, r_array : felt*, p_array_len : felt, p_array : felt*):
     alloc_locals
     # create arrays at last step
     if length == 0:
@@ -633,7 +644,7 @@ func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
         return (0, r_array, 0, p_array)
     end
     # recursive call
-    let (r_array_len, r_array, p_array_len, p_array) = check_pricing(length - 8, array + 8, loan_hash, end_hash)
+    let (r_array_len, r_array, p_array_len, p_array) = check_pricing(length - 8, array + 8, loan_hash, end_hash, lockup)
     # validate that the PP signed both loanID and rate correctly
     let signed_loan_r = array[0]
     let signed_loan_s = array[1]
@@ -647,6 +658,10 @@ func check_pricing{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     verify_ecdsa_signature(message=loan_hash, public_key=pp_pub, signature_r=signed_loan_r, signature_s=signed_loan_s)    
     verify_ecdsa_signature(message=end_hash, public_key=pp_pub, signature_r=signed_end_r, signature_s=signed_end_s)    
     verify_ecdsa_signature(message=rate_hash, public_key=pp_pub, signature_r=signed_rate_r, signature_s=signed_rate_s)
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    let (lp_token, czt_token, lock_ts, last_id, status) = CZCore.get_pp_status(czcore_addy, pp_pub)
+    CZCore.set_pp_status(czcore_addy, pp_pub, lp_token, czt_token, lockup, last_id, status)
     # add to new arrays
     assert [r_array + r_array_len] = rate
     assert [p_array + p_array_len] = pp_pub
