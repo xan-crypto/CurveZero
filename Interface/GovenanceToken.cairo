@@ -3,7 +3,7 @@
 # @dev all numbers passed into contract must be Math10xx8 type
 # CZT (curvezero) native tokens are staked to provide insurance in the case of massive loan insolveny
 # in such an event the staked CZT tokens can be slashed to bridge the liquidity gap
-# stakers are rewarded 2% of the accrued interest on all loans for bearing this risk
+# stakers are rewarded 5% of the accrued interest on all loans for bearing this risk
 # the reward split is in the Settings contract and can be amended by the controller
 # rewards are accrued to CZCore at the time of loan repayment, these are held here pending distribution by controller
 # the controller can call distribute that will update the reward mapping for users
@@ -82,12 +82,11 @@ func gt_claim(addy : felt, reward : felt):
 end
 
 ####################################################################################
-# @dev stake CZT tokens to earn proportional rewards, 2% of accrued interest initially
+# @dev stake CZT tokens to earn proportional rewards, 5% of accrued interest initially
 # @param input is the amount of CZT tokens to stake
 ####################################################################################
 @external
-func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt):
-    
+func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt):    
     alloc_locals
     # @dev check stake is positve amount
     with_attr error_message("GT stake should be positive amount."):
@@ -120,13 +119,13 @@ func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     if old_user == 1:
         CZCore.set_staker_total(czcore_addy, gt_total_new, index)
         # @dev emit event
-        gt_stake_unstake.emit(addy=user, stake_current=gt_user_new)
+        gt_stake_unstake.emit(user, gt_user_new)
         return()
     else:
         CZCore.set_staker_total(czcore_addy, gt_total_new, index + 1)
         CZCore.set_staker_index(czcore_addy, index, user)
         # @dev emit event
-        gt_stake_unstake.emit(addy=user, stake_current=gt_user_new)
+        gt_stake_unstake.emit(user, gt_user_new)
         return()
     end
 end
@@ -137,7 +136,6 @@ end
 ####################################################################################
 @external
 func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt):
-    
     alloc_locals
     # @dev check unstake is positve amount
     let (_trusted_addy) = trusted_addy.read()
@@ -173,13 +171,13 @@ func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
     let (czt_decimals) = Erc20.ERC20_decimals(czt_addy)
     let (gt_token_erc) = Math10xx8_convert_from(gt_token, czt_decimals)
-    CZCore.erc20_transfer(czcore_addy, czt_addy, user, gt_token_erc)            
     
     # @dev update user and aggregate
     CZCore.set_staker_details(czcore_addy, user, gt_user_new, reward)   
     CZCore.set_staker_total(czcore_addy, gt_total_new, index)
+    CZCore.erc20_transfer(czcore_addy, czt_addy, user, gt_token_erc)            
     # @dev emit event
-    gt_stake_unstake.emit(addy=user,stake_current=gt_user_new)
+    gt_stake_unstake.emit(user, gt_user_new)
     return()
 end
 
@@ -213,12 +211,12 @@ func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (gt_user, reward, old_user) = CZCore.get_staker_details(czcore_addy,user)
     # @dev transfer tokens
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    let (reward_erc) = check_user_balance(czcore_addy, usdc_addy, reward)    
-    # @dev transfer tokens
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, reward_erc)            
+    let (reward_erc) = check_user_balance(czcore_addy, usdc_addy, reward)            
     # @dev update user rewards
     CZCore.set_staker_details(czcore_addy, user, gt_user, 0)   
+    # @dev transfer tokens
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, reward_erc)   
     # @dev emit event
-    gt_claim.emit(addy=user,reward=reward)
+    gt_claim.emit(user, reward)
     return()
 end
