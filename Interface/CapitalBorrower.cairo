@@ -27,7 +27,7 @@ from starkware.cairo.common.math import unsigned_div_rem
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20, Oracle
 from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_sub, Math10xx8_add, Math10xx8_ts, Math10xx8_one, Math10xx8_year, Math10xx8_convert_from, Math10xx8_zero
-from Functions.Checks import check_is_owner, check_min_pp, check_ltv, check_utilization, check_max_term, check_loan_range, check_user_balance
+from Functions.Checks import check_is_owner, check_min_pp, check_ltv, check_utilization, check_max_term, check_loan_range, check_user_balance, calc_residual_loan_capital
 
 ####################################################################################
 # @dev storage for the addy of the owner
@@ -254,9 +254,9 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (new_reval_ts) = Math10xx8_ts()
     # @dev update CZCore - run accrual + update wt avg rate
     let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
-    let (loan_repay) = calc_loan_repay(notional, hist_repay, repay)
-    CZCore.set_update_rate(czcore_addy, loan_repay, rate, 0)
-    let (new_loan_total) = Math10xx8_sub(loan_total, loan_repay)
+    let (residual_loan_capital) = calc_residual_loan_capital(notional, hist_repay, repay)
+    CZCore.set_update_rate(czcore_addy, residual_loan_capital, rate, 0)
+    let (new_loan_total) = Math10xx8_sub(loan_total, residual_loan_capital)
 
     if new_total_acrrued_notional_os == 0:
         # @dev if loan repaid in full, do accrual splits
@@ -282,32 +282,6 @@ func repay_loan_partial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         # @dev emit event
         event_loan_change.emit(user, notional, collateral, start_ts, new_reval_ts, end_ts, rate, total_accrual, new_repayment, liquidate_me)
         return ()
-    end
-end
-
-####################################################################################
-# @dev this function calculates the residual loan capital repay amount
-# max(0 , min(repay, notional - hist_repay))
-# need this for the wt avg rate recal and the loan total recalc
-# @param input is 
-# - notional of current loan
-# - history repayments made to date
-# - new repayment
-# @return
-# - the loan repayment (to be used in blended wt avg calc and to update loan total in CZ state)
-####################################################################################
-func calc_loan_repay{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(notional : felt, hist_repay : felt, repay : felt) -> (loan_repay : felt):
-    alloc_locals
-    let (no_notional_os) = is_le(notional, hist_repay)
-    if no_notional_os == 1:
-        return(0)
-    end
-    let (notional_os) = Math10xx8_sub(notional, hist_repay)
-    let (repay_less_notional_os) = is_le(repay, notional_os)
-    if repay_less_notional_os == 1:
-        return(repay)
-    else:
-        return(notional_os)
     end
 end
 
@@ -492,10 +466,10 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 
     # @dev accrue to current ts and then updated wt avg rate
     let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
-    let (loan_repay) = calc_loan_repay(old_notional, hist_repay, repay)
-    let (loan_total_dn) = Math10xx8_sub(loan_total, loan_repay)
+    let (residual_loan_capital) = calc_residual_loan_capital(old_notional, hist_repay, repay)
+    let (loan_total_dn) = Math10xx8_sub(loan_total, residual_loan_capital)
     let (new_loan_total) = Math10xx8_add(loan_total_dn, notional_with_fee)
-    CZCore.set_update_rate(czcore_addy, loan_repay, old_rate, 0)
+    CZCore.set_update_rate(czcore_addy, residual_loan_capital, old_rate, 0)
     CZCore.set_update_rate(czcore_addy, notional_with_fee, median_rate_boost, 1)
     CZCore.set_cb_loan(czcore_addy, user, notional_with_fee, collateral, start_ts, start_ts, end_ts, median_rate_boost, 0, 0, 0, 0)
     CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
