@@ -12,6 +12,7 @@
 # - check current utilization be max level from Settings
 # - check term of loan below max term
 # - check loan range within range in Settings
+# - calc the residual loan capital
 # There is no owner addy or trusted addy here, these functions are imported to the relevant contracts
 # @author xan-crypto
 ####################################################################################
@@ -19,9 +20,10 @@
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
-from starkware.cairo.common.math import assert_le, assert_nn_le, assert_in_range
+from starkware.cairo.common.math import assert_le, assert_nn_le, assert_in_range, assert_nn
+from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
-from Functions.Math10xx8 import Math10xx8_div, Math10xx8_mul, Math10xx8_convert_from, Math10xx8_zero, Math10xx8_convert_to, Math10xx8_ts, Math10xx8_add, Math10xx8_fromUint256, Math10xx8_fromFelt
+from Functions.Math10xx8 import Math10xx8_div, Math10xx8_mul, Math10xx8_convert_from, Math10xx8_zero, Math10xx8_convert_to, Math10xx8_ts, Math10xx8_add, Math10xx8_sub, Math10xx8_fromUint256, Math10xx8_fromFelt
 from InterfaceAll import Settings, Erc20, Oracle
 
 ####################################################################################
@@ -83,7 +85,7 @@ end
 # - the amount of token in erc20 native contract terms
 # recall that Math10xx8 is a different decimal system to 18 decimals which is the erc20 std at the moment
 ####################################################################################
-func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(caller : felt, erc_addy: felt, amount : felt) -> (amount_erc : felt):
+func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(caller : felt, erc_addy : felt, amount : felt) -> (amount_erc : felt):
     alloc_locals
     let (caller_balance_unit : Uint256) = Erc20.ERC20_balanceOf(erc_addy, caller)
     let (caller_balance) = Math10xx8_fromUint256(caller_balance_unit)
@@ -121,6 +123,9 @@ end
 ####################################################################################
 func check_ltv{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(oracle_addy : felt, settings_addy : felt, notional : felt, collateral : felt):
     alloc_locals
+    with_attr error_message("Collateral should be a positive number"):
+        assert_nn(collateral)
+    end
     let (price_erc) = Oracle.get_oracle_price(oracle_addy)
     let (decimals) = Oracle.get_oracle_decimals(oracle_addy)
     let (ltv) = Settings.get_weth_ltv(settings_addy)
@@ -183,4 +188,30 @@ func check_loan_range{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
        assert_in_range(notional, min_loan, max_loan)
     end
     return()
+end
+
+####################################################################################
+# @dev this function calculates the residual loan capital repay amount
+# max(0 , min(repay, notional - hist_repay))
+# need this for the wt avg rate recal and the loan total recalc
+# @param input is 
+# - notional of current loan
+# - history repayments made to date
+# - new repayment
+# @return
+# - the loan repayment (to be used in blended wt avg calc and to update loan total in CZ state)
+####################################################################################
+func calc_residual_loan_capital{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(notional : felt, hist_repay : felt, repay : felt) -> (loan_repay : felt):
+    alloc_locals
+    let (no_notional_os) = is_le(notional, hist_repay)
+    if no_notional_os == 1:
+        return(0)
+    end
+    let (notional_os) = Math10xx8_sub(notional, hist_repay)
+    let (repay_less_notional_os) = is_le(repay, notional_os)
+    if repay_less_notional_os == 1:
+        return(repay)
+    else:
+        return(notional_os)
+    end
 end
