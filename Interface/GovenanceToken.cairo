@@ -107,7 +107,7 @@ func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     check_insurance_shortfall_ratio(capital_total, insolvency_total, min_is_ratio)
     
     # @dev get user and total staking details
-    let (gt_user, reward, old_user) = CZCore.get_staker_details(czcore_addy,user)
+    let (gt_user, reward, old_user) = CZCore.get_staker_details(czcore_addy, user)
     let (gt_total, index) = CZCore.get_staker_total(czcore_addy)
 
     # @dev transfer tokens
@@ -169,9 +169,8 @@ func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 
     # @dev transfer tokens
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
-    let (czt_decimals) = Erc20.ERC20_decimals(czt_addy)
-    let (gt_token_erc) = Math10xx8_convert_from(gt_token, czt_decimals)
-    
+    let (gt_token_erc) = check_user_balance(czcore_addy, czt_addy, gt_token)
+
     # @dev update user and aggregate
     CZCore.set_staker_details(czcore_addy, user, gt_user_new, reward)   
     CZCore.set_staker_total(czcore_addy, gt_total_new, index)
@@ -194,7 +193,7 @@ func view_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     # @dev get current user stake
-    let (gt_user, reward, old_user) = CZCore.get_staker_details(czcore_addy,user)
+    let (gt_user, reward, old_user) = CZCore.get_staker_details(czcore_addy, user)
     return(gt_user, reward)
 end
 
