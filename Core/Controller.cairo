@@ -7,7 +7,7 @@
 # - get/set the TrustedAddy contract address where all contract addys are stored
 # - pause and unpause the protocol, this is required to prevent LP/PP/GT from removing liquidity/stake 
 # in the case of a liquidity event / anomalous loan, also prevents the creation of new loans 
-# - distribute rewards from CZCore to stakers, they can they claim that using the GovenanceToken contract
+# - distribute rewards from CZCore to stakers, they can then claim that using the GovenanceToken contract
 # - slash PP if anomalous behaviour detected, move funds to insurance fund
 # - slash GT holders if liquidity gap, move funds to insurance fund 
 # - do a system check to compare USDC asset/liabilities to USDC balance in the ERC20 contract
@@ -131,7 +131,7 @@ func distribute_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         assert_nn(reward_total)
     end
     let (stake_total,index) = CZCore.get_staker_total(czcore_addy)
-    run_distribution(czcore_addy,stake_total,reward_total,index)
+    run_distribution(czcore_addy, stake_total, reward_total, index)
     # @dev set CZCore reward_total to 0
     CZCore.set_cz_state(czcore_addy, lp_total, capital_total, loan_total, insolvency_total, 0)
     return ()
@@ -150,12 +150,12 @@ func run_distribution{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     if index == 0:
         return()
     end
-    run_distribution(czcore_addy,stake_total,reward_total,index-1)
+    run_distribution(czcore_addy, stake_total, reward_total, index-1)
     let (user) = CZCore.get_staker_index(czcore_addy, index-1)
     let (stake, unclaimed, old_user) = CZCore.get_staker_details(czcore_addy, user)
-    let (temp1) = Math10xx8_mul(reward_total, stake)
-    let (temp2) = Math10xx8_div(temp1,stake_total)
-    let (reward_new) = Math10xx8_add(temp2, unclaimed)
+    let (staking_ratio) = Math10xx8_div(stake, stake_total)
+    let (reward) = Math10xx8_mul(reward_total, staking_ratio)
+    let (reward_new) = Math10xx8_add(reward, unclaimed)
     CZCore.set_staker_details(czcore_addy, user, stake, reward_new)
     return ()
 end
@@ -181,7 +181,7 @@ func slash_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(
     # @dev check if status 1 - has to be a valid pp
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    let (lp_locked, czt_locked, pp_status) = CZCore.get_pp_status(czcore_addy, user)
+    let (lp_locked, czt_locked, lock_ts, last_id, pp_status) = CZCore.get_pp_status(czcore_addy, user)
     with_attr error_message("User is not an existing PP."):
         assert pp_status = 1
     end
@@ -196,14 +196,19 @@ func slash_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(
     
     # @dev check that czcore has eno CZT tokens and transfer
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
-    let (czt_remain_erc) = check_user_balance(czcore_addy, czt_addy, czt_remain)
-    CZCore.erc20_transfer(czcore_addy, czt_addy, user, czt_remain_erc)
     let (czt_slashed_erc) = check_user_balance(czcore_addy, czt_addy, czt_slashed)
     CZCore.erc20_transfer(czcore_addy, czt_addy, owner, czt_slashed_erc)
-    
+    let (czt_remain_erc) = check_user_balance(czcore_addy, czt_addy, czt_remain)
+    CZCore.erc20_transfer(czcore_addy, czt_addy, user, czt_remain_erc)
+
     # @dev demote PP and burn lp
-    let (lp_user, lockup) = CZCore.get_lp_balance(czcore_addy, user)
-    CZCore.set_pp_status(czcore_addy, user, lp_user, lp_remain, czt_remain, lockup, 0)
+    let (lpt_addy) = TrustedAddy.get_lpt_addy(_trusted_addy)
+    let (lp_slashed_erc) = check_user_balance(czcore_addy, lpt_addy, lp_slashed)
+    CZCore.erc20_burn(czcore_addy, lpt_addy, czcore_addy, lp_slashed_erc)
+    let (lp_remain_erc) = check_user_balance(czcore_addy, lpt_addy, lp_remain)
+    CZCore.erc20_transfer(czcore_addy, lpt_addy, user, lp_remain_erc)
+
+    CZCore.set_pp_status(czcore_addy, user, lp_remain, czt_remain, lock_ts, last_id, 0)
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
     with_attr error_message("Slash must be less or equal to LP total."):
         assert_le(lp_slashed, lp_total)
@@ -211,7 +216,7 @@ func slash_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(
     let (new_lp_total) = Math10xx8_sub(lp_total, lp_slashed)
     CZCore.set_cz_state(czcore_addy, new_lp_total, capital_total, loan_total, insolvency_total, reward_total)
     # @dev emit event
-    event_pp_slash.emit(addy=user, pp_status=0, lp_slashed=lp_slashed, czt_slashed=czt_slashed)  
+    event_pp_slash.emit(user, 0, lp_slashed, czt_slashed)  
     return()
 end
 
@@ -249,16 +254,15 @@ func slash_gt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     
     run_slash(czcore_addy, remain, index)
     # @dev emit event
-    event_gt_slash.emit(slash_percentage=slash_percentage, stake_total=stake_total, new_stake_total=new_stake_total, index=index)  
+    event_gt_slash.emit(slash_percentage, stake_total, new_stake_total, index)  
     return()
 end
 
 ####################################################################################
-# @dev send out user unclaimed rewards
+# @dev slashing each individual user
 # @param 
 # - CZCore addy for getting user stake/unclaimed data
-# - total stake for calculating reward ratio
-# - reward total being distributed
+# - 1 - slashing percentage
 # - index / count of number of stakers
 ####################################################################################
 func run_slash{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(czcore_addy : felt, remain : felt, index : felt):
@@ -282,28 +286,28 @@ end
 # - current USDC balance
 ####################################################################################
 @view
-func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (asset_liability : felt, usd_bal : felt):
+func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (asset_liability : felt, accrued_interest : felt, usd_bal : felt):
     alloc_locals
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)   
+    let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
     let (stake_total, index) = CZCore.get_staker_total(czcore_addy)
-        
+    
     # @dev get the total unclaimed rewards by all users    
     let (unclaimed_total) = sum_unclaimed_rewards(czcore_addy, index)
     # @dev we sum captal and reward and unclaimed reward and subtract loan and insolvency
-    let (temp1) = Math10xx8_add(capital_total, reward_total)
-    let (temp2) = Math10xx8_add(temp1, unclaimed_total)
-    let (temp3) = Math10xx8_sub(temp2, loan_total)
-    let (asset_liability) = Math10xx8_sub(temp3, insolvency_total)
+    let (capital_reward) = Math10xx8_add(capital_total, reward_total)
+    let (capital_reward_unclaimed) = Math10xx8_add(capital_reward, unclaimed_total)
+    let (asset_liability) = Math10xx8_sub(capital_reward_unclaimed, loan_total)
     
     # @dev get USDC balance of for czcore and convert to math10xx8
     let (decimals) = Erc20.ERC20_decimals(usdc_addy)
     let (bal_erc_unit) = Erc20.ERC20_balanceOf(usdc_addy, czcore_addy)
     let (bal_erc) = Math10xx8_fromUint256(bal_erc_unit)
     let (usd_bal) = Math10xx8_convert_to(bal_erc, decimals)
-    return(asset_liability, usd_bal)
+    return(asset_liability, accrued_interest_total, usd_bal)
 end
 
 ####################################################################################
