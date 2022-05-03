@@ -41,3 +41,4 @@ Work together as a community<br>
 Integrate into L2 money market protocol to provide yields on collateral<br>
 Expand from single collateral to multi collateral<br>
 Solve for continuous accrual of compound interest to LPs<br>
+Implement KYC, AML and OFAC retrictions<br>
