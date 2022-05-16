@@ -31,6 +31,7 @@ Audits - 0%<br>
 ![image](https://user-images.githubusercontent.com/62293102/158979980-92401fe5-a91c-4337-9f1b-38bd4be9b2d6.png)
 28 Mar 2022 - First iteration of website design done<br>
 14 Apr 2022 - CurveZero wins best L2 Dapp in the StarkNet x Encode hackathon<br>
+16 May 2022 - Solved for continuous accrual of interest to LPs<br>
 
 **Our Mantras**:<br>
 Make products that people love<br>
@@ -40,5 +41,4 @@ Work together as a community<br>
 **Our Future Roadmap**:<br>
 Integrate into L2 money market protocol to provide yields on collateral<br>
 Expand from single collateral to multi collateral<br>
-Solve for continuous accrual of compound interest to LPs<br>
 Implement KYC, AML and OFAC restrictions<br>
