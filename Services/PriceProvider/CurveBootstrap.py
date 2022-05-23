@@ -10,6 +10,10 @@
 # - the ratioed shift should be appropriate because the treasuries are risk free so the shape should be correct
 # - the CurveZero curve is based on over collateralisation hence there should also be no market risk
 # - by using the shift from the 1y pt we will capture the native crypto premium but maintain the risk free shape
+# 23-05-22 updates
+# - remove treasury bonds for simplicity
+# - add margin frac for spot futs basis to create lend / borrow double
+# - implies x% of cash needed to sustain position => lend rate/(1-x%)
 # @author xan-crypto
 ####################################################################################
 
@@ -41,9 +45,10 @@ def get_deribit_futs(_yc):
             price = deribit.public_get_ticker({'instrument_name':ticker['instrument_name']})
             mid_price = (float(price['result']['best_bid_price']) + float(price['result']['best_ask_price']))*0.5
             term = (float(ticker['expiration_timestamp'])/1000-now)/86400
-            # @dev to prevent distorts vs ON from aave
-            if term > 60:
-                rate = (mid_price/index)**(365/term)-1
+            # @dev to prevent distorts vs ON from aave, less than 14 days on deribit can behave strangely
+            # spots futs basis is lend side, to get borrow side assume 20% of realised cash needed for margin
+            if term > 14:
+                rate = ((mid_price/index)**(365/term)-1)/0.8
                 _yc = _yc.append({'source': 'deribit','type': 'futs','term': term,'rate': rate}, ignore_index=True)
     _yc = _yc.sort_values(by='term')
     return _yc
@@ -51,7 +56,7 @@ def get_deribit_futs(_yc):
 # @dev investing for treasury bonds
 def get_investing_tbonds(_yc):
     tb = investpy.bonds.get_bonds_overview('united states', as_json=False)
-    index = tb.loc[tb.name=='U.S. 5Y'].index[0]
+    index = tb.loc[tb.name=='U.S. 2Y'].index[0]
     tb = tb[0:index+1]
     tb['last'] = tb['last']/100
     tb['term'] = 0.0
@@ -70,14 +75,14 @@ def bootstrap_yc():
     _yc = pd.DataFrame(columns=['source', 'type', 'term', 'rate'])
     _yc = get_aave_on(_yc)
     _yc = get_deribit_futs(_yc)
-    _yc = get_investing_tbonds(_yc)
+    # _yc = get_investing_tbonds(_yc)
     _yc['yfrac'] = _yc.term / 365
     return _yc
 
 # @dev plot curve
 yc = bootstrap_yc()
 plt.plot(yc.yfrac.values, yc.rate.values)
-plt.axis([0,5,0,0.1])
+plt.axis([0,1,0,0.1])
 plt.ylabel('rate')
 plt.xlabel('year')
 plt.show()
