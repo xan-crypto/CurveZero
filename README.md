@@ -12,7 +12,7 @@ https://twitter.com/curve_zero<br>
 **Abstract**: This litepaper introduces a framework for determining the USD funding rate term structure. The protocol will live on-chain via layer 2 ethereum, either on starknet or zksync. The traditional bootstrap process for curve building is tricky due to the lack of liquid on-chain financial instruments from which rates can be extracted. The various shapes and kinks in term structure are also difficult to capture via a closed form solution, thus we rely on market forces for its expression. Effectively once this curve is known, a user can lock into a fixed rate loan for n months in a trustless and transparent manner (0-24 months initially).
 
 **Protocol Architecture**:
-![image](https://user-images.githubusercontent.com/62293102/169762263-b497742e-62f4-4a52-a204-fe375cf86076.png)
+![image](https://user-images.githubusercontent.com/62293102/169762326-378a5a73-d79a-4a3d-a046-b401a02a8429.png)
 
 **Progress**:<br>
 Protocol (cairo) - 65%<br>
