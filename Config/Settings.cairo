@@ -4,22 +4,20 @@
 # Users can
 # - view the owner addy
 # - view the TrustedAddy contract address where all contract addys are stored
-# - view the token requirements to become a PP
-# - view the lockup for a PP post valid price submission
-# - view loan origination fee and split between PP/IF
+# - view the max LP capital allowed in the protocol
+# - view the percentage that can be used for uncollateralised lending
+# - view loan origination fee and split between (Dev Fund) DF/IF
 # - view accrued interest split between LP/IF/GT
 # - view the min max loan in USDC
 # - view the min max deposit in USDC for LP tokens
 # - view the utilization stop level, after which no new loans will be granted
-# - view the min number of PP for valid pricing 
 # - view the insurance shortfall ratio, beyond which LP/GT changes are locked pending resolution
-# - view the min max loan term
+# - view the max loan term
 # - view the WETH ltv for loan creation
 # - view the WETH liquidation ratio for loan liquidation
 # - view the WETH liquidation fee
 # - view the grace period, period after end ts that a loan is liquidated
-# - view the pp slash percentage
-# - view the lp yield boost (this is a fixed spread over the pp oracle median to balance supply/demand)
+# - view the lp yield boost (this is a positive fixed spread over the stripped curve to balance supply/demand)
 # Owner can set all of the above (excluding the owner addy), with defaults set on initialization 
 # Owner will be the same addy as the controller and will be a multisig wallet 
 # This contract addy will be stored in the TrustedAddy contract
@@ -41,6 +39,8 @@ from Functions.Checks import check_is_owner
 ####################################################################################
 const Math10xx8_FRACT_PART = 10 ** 8
 const Math10xx8_ONE = 1 * Math10xx8_FRACT_PART
+const uncollateralised = 20000000
+const max_uncollateralised = 30000000
 const origination_fee_total = 200000
 const origination_fee_split = 50000000
 const accrued_interest_split_1 = 90000000
@@ -52,9 +52,7 @@ const ltv = 60000000
 const liquidation_rato = 110000000
 const liquidation_fee = 2500000
 const liquidation_period = 60480000000000
-const pp_slash_amount = 50000000
-const pp_lockup_period = 60480000000000
-const lp_yield_spread = 1000000
+const lp_yield_spread = 0
 const max_lp_yield_spread = 10000000
 
 ####################################################################################
@@ -75,22 +73,20 @@ end
 @constructor
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(owner : felt):
     owner_addy.write(owner)
-    # @dev set initial amounts for becoming pp - NB NB change this later
-    pp_token_requirement.write((1000 * Math10xx8_ONE, 1000 * Math10xx8_ONE))
-    # @dev set initial lock up period post of valid pricing request
-    pp_lockup.write(pp_lockup_period)
-    # @dev origination fee and split 20bps and 50/50 PP IF
+    # @dev max LP capital allowed
+    max_capital.write(10**6*Math10xx8_ONE)
+    # @dev uncollateralised split
+    uncollateralised_split.write(uncollateralised)
+    # @dev origination fee and split 20bps and 50/50 DF/IF
     origination_fee.write((origination_fee_total, origination_fee_split, origination_fee_split))
     # @dev accrued interest split between LP IF and GT - 90/5/5
     accrued_interest_split.write((accrued_interest_split_1, accrued_interest_split_2, accrued_interest_split_3))
     # @dev min loan and max loan amounts
-    min_max_loan.write((10**2*Math10xx8_ONE - 1, 10**4*Math10xx8_ONE + 1))
+    min_max_loan.write((10**2*Math10xx8_ONE - 1, 10**5*Math10xx8_ONE + 1))
     # @dev min deposit and max deposit from LPs accepted
-    min_max_deposit.write((10**2*Math10xx8_ONE - 1, 10**4*Math10xx8_ONE + 1))
+    min_max_deposit.write((10**2*Math10xx8_ONE - 1, 10**5*Math10xx8_ONE + 1))
     # @dev utilization start and stop levels
     utilization.write(utilization_total)
-    # @dev min number of PPs for pricing
-    min_pp_accepted.write(1*Math10xx8_ONE)
     # @dev insurance shortfall ratio to lp capital
     insurance_shortfall_ratio.write(insurance_shortfall)    
     # @dev max loan term - 3 months initially
@@ -103,8 +99,6 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     weth_liquidation_fee.write(liquidation_fee)  
     # @dev liquidation settlement period
     grace_period.write(liquidation_period)
-    # @dev pp slash percentage
-    pp_slash_percentage.write(pp_slash_amount)
     # @dev lp yield boost / spread
     lp_yield_boost.write(lp_yield_spread)    
     return ()
@@ -133,60 +127,68 @@ func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 ####################################################################################
-# @dev view / set current requirement to become PP
-# Locking up LP and CZT tokens aligns PP with the protocol, malicious activity can result in slashing
+# @dev view / set max LP capital allowed into protocol
+# this is to control overall risk of system, also allows for balancing of lenders / borrowers
+# we will ratchet up the max capital as borrowers appear, thus ensuring max returns to LPs
+# recall that pool size do not control rates in any way with CurveZero... so we can restrict LP pool without impacting borrowers
 # @param / @return 
-# - Lp tokens required
-# - CZT tokens required
+# - max capital allowed in system in Math10xx8
 ####################################################################################
 @storage_var
-func pp_token_requirement() -> (require : (felt, felt)):
+func max_capital() -> (res : felt):
 end
 
 @view
-func get_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (lp_require : felt, cz_require : felt):
-    let (res) = pp_token_requirement.read()
-    return (res[0],res[1])
-end
-
-@external
-func set_pp_token_requirement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_require : felt, cz_require : felt):
-    let (owner) = owner_addy.read()
-    check_is_owner(owner)
-    pp_token_requirement.write((lp_require,cz_require))
-    return ()
-end
-
-####################################################################################
-# @dev view / set lockup period for PP post valid pricing request
-# Locking up LP and CZT tokens aligns PP with the protocol, malicious activity can result in slashing 
-# Governance has the lock up period to decide on whether slashing is appropriate
-# @param / @return 
-# - lock up period
-####################################################################################
-@storage_var
-func pp_lockup() -> (lockup : felt):
-end
-
-@view
-func get_pp_lockup{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (lockup : felt):
-    let (res) = pp_lockup.read()
+func get_max_capital{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (max_capital : felt):
+    let (res) = max_capital.read()
     return (res)
 end
 
 @external
-func set_pp_lockup{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lockup : felt):
+func set_max_capital{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(capital : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
-    pp_lockup.write(lockup)
+    max_capital.write(capital)
     return ()
 end
 
 ####################################################################################
-# @dev view / set origination fee and split btw PP and IF
+# @dev view / set the uncollateralised lending split
+# the owner can borrow capital uncollateralised for lending into pools like maple finance
+# there is a max uncollateralised limit of 30% of the lp capital that is hard fixed, so never more than 30% uncol lending
+# using some uncollateralised lending ensure that LP earn 4-6%, collateralised borrowers pay 4-5%
+# the protocol requires a blend of col and uncol lending to ensure somewhat attractive yield for LPs
+# @param / @return 
+# - current and max uncol lending split
+####################################################################################
+@storage_var
+func uncollateralised_split() -> (res : felt):
+end
+
+@view
+func get_uncollateralised_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (uncol_split : felt, max_uncol_split : felt):
+    let (res) = uncollateralised_split.read()
+    return (res, max_uncollateralised)
+end
+
+@external
+func set_uncollateralised_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(uncol_split : felt):
+    alloc_locals
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    let (test_range) = is_in_range(uncol_split, 0, max_uncollateralised)
+    with_attr error_message("Uncollateralised split not in required range."):
+        assert test_range = 1
+    end
+    uncollateralised_split.write(uncol_split)
+    return ()
+end
+
+####################################################################################
+# @dev view / set origination fee and split btw DF and IF
 # @param / @return 
 # - fee in % and in Math10xx8 20bps = 0.002 * 10**8
-# - PP split
+# - DF split
 # - IF split
 ####################################################################################
 @storage_var
@@ -194,20 +196,20 @@ func origination_fee() -> (res : (felt,felt,felt)):
 end
 
 @view
-func get_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (fee : felt, pp_split : felt, if_split : felt):
+func get_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (fee : felt, df_split : felt, if_split : felt):
     let (res) = origination_fee.read()
     return (res[0],res[1],res[2])
 end
 
 @external
-func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt, pp_split : felt, if_split : felt):
+func set_origination_fee{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(fee : felt, df_split : felt, if_split : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
-    let (sum_splits) = Math10xx8_add(pp_split,if_split)
-    with_attr error_message("PP split and IF split should sum to 1"):
+    let (sum_splits) = Math10xx8_add(df_split, if_split)
+    with_attr error_message("DF split and IF split should sum to 1"):
         assert sum_splits = Math10xx8_ONE
     end
-    origination_fee.write((fee,pp_split,if_split))
+    origination_fee.write((fee, df_split, if_split))
     return ()
 end
 
@@ -315,32 +317,6 @@ func set_utilization{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (owner) = owner_addy.read()
     check_is_owner(owner)
     utilization.write(stop)
-    return ()
-end
-
-####################################################################################
-# @dev view / set min number of PPs for pricing
-# pricing oracles need atleast some min number of submission for the price to be accurate
-# if have 101 PP prices then 50 can be malcious on a pricing request and we still get reasonable price (median based)
-# PP that price will have stakes locked for 7 day for slashing if needed
-# @param / @return 
-# - min number of PP submission for a valid price
-####################################################################################
-@storage_var
-func min_pp_accepted() -> (res : felt):
-end
-
-@view
-func get_min_pp_accepted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (min_pp : felt):
-    let (res) = min_pp_accepted.read()
-    return (res)
-end
-
-@external
-func set_min_pp_accepted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(min_pp : felt):
-    let (owner) = owner_addy.read()
-    check_is_owner(owner)
-    min_pp_accepted.write(min_pp)
     return ()
 end
 
@@ -499,39 +475,8 @@ func set_grace_period{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 ####################################################################################
-# @dev view / set the PP slash percentage
-# this is the amount of LP and CZT tokens that are taken from the PP if slashed
-# slashing will occur if there is some malicious behaviour and is called by controller
-# @param / @return 
-# - slash
-####################################################################################
-@storage_var
-func pp_slash_percentage() -> (res : felt):
-end
-
-@view
-func get_pp_slash_percentage{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (percentage : felt):
-    let (res) = pp_slash_percentage.read()
-    return (res)
-end
-
-@external
-func set_pp_slash_percentage{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(percentage : felt):
-    alloc_locals
-    let (owner) = owner_addy.read()
-    check_is_owner(owner)
-    let (one) = Math10xx8_one()
-    let (test_range) = is_in_range(percentage, 0, one)
-    with_attr error_message("Slash perecent not in required range."):
-        assert test_range = 1
-    end
-    pp_slash_percentage.write(percentage)
-    return ()
-end
-
-####################################################################################
 # @dev view / set the LP yield boost / spread
-# this is the spread that gets added on top of the PP oracle curve
+# this is the spread that gets added on top of the yield curve
 # we use this to balance supply and demand, we believe that attracting LP capital initially might be difficult
 # thus goverance has the ability to shift this spread higher, making it more attract for LPs to depo capital
 # the range for the spread is hard fixed from 0-10%
