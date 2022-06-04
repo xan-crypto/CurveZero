@@ -50,7 +50,7 @@ const utilization_total = 90000000
 const insurance_shortfall = 1000000
 const ltv = 60000000
 const liquidation_rato = 110000000
-const liquidation_fee = 2500000
+const liquidation_fee = 5000000
 const liquidation_period = 60480000000000
 const lp_yield_spread = 0
 const max_lp_yield_spread = 10000000
@@ -425,7 +425,7 @@ end
 ####################################################################################
 # @dev view / set liquidation fee
 # this is the fee that the loan liquidator earns from liquidating the loan
-# initially this fee will be set at 2.5%, so $25 on a $1000 liquidation
+# initially this fee will be set at 5%, so $50 on a $1000 liquidation
 # @param / @return 
 # - liquidation fee
 ####################################################################################
