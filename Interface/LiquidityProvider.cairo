@@ -103,6 +103,10 @@ func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
     let (accrued_capital_total) = Math10xx8_add(capital_total, accrued_interest_total)
     let (new_capital_total) = Math10xx8_add(capital_total, usdc_deposit)
+    let (max_capital) = Settings.get_max_capital(settings_addy)
+    with_attr error_message("Deposit would exceed the max capital allowed in the protocol."):
+        assert_le(new_capital_total, max_capital) 
+    end
     let (new_accrued_capital_total) = Math10xx8_add(accrued_capital_total, usdc_deposit)
 
     # @dev transfer the USDC, mint the lp token and update variables
