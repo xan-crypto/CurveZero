@@ -98,22 +98,6 @@ func check_user_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 end
 
 ####################################################################################
-# @dev check eno pp for pricing, settings has min_pp
-# @param 
-# - settings addy so that we can get min pp accepted
-# - number of PPs in current pricing request
-####################################################################################
-func check_min_pp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(settings_addy : felt, num_pp : felt):
-    alloc_locals
-    let (convert_num_pp) = Math10xx8_fromFelt(num_pp)
-    let (min_pp) = Settings.get_min_pp_accepted(settings_addy)
-    with_attr error_message("Not enough PPs for valid pricing."):
-        assert_le(min_pp, convert_num_pp)
-    end
-    return()
-end
-
-####################################################################################
 # @dev test sufficient collateral to proceed vs notional of loan
 # @param 
 # - oracle addy so that we can get price and decimals
