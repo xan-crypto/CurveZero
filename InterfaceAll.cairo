@@ -123,9 +123,9 @@ end
 # @dev interface for the settings contract
 @contract_interface
 namespace Settings:
-    func get_pp_token_requirement() -> (lp_require : felt, cz_require : felt):
-    end    
-    func get_lockup_period() -> (lockup : felt):
+    func get_max_capital() -> (max_capital : felt):
+    end
+    func get_uncollateralised_split() -> (uncol_split : felt, max_uncol_split : felt):
     end
     func get_origination_fee() -> (fee : felt, pp_split : felt, if_split : felt):
     end
@@ -137,8 +137,6 @@ namespace Settings:
     end
     func get_utilization() -> (stop : felt):
     end   
-    func get_min_pp_accepted() -> (min_pp : felt):
-    end  
     func get_insurance_shortfall_ratio() -> (insurance_shortfall_ratio : felt):
     end
     func get_max_loan_term() -> (max_term : felt):
@@ -150,8 +148,6 @@ namespace Settings:
     func get_weth_liquidation_fee() -> (fee : felt):
     end
     func get_grace_period() -> (period: felt):
-    end
-    func get_pp_slash_percentage() -> (percentage: felt):
     end
     func get_lp_yield_boost() -> (spread: felt):
     end
