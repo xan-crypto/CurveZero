@@ -17,6 +17,7 @@
 # - put limits on min and max rate
 # @author xan-crypto
 ####################################################################################
+import pprint
 
 import ccxt
 import json
@@ -26,6 +27,9 @@ import requests
 import time
 import investpy
 from matplotlib import pyplot as plt
+from datetime import datetime
+import os
+os.chdir('C:/Users/Xan/PycharmProjects/Cario')
 
 # @dev aave ON rate on USDC borrow rate - get from graphql
 def get_aave_on(_yc):
@@ -49,10 +53,28 @@ def get_deribit_futs(_yc):
             # @dev to prevent distorts vs ON from aave, less than 14 days on deribit can behave strangely
             # since close to expiry spot and futs differences can results in large positive / negative rates
             # spots futs basis is lend side, to get borrow side assume 20% of realised cash needed for margin
-            if term > 14:
-                rate = ((mid_price/index)**(365/term)-1)/0.8
+            if term > 0:
+                rate = ((mid_price/index)**(365/term)-1)/1
                 _yc = _yc.append({'source': 'deribit','type': 'futs','term': term,'rate': rate}, ignore_index=True)
-    _yc = _yc.sort_values(by='term')
+    return _yc
+
+# @dev ftx for the spot futs basis
+def get_ftx_futs(_yc):
+    ftx = ccxt.ftx({'rateLimit': 100, 'options': {'adjustForTimeDifference': True}, 'enableRateLimit': True})
+    futures = ftx.publicGetFutures()
+    now = time.time()
+    for ticker in futures['result']:
+        if ticker['underlying'] == 'BTC' and ticker['type'] == 'future':
+            mid_price = (float(ticker['bid']) + float(ticker['ask']))*0.5
+            index = float(ticker['index'])
+            datetimeObj = datetime.strptime(ticker['expiry'][:-6], '%Y-%m-%dT%H:%M:%S')
+            term = (datetimeObj.timestamp()-now)/86400
+            # @dev to prevent distorts vs ON from aave, less than 14 days on deribit can behave strangely
+            # since close to expiry spot and futs differences can results in large positive / negative rates
+            # spots futs basis is lend side, to get borrow side assume 20% of realised cash needed for margin
+            if term > 0:
+                rate = ((mid_price/index)**(365/term)-1)/1
+                _yc = _yc.append({'source': 'ftx','type': 'futs','term': term,'rate': rate}, ignore_index=True)
     return _yc
 
 # @dev investing for treasury bonds
@@ -76,21 +98,45 @@ def get_investing_tbonds(_yc):
 def bootstrap_yc():
     _yc = pd.DataFrame(columns=['source', 'type', 'term', 'rate', 'yfrac', 'ts_capture', 'ts_expiry'])
     _yc = get_aave_on(_yc)
-    _yc = get_deribit_futs(_yc)
+    # _yc = get_deribit_futs(_yc)
+    _yc = get_ftx_futs(_yc)
     # _yc = get_investing_tbonds(_yc)
+    _yc = _yc.sort_values(by='term').reset_index(drop=True)
     _yc['yfrac'] = _yc.term / 365
     _yc['ts_capture'] = time.time()
     _yc['ts_expiry'] = _yc.term * 86400 + time.time()
     # @dev to prevent arbitrage, the curve will be flat from Aave ON or upward sloping
     # reject any rates below Aave ON
-    _yc = _yc.loc[_yc.rate >= _yc.iloc[0]['rate']].reset_index(drop=True)
+    # _yc = _yc.loc[_yc.rate >= _yc.iloc[0]['rate']].reset_index(drop=True)
     return _yc
 
 # @dev plot curve
-yc = bootstrap_yc()
-plt.plot(yc.yfrac.values, yc.rate.values)
-plt.axis([0,1,0,0.1])
+try: hist_curve = pd.read_csv('CurveData.csv')
+except: hist_curve = pd.DataFrame()
+while True:
+    try:
+        yc = bootstrap_yc()
+        hist_curve = hist_curve.append(yc[['term','rate']],ignore_index=True)
+        # print(yc)
+        hist_curve.to_csv('CurveData.csv', index=False)
+        time.sleep(300)
+    except:
+        break
+
+# @dev plot all
+indices = hist_curve.loc[hist_curve.term==1].index
+indices = indices.sort_values(ascending=False)
+margin = 0.85
+last = len(hist_curve)
+for index in indices:
+    df = hist_curve[index:last].reset_index(drop=True)
+    last = index
+    df = df.loc[df.rate >= df.iloc[0]['rate']].reset_index(drop=True)
+    df = df.loc[(df.term == 1)|(df.term >= 45)].reset_index(drop=True)
+    df.at[0,'rate'] = df.at[0,'rate']*margin
+    df['rate'] = df['rate']/margin
+    plt.plot(df['term'], df['rate'])
+plt.axis([0,365,0,0.1])
 plt.ylabel('rate')
-plt.xlabel('year')
+plt.xlabel('days')
 plt.show()
-print(yc)
