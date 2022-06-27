@@ -228,7 +228,7 @@ func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     let (unclaimed_reward_total) = sum_unclaimed_rewards(czcore_addy, index)
     # @dev get USDC balance of for czcore 
     let (usd_bal_total) = get_user_balance(usdc_addy, czcore_addy)
-    return(loan_total, accrued_interest_total, usd_bal_total, capital_total, reward_total, unclaimed_reward_total)
+    return(loan_total, accrued_interest_total, usd_bal_total, capital_total, insolvency_total, reward_total, unclaimed_reward_total)
 end
 
 ####################################################################################
