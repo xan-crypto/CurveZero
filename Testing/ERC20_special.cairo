@@ -12,6 +12,44 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check
+from Functions.Checks import check_is_owner, check_is_czcore
+from InterfaceAll import TrustedAddy
+
+####################################################################################
+# @dev storage for the addy of the owner
+# this is needed so that the owner can point this contract to the TrustedAddy contract
+####################################################################################
+@storage_var
+func owner_addy() -> (addy : felt):
+end
+
+@view
+func get_owner_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
+    let (addy) = owner_addy.read()
+    return (addy)
+end
+
+####################################################################################
+# @dev storage for the trusted addy contract
+# the TrustedAddy contract stores all the contract addys
+####################################################################################
+@storage_var
+func trusted_addy() -> (addy : felt):
+end
+
+@view
+func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = trusted_addy.read()
+    return (addy)
+end
+
+@external
+func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    trusted_addy.write(addy)
+    return ()
+end
 
 # Storage
 @storage_var
@@ -47,13 +85,12 @@ func constructor{
     }(
         name: felt,
         symbol: felt,
-        initial_supply: Uint256,
-        recipient: felt
+        owner: felt
     ):
     ERC20_name_.write(name)
     ERC20_symbol_.write(symbol)
     ERC20_decimals_.write(18)
-    ERC20_mint(recipient, initial_supply)
+    owner_addy.write(owner)
     return ()
 end
 
@@ -213,6 +250,10 @@ func ERC20_mint{
         range_check_ptr
     }(recipient: felt, amount: Uint256):
     alloc_locals
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    check_is_czcore(czcore_addy)
+    
     assert_not_zero(recipient)
     uint256_check(amount)
 
@@ -237,6 +278,10 @@ func ERC20_burn{
         range_check_ptr
     }(account: felt, amount: Uint256):
     alloc_locals
+    let (_trusted_addy) = trusted_addy.read()
+    let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
+    check_is_czcore(czcore_addy)
+
     assert_not_zero(account)
     uint256_check(amount)
 

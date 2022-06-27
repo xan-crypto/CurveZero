@@ -30,6 +30,8 @@ namespace TrustedAddy:
     end
     func get_if_addy() -> (addy : felt):
     end
+    func get_df_addy() -> (addy : felt):
+    end    
     func get_czcore_addy() -> (addy : felt):
     end
     func get_controller_addy() -> (addy : felt):
@@ -77,7 +79,7 @@ namespace CZCore:
     end  
     func get_cb_loan(user : felt) -> (notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt):
     end  
-    func set_cb_loan(user : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt, new : felt):
+    func set_cb_loan(user : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt, type : felt):
     end  
     func get_staker_index(index : felt) -> (user : felt):
     end  
@@ -169,5 +171,15 @@ end
 namespace CapitalBorrower:
     func view_loan_detail(user : felt) -> (
         notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt, accrued_interest : felt):
+    end    
+end
+
+##################################################################
+# interface for the priceprovider contract
+@contract_interface
+namespace PriceProvider:
+    func get_rate(expiry_ts : felt) -> (rate : felt):
+    end    
+    func get_curve_points() -> (data_len : felt, data : felt*):
     end    
 end

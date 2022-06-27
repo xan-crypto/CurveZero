@@ -13,6 +13,7 @@
 # - LoanLiquidator addy
 # - GovenanceToken addy
 # - InsuranceFund addy
+# - DevelopmentFund addy
 # - CZCore addy
 # - Controller addy
 # - Settings addy
@@ -66,6 +67,11 @@ end
 func if_addy() -> (addy : felt):
 end
 
+# @dev addy of the development fund
+@storage_var
+func df_addy() -> (addy : felt):
+end
+
 # @dev addy of the czcore contract
 @storage_var
 func czcore_addy() -> (addy : felt):
@@ -111,34 +117,36 @@ end
 @constructor
 func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(
     _owner_addy : felt,
+    _df_addy : felt,
     _lp_addy : felt,
-    _pp_addy : felt,
     _cb_addy : felt,
     _ll_addy : felt,
     _gt_addy : felt,
+    _pp_addy : felt,
     _if_addy : felt,
     _czcore_addy : felt,
     _controller_addy : felt,
     _settings_addy : felt,
     _usdc_addy : felt,
-    _weth_addy : felt,
-    _lpt_addy : felt,
     _czt_addy : felt,
+    _weth_addy : felt,
+    _lpt_addy : felt,    
     _oracle_addy : felt):
     owner_addy.write(_owner_addy)
+    df_addy.write(_df_addy)
     lp_addy.write(_lp_addy)
-    pp_addy.write(_pp_addy)
     cb_addy.write(_cb_addy)
     ll_addy.write(_ll_addy)
     gt_addy.write(_gt_addy)
+    pp_addy.write(_pp_addy)
     if_addy.write(_if_addy)
     czcore_addy.write(_czcore_addy)
     controller_addy.write(_controller_addy)
     settings_addy.write(_settings_addy)
     usdc_addy.write(_usdc_addy)
-    weth_addy.write(_weth_addy)
-    lpt_addy.write(_lpt_addy)
     czt_addy.write(_czt_addy)
+    weth_addy.write(_weth_addy)
+    lpt_addy.write(_lpt_addy)    
     oracle_addy.write(_oracle_addy)
     return ()
 end
@@ -224,6 +232,20 @@ func set_if_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     let (owner) = owner_addy.read()
     check_is_owner(owner)
     if_addy.write(addy)
+    return ()
+end
+
+# @dev view/set df addy
+@view
+func get_df_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (addy : felt):
+    let (addy) = df_addy.read()
+    return (addy)
+end
+@external
+func set_df_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
+    let (owner) = owner_addy.read()
+    check_is_owner(owner)
+    df_addy.write(addy)
     return ()
 end
 

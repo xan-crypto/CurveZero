@@ -10,7 +10,6 @@
 # - mint/burn LP tokens for a user (erc20 tokens equivalent)
 # - get/set cz state (lp total, capital total, loan total, insolvency total, reward total)
 # - get/set accrued interest state (accrued interest total, weighted average rate, last accrual ts)
-# - get/set PP status (lp tokens locked, czt tokens locked, lockup timestamp post pricing, PP status)
 # - get/set a user loan
 # - get/set index of stakers needed for distributions
 # - get/set a users stake and unclaimed rewards
@@ -30,7 +29,7 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math import assert_le
 from InterfaceAll import TrustedAddy, Controller, Erc20
 from Functions.Math10xx8 import Math10xx8_toUint256, Math10xx8_fromUint256, Math10xx8_ts, Math10xx8_year, Math10xx8_add, Math10xx8_sub, Math10xx8_mul, Math10xx8_div
-from Functions.Checks import check_is_owner
+from Functions.Checks import check_is_owner, convert_to_erc
 
 ####################################################################################
 # @dev storage for the addy of the owner
@@ -79,7 +78,7 @@ end
 # below functions are all specific to CZCore so no need to move to Checks contract
 # functions below include
 # - check if system is currently paused
-# - check if caller is authorised i.e. either LP, PP, CB, LL, GT, IF or Controller contract
+# - check if caller is authorised i.e. either LP, CB, LL, GT, IF or Controller contract
 ####################################################################################
 func is_paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     let (_trusted_addy) = trusted_addy.read()
@@ -96,7 +95,7 @@ func authorised_callers{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (caller) = get_caller_address()
     let (_trusted_addy) = trusted_addy.read()
     # @dev this has been optimised for the most frequent callers
-    # priority is CB LP GT LL PP Controller and lastly IF
+    # priority is CB LP GT LL Controller and lastly IF
     let (cb_addy) = TrustedAddy.get_cb_addy(_trusted_addy)
     if caller == cb_addy:
     	return()
@@ -112,11 +111,7 @@ func authorised_callers{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (ll_addy) = TrustedAddy.get_ll_addy(_trusted_addy)
     if caller == ll_addy:
     	return()
-    end
-    let (pp_addy) = TrustedAddy.get_pp_addy(_trusted_addy)
-    if caller == pp_addy:
-    	return()
-    end    
+    end 
     let (controller_addy) = TrustedAddy.get_controller_addy(_trusted_addy)
     if caller == controller_addy:
     	return()
@@ -144,20 +139,21 @@ end
 func erc20_transferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, sender : felt, recipient : felt, amount : felt):
     alloc_locals
     authorised_callers()
+    let (amount_erc) = convert_to_erc(erc_addy, amount)
     # @dev return insufficient allownace 
     with_attr error_message("Insufficient Allowance"):
         let (allowance_unit) = Erc20.ERC20_allowance(erc_addy, sender, recipient)
         let (allowance) = Math10xx8_fromUint256(allowance_unit)
-        assert_le(amount, allowance)
+        assert_le(amount_erc, allowance)
     end
-    let (amount_unit) = Math10xx8_toUint256(amount)
+    let (amount_unit) = Math10xx8_toUint256(amount_erc)
     Erc20.ERC20_transferFrom(erc_addy, sender=sender, recipient=recipient, amount=amount_unit)
     return ()
 end
 
 ####################################################################################
 # @dev this is a pass thru function to the generic ERC-20 token contract
-# this is generally used to send tokens form CZCore to other addy e.g. pay a PP the origination fee
+# this is generally used to send tokens form CZCore to other addy e.g. pay a DF the origination fee
 # @param input is
 # - the erc20 contract address
 # - the recipient of the funds 
@@ -167,7 +163,8 @@ end
 func erc20_transfer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(erc_addy : felt, recipient : felt, amount : felt):
     alloc_locals
     authorised_callers()
-    let (amount_unit) = Math10xx8_toUint256(amount)
+    let (amount_erc) = convert_to_erc(erc_addy, amount)
+    let (amount_unit) = Math10xx8_toUint256(amount_erc)
     Erc20.ERC20_transfer(erc_addy, recipient=recipient, amount=amount_unit)
     return ()
 end 
@@ -185,7 +182,8 @@ func erc20_mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     alloc_locals
     authorised_callers()
     is_paused()
-    let (amount_unit) = Math10xx8_toUint256(amount)
+    let (amount_erc) = convert_to_erc(erc_addy, amount)
+    let (amount_unit) = Math10xx8_toUint256(amount_erc)
     Erc20.ERC20_mint(erc_addy, recipient=recipient, amount=amount_unit)
     return ()
 end
@@ -203,14 +201,15 @@ func erc20_burn{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     alloc_locals
     authorised_callers()
     is_paused()
+    let (amount_erc) = convert_to_erc(erc_addy, amount)
     # @dev return insufficient balance
     # dupe check on balance? will this be done in the erc20 contract
     with_attr error_message("Insufficient Balance"):
         let (balance_unit) = Erc20.ERC20_balanceOf(erc_addy, account)
         let (balance) = Math10xx8_fromUint256(balance_unit)
-        assert_le(amount, balance)
+        assert_le(amount_erc, balance)
     end
-    let (amount_unit) = Math10xx8_toUint256(amount)
+    let (amount_unit) = Math10xx8_toUint256(amount_erc)
     Erc20.ERC20_burn(erc_addy, account=account, amount=amount_unit)
     return ()
 end
@@ -271,7 +270,7 @@ end
 # - 1 for adding exposure 0 for removing exposure
 ####################################################################################
 @external
-func set_update_rate{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(new_loan : felt, new_rate : felt, add_remove : felt) -> ():
+func set_update_rate{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(new_loan : felt, new_rate : felt, add_remove : felt):
     alloc_locals
     authorised_callers()
     let (ai) = accrued_interest.read()
@@ -359,46 +358,6 @@ func set_cz_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
 end
 
 ####################################################################################
-# @dev the PP status by user
-####################################################################################
-@storage_var
-func pp_status(user : felt) -> (status : (felt, felt, felt, felt, felt)):
-end
-
-####################################################################################
-# @dev get the PP status of the given user
-# @param the user address
-# @return 
-# - locked lp tokens which was the requirement at the time of locking
-# - locked czt tokens which was the requirement at the time of locking
-# - lock timestamp, 7days post a valid pricing requestion submission
-# - pp status 0 - not a pricing provider 1 - valid pricing provider
-####################################################################################
-@view
-func get_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_locked : felt, cz_locked : felt, lock_ts : felt, last_id : felt, status : felt):
-    let (res) = pp_status.read(user=user)
-    return (res[0], res[1], res[2], res[3], res[4])
-end
-
-####################################################################################
-# @dev functions to promote and demote pp
-# @param 
-# - user addy
-# - lp required when promoting
-# - czt required when promoting
-# - the lockup period on the PP post pricing submission
-# - promote true/false flag 1 - promote 0 - demote
-####################################################################################
-@external
-func set_pp_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        user : felt, lp_locked : felt, cz_locked : felt, lock_ts : felt, last_id : felt, status : felt):
-    authorised_callers()
-    is_paused()
-    pp_status.write(user, (lp_locked, cz_locked, lock_ts, last_id, status))
-    return ()
-end
-
-####################################################################################
 # @dev the CB loans by user
 # functions support CB interface to create loans, repay loans, refinance loans and change collateral
 ####################################################################################
@@ -443,10 +402,10 @@ end
 # if system paused should allow existing loan holders to repay or refinance or change collateral
 ####################################################################################
 @external
-func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt, new : felt):
+func set_cb_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt, type : felt):
     authorised_callers()
     # @dev new loans not allowed when system paused, repay refinancing inc dec collateral still allowed
-    if new == 1:
+    if type == 1:
     	is_paused()
     	cb_loan.write(user, (notional, collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me))
         return()
@@ -482,10 +441,10 @@ end
 # - user addy
 ####################################################################################
 @external
-func set_staker_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(index:felt,user : felt):
+func set_staker_index{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(index : felt,user : felt):
     authorised_callers()
     is_paused()
-    staker_index.write(index,user)
+    staker_index.write(index, user)
     return ()
 end
 

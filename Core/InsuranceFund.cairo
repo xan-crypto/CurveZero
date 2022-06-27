@@ -16,7 +16,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Erc20
 from starkware.cairo.common.uint256 import Uint256
 from Functions.Math10xx8 import Math10xx8_sub, Math10xx8_add, Math10xx8_convert_to, Math10xx8_fromUint256, Math10xx8_toUint256
-from Functions.Checks import check_is_owner, check_user_balance
+from Functions.Checks import check_is_owner, check_user_balance, get_user_balance, check_if_payout, convert_to_erc
 
 ####################################################################################
 # @dev storage for the addy of the owner
@@ -80,10 +80,7 @@ func insurance_fund_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     let (_trusted_addy) = trusted_addy.read()
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
-    let (balance_unit : Uint256) = Erc20.ERC20_balanceOf(usdc_addy, if_addy)
-    let (balance_erc) = Math10xx8_fromUint256(balance_unit)
-    let (decimals) = Erc20.ERC20_decimals(usdc_addy)
-    let (balance) = Math10xx8_convert_to(balance_erc, decimals)
+    let (balance) = get_user_balance(usdc_addy, if_addy)
     return(balance)
 end
 
@@ -104,12 +101,11 @@ func insurance_fund_payout{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     let (if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
-    with_attr error_message("Can not payout more than the insolvency total."):
-        assert_le(payout, insolvency_total)
-    end
+    check_if_payout(payout, insolvency_total)
 
     # @dev check that the IF has sufficient USDC reserves to make the payout
-    let (payout_erc) = check_user_balance(if_addy, usdc_addy, payout)
+    check_user_balance(usdc_addy, if_addy, payout)
+    let (payout_erc) = convert_to_erc(usdc_addy, payout)
     let (payout_unit) = Math10xx8_toUint256(payout_erc)
     Erc20.ERC20_transfer(usdc_addy, czcore_addy, payout_unit)
     # @dev update CZCore

@@ -2,23 +2,28 @@
 # @title PriceProvider contract
 # @dev all numbers passed into contract must be Math10xx8 type
 # Users can
-# - request the simple interest rate for any timestamp
-# if the timestamp is prior the first ts in the inst array => the rate of the first inst is given (aave ON)
-# if the timestamp is after the last ts in the inst array => the rate of the last inst is fiven (last spot futs basis + adjustment)
-# the rate return should always be >= to the rate of the first inst (implied flat for upward sloping yield curve)
-# The Oracle PP will store the latest array of the follow tuples [ inst_id, end_ts, rate ... ]
+# - request the simple interest rate for any timestamp (linear interpolation)
+# - request the full curve points
+# Owner can
+# - update the full curve points
+# if the timestamp is prior the first ts in the curve => raise error
+# if the timestamp is after the last ts in the curve => raise error
+# added check that the data is not stale
+# added check that the rate return should always be >= to the rate of the first point (implied flat for upward sloping yield curve)
 # This contract addy will be stored in the TrustedAddy contract
-# This contract will be called from the CB contract
+# This contract will be called from the CB contract or external
 # @author xan-crypto
 ####################################################################################
 
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_le
+from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20
-from Functions.Math10xx8 import Math10xx8_ts, Math10xx8_sub
+from Functions.Math10xx8 import Math10xx8_ts, Math10xx8_sub, Math10xx8_div, Math10xx8_mul, Math10xx8_add
 from Functions.Checks import check_is_owner, check_user_balance
+from starkware.cairo.common.alloc import alloc
 
 ####################################################################################
 # @dev storage for the addy of the owner
@@ -41,63 +46,130 @@ func get_owner_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return (addy)
 end
 
+
 ####################################################################################
-# @dev storage for the trusted addy contract
-# the TrustedAddy contract stores all the contract addys
+# @dev storage for the different curve points + storage for the capture timestamp
 ####################################################################################
 @storage_var
-func trusted_addy() -> (addy : felt):
+func curve_points() -> (data : (felt, felt, felt, felt, felt, felt, felt, felt)):
+end
+
+@storage_var
+func curve_capture() -> (ts : felt):
 end
 
 @view
-func get_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (addy : felt):
-    let (addy) = trusted_addy.read()
-    return (addy)
+func get_curve_capture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (ts : felt):
+    let (ts) = curve_capture.read()
+    return (ts)
 end
 
+####################################################################################
+# @dev owner can set curve points
+# @param
+# - the capture timestamp for comparison to the block timestamp
+# - the data array lenght
+# - the data array
+# currently fixed len of n, if n-2x pounts then x 0,0 points at front of curve, owner update will ensure conforms
+####################################################################################
 @external
-func set_trusted_addy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(addy : felt):
+func set_curve_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(ts_capture : felt, data_len : felt, data : felt*):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
-    trusted_addy.write(addy)
+    with_attr error_message("Data lenght must be 8"):
+        assert data_len = 8
+    end
+    # check_ts_expiry(ts_capture)
+    curve_capture.write(ts_capture)
+    curve_points.write((data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]))
     return ()
 end
 
 ####################################################################################
-# @dev get rate from curve
-# @param input is 
-# - the timestamp of rate needed
+# @dev user can get all the curve points [ ts , rate ...]
+# drops any 0,0 points from front of curve
 # @return
-# - the rate at that timestamp
-# flat before start pt and after end pt
+# - curve points
+####################################################################################
+@view
+func get_curve_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (data_len : felt, data : felt*):
+    alloc_locals
+    let (ts_capture) = curve_capture.read()
+    # check_ts_expiry(ts_capture)
+    let (curve) = curve_points.read()
+    let (data : felt*) = alloc()
+    let data_len = 8
+    assert [data + 0] = curve[0]
+    assert [data + 1] = curve[1]
+    assert [data + 2] = curve[2]
+    assert [data + 3] = curve[3]
+    assert [data + 4] = curve[4]
+    assert [data + 5] = curve[5]
+    assert [data + 6] = curve[6]
+    assert [data + 7] = curve[7]
+    let (clean_curve_len, clean_curve) = create_clean_curve(data_len, data)
+    return (clean_curve_len, clean_curve)
+end
+
+####################################################################################
+# @dev this function just drops all 0,0 points from front of curve
+# param arry in 
+# return array out of equal or shorter lenght
+####################################################################################
+func create_clean_curve{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(x_len : felt, x : felt*) -> (y_len : felt, y : felt*):
+    alloc_locals
+    if x[1] != 0:
+        return (x_len, x)
+    end
+    # @dev recursive call
+    let (y_len, y) = create_clean_curve(x_len - 2, x + 2)
+    return (y_len, y)
+end
+
+
+####################################################################################
+# @dev this function returns the rate at any ts on the curve
+# @param ts input
+# @return rate
 ####################################################################################
 @view
 func get_rate{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(ts : felt) -> (rate : felt):
     alloc_locals
-    # @dev check if status not 1 already - existing pp
-    let (_trusted_addy) = trusted_addy.read()
-    let (oracle_pp_addy) = TrustedAddy.get_oracle_pp_addy(_trusted_addy)
-    let (id_1, ts_1, price_1, id_2, ts_2, price_2) = CZCore.get_pp_status(czcore_addy, user)
-    
-    # @dev check that user has eno LP tokens
-    if is_le(ts, ts_1) == 1:
-        return(price_1)
+    let(data_len, data) = get_curve_points()
+    # @dev if before start or after end throw error
+    with_attr error_message("Timestamp before first data point in curve"):
+        assert_le(data[0], ts)
     end
-    if is_le(ts, ts_2) == 1:
-        let (int_rate) = interpolate(ts_1, price_1, ts_2, price_2, ts)
-        return(int_rate)
-    else:
-        return(price_2)
-    end
+    with_attr error_message("Timestamp after last data point in curve"):
+        assert_le(ts, data[data_len-2])
+    end    
+    # @dev get interp points and perform linear interp
+    let (x1, y1, x2, y2) = get_interpolate_data(ts, data_len, data)
+    let (rate) = interpolate(ts, x1, y1, x2, y2)
+    return(rate)
 end
 
 ####################################################################################
-# @dev interpolate function
+# @dev this function returns the interp points x1 <= ts < x2  (x1,y1) and (x2,y2)
 ####################################################################################
-func interpolate{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(x1 : felt, y1 : felt, x2 : felt, y2 : felt, x : felt) -> (y : felt):
+func get_interpolate_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(ts : felt, x_len : felt, x : felt*) -> (x1 : felt, y1 : felt, x2 : felt, y2 : felt):
     alloc_locals
+    let (test) = is_le(ts, x[2])
+    if test == 1:
+        return (x[0], x[1], x[2], x[3])
+    end
+    let (x1, y1, x2, y2) = get_interpolate_data(ts, x_len - 2, x + 2)
+    return (x1, y1, x2, y2)
+end
 
-    if is_le(y1, y2) == 1:
+####################################################################################
+# @dev this function performs linear interp
+# have to handle flat/upward slopping and downward slopping seperately
+####################################################################################
+func interpolate{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,range_check_ptr}(x : felt, x1 : felt, y1 : felt, x2 : felt, y2 : felt) -> (y : felt):
+    alloc_locals
+    let (test) = is_le(y1, y2)
+    if test == 1:
         let (y_diff) = Math10xx8_sub(y2, y1)
         let (x_diff) = Math10xx8_sub(x2, x1)
         let (x_int) = Math10xx8_sub(x, x1)

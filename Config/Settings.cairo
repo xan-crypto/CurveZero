@@ -5,7 +5,6 @@
 # - view the owner addy
 # - view the TrustedAddy contract address where all contract addys are stored
 # - view the max LP capital allowed in the protocol
-# - view the percentage that can be used for uncollateralised lending
 # - view loan origination fee and split between (Dev Fund) DF/IF
 # - view accrued interest split between LP/IF/GT
 # - view the min max loan in USDC
@@ -29,8 +28,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math_cmp import is_in_range
-from InterfaceAll import TrustedAddy
-from Functions.Math10xx8 import Math10xx8_add, Math10xx8_one
+from Functions.Math10xx8 import Math10xx8_add
 from Functions.Checks import check_is_owner
 
 ####################################################################################
@@ -39,8 +37,6 @@ from Functions.Checks import check_is_owner
 ####################################################################################
 const Math10xx8_FRACT_PART = 10 ** 8
 const Math10xx8_ONE = 1 * Math10xx8_FRACT_PART
-const uncollateralised = 20000000
-const max_uncollateralised = 30000000
 const origination_fee_total = 200000
 const origination_fee_split = 50000000
 const accrued_interest_split_1 = 90000000
@@ -75,8 +71,6 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     owner_addy.write(owner)
     # @dev max LP capital allowed
     max_capital.write(10**6*Math10xx8_ONE)
-    # @dev uncollateralised split
-    uncollateralised_split.write(uncollateralised)
     # @dev origination fee and split 20bps and 50/50 DF/IF
     origination_fee.write((origination_fee_total, origination_fee_split, origination_fee_split))
     # @dev accrued interest split between LP IF and GT - 90/5/5
@@ -149,38 +143,6 @@ func set_max_capital{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (owner) = owner_addy.read()
     check_is_owner(owner)
     max_capital.write(capital)
-    return ()
-end
-
-####################################################################################
-# @dev view / set the uncollateralised lending split
-# the owner can borrow capital uncollateralised for lending into pools like maple finance
-# there is a max uncollateralised limit of 30% of the lp capital that is hard fixed, so never more than 30% uncol lending
-# using some uncollateralised lending ensure that LP earn 4-6%, collateralised borrowers pay 4-5%
-# the protocol requires a blend of col and uncol lending to ensure somewhat attractive yield for LPs
-# @param / @return 
-# - current and max uncol lending split
-####################################################################################
-@storage_var
-func uncollateralised_split() -> (res : felt):
-end
-
-@view
-func get_uncollateralised_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (uncol_split : felt, max_uncol_split : felt):
-    let (res) = uncollateralised_split.read()
-    return (res, max_uncollateralised)
-end
-
-@external
-func set_uncollateralised_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(uncol_split : felt):
-    alloc_locals
-    let (owner) = owner_addy.read()
-    check_is_owner(owner)
-    let (test_range) = is_in_range(uncol_split, 0, max_uncollateralised)
-    with_attr error_message("Uncollateralised split not in required range."):
-        assert test_range = 1
-    end
-    uncollateralised_split.write(uncol_split)
     return ()
 end
 
