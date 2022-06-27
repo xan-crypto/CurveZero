@@ -215,7 +215,7 @@ end
 # - current liabilities (capital, reward, reward_unclaimed)
 ####################################################################################
 @view
-func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (loan_total : felt, accrued_interest_total : felt, usd_bal_total : felt, capital_total : felt, reward_total : felt, unclaimed_reward_total):
+func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (loan_total : felt, accrued_interest_total : felt, usd_bal_total : felt, capital_total : felt, insolvency_total : felt, reward_total : felt, unclaimed_reward_total):
     alloc_locals
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
