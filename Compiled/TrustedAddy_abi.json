@@ -1,0 +1,418 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "_owner_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_df_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_lp_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_cb_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_ll_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_gt_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_pp_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_if_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_czcore_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_controller_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_settings_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_usdc_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_czt_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_weth_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_lpt_addy",
+                "type": "felt"
+            },
+            {
+                "name": "_oracle_addy",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "get_lp_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_lp_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_pp_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_pp_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_cb_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_cb_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_ll_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_ll_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_gt_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_gt_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_if_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_if_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_df_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_df_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_czcore_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_czcore_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_controller_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_controller_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_settings_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_settings_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_usdc_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_usdc_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_weth_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_weth_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_lpt_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_lpt_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_czt_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_czt_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_oracle_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_oracle_addy",
+        "outputs": [],
+        "type": "function"
+    }
+]

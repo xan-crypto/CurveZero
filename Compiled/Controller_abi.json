@@ -1,0 +1,152 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "get_owner_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_trusted_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_trusted_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "data": [
+            {
+                "name": "slash_percentage",
+                "type": "felt"
+            },
+            {
+                "name": "stake_total",
+                "type": "felt"
+            },
+            {
+                "name": "new_stake_total",
+                "type": "felt"
+            },
+            {
+                "name": "index",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "event_gt_slash",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "get_paused",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "set_paused",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "set_unpaused",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "distribute_rewards",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "slash_percentage",
+                "type": "felt"
+            }
+        ],
+        "name": "slash_gt",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "system_check",
+        "outputs": [
+            {
+                "name": "loan_total",
+                "type": "felt"
+            },
+            {
+                "name": "collateral_total",
+                "type": "felt"
+            },
+            {
+                "name": "accrued_interest_total",
+                "type": "felt"
+            },
+            {
+                "name": "usdc_bal_total",
+                "type": "felt"
+            },
+            {
+                "name": "capital_total",
+                "type": "felt"
+            },
+            {
+                "name": "insolvency_total",
+                "type": "felt"
+            },
+            {
+                "name": "reward_total",
+                "type": "felt"
+            },
+            {
+                "name": "unclaimed_reward_total",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]

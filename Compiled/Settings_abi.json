@@ -1,0 +1,395 @@
+[
+    {
+        "inputs": [],
+        "name": "get_owner_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "get_trusted_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_trusted_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_max_capital",
+        "outputs": [
+            {
+                "name": "max_capital",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "capital",
+                "type": "felt"
+            }
+        ],
+        "name": "set_max_capital",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_origination_fee",
+        "outputs": [
+            {
+                "name": "fee",
+                "type": "felt"
+            },
+            {
+                "name": "df_split",
+                "type": "felt"
+            },
+            {
+                "name": "if_split",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "fee",
+                "type": "felt"
+            },
+            {
+                "name": "df_split",
+                "type": "felt"
+            },
+            {
+                "name": "if_split",
+                "type": "felt"
+            }
+        ],
+        "name": "set_origination_fee",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_accrued_interest_split",
+        "outputs": [
+            {
+                "name": "lp_split",
+                "type": "felt"
+            },
+            {
+                "name": "if_split",
+                "type": "felt"
+            },
+            {
+                "name": "gt_split",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "lp_split",
+                "type": "felt"
+            },
+            {
+                "name": "if_split",
+                "type": "felt"
+            },
+            {
+                "name": "gt_split",
+                "type": "felt"
+            }
+        ],
+        "name": "set_accrued_interest_split",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_min_max_loan",
+        "outputs": [
+            {
+                "name": "min_loan",
+                "type": "felt"
+            },
+            {
+                "name": "max_loan",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "min_loan",
+                "type": "felt"
+            },
+            {
+                "name": "max_loan",
+                "type": "felt"
+            }
+        ],
+        "name": "set_min_max_loan",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_min_max_deposit",
+        "outputs": [
+            {
+                "name": "min_deposit",
+                "type": "felt"
+            },
+            {
+                "name": "max_deposit",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "min_deposit",
+                "type": "felt"
+            },
+            {
+                "name": "max_deposit",
+                "type": "felt"
+            }
+        ],
+        "name": "set_min_max_deposit",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_utilization",
+        "outputs": [
+            {
+                "name": "stop",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "stop",
+                "type": "felt"
+            }
+        ],
+        "name": "set_utilization",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_insurance_shortfall_ratio",
+        "outputs": [
+            {
+                "name": "is_ratio",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "is_ratio",
+                "type": "felt"
+            }
+        ],
+        "name": "set_insurance_shortfall_ratio",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_max_loan_term",
+        "outputs": [
+            {
+                "name": "max_term",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "max_term",
+                "type": "felt"
+            }
+        ],
+        "name": "set_max_loan_term",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_weth_ltv",
+        "outputs": [
+            {
+                "name": "ltv",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "ltv",
+                "type": "felt"
+            }
+        ],
+        "name": "set_weth_ltv",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_weth_liquidation_ratio",
+        "outputs": [
+            {
+                "name": "ratio",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "ratio",
+                "type": "felt"
+            }
+        ],
+        "name": "set_weth_liquidation_ratio",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_weth_liquidation_fee",
+        "outputs": [
+            {
+                "name": "fee",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "fee",
+                "type": "felt"
+            }
+        ],
+        "name": "set_weth_liquidation_fee",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_grace_period",
+        "outputs": [
+            {
+                "name": "period",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "period",
+                "type": "felt"
+            }
+        ],
+        "name": "set_grace_period",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_lp_yield_boost",
+        "outputs": [
+            {
+                "name": "spread",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "spread",
+                "type": "felt"
+            }
+        ],
+        "name": "set_lp_yield_boost",
+        "outputs": [],
+        "type": "function"
+    }
+]

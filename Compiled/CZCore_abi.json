@@ -1,0 +1,451 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "get_owner_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_trusted_addy",
+        "outputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "addy",
+                "type": "felt"
+            }
+        ],
+        "name": "set_trusted_addy",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "erc_addy",
+                "type": "felt"
+            },
+            {
+                "name": "sender",
+                "type": "felt"
+            },
+            {
+                "name": "recipient",
+                "type": "felt"
+            },
+            {
+                "name": "amount",
+                "type": "felt"
+            }
+        ],
+        "name": "erc20_transferFrom",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "erc_addy",
+                "type": "felt"
+            },
+            {
+                "name": "recipient",
+                "type": "felt"
+            },
+            {
+                "name": "amount",
+                "type": "felt"
+            }
+        ],
+        "name": "erc20_transfer",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "erc_addy",
+                "type": "felt"
+            },
+            {
+                "name": "recipient",
+                "type": "felt"
+            },
+            {
+                "name": "amount",
+                "type": "felt"
+            }
+        ],
+        "name": "erc20_mint",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "erc_addy",
+                "type": "felt"
+            },
+            {
+                "name": "account",
+                "type": "felt"
+            },
+            {
+                "name": "amount",
+                "type": "felt"
+            }
+        ],
+        "name": "erc20_burn",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_accrued_interest",
+        "outputs": [
+            {
+                "name": "accrued_interest_total",
+                "type": "felt"
+            },
+            {
+                "name": "wt_avg_rate",
+                "type": "felt"
+            },
+            {
+                "name": "last_accrual_ts",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "set_update_accrual",
+        "outputs": [
+            {
+                "name": "accrued_interest_total",
+                "type": "felt"
+            }
+        ],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "new_loan",
+                "type": "felt"
+            },
+            {
+                "name": "new_rate",
+                "type": "felt"
+            },
+            {
+                "name": "add_remove",
+                "type": "felt"
+            }
+        ],
+        "name": "set_update_rate",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "payment",
+                "type": "felt"
+            }
+        ],
+        "name": "set_reduce_accrual",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_cz_state",
+        "outputs": [
+            {
+                "name": "lp_total",
+                "type": "felt"
+            },
+            {
+                "name": "capital_total",
+                "type": "felt"
+            },
+            {
+                "name": "loan_total",
+                "type": "felt"
+            },
+            {
+                "name": "insolvency_total",
+                "type": "felt"
+            },
+            {
+                "name": "reward_total",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "lp_total",
+                "type": "felt"
+            },
+            {
+                "name": "capital_total",
+                "type": "felt"
+            },
+            {
+                "name": "loan_total",
+                "type": "felt"
+            },
+            {
+                "name": "insolvency_total",
+                "type": "felt"
+            },
+            {
+                "name": "reward_total",
+                "type": "felt"
+            }
+        ],
+        "name": "set_cz_state",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "user",
+                "type": "felt"
+            }
+        ],
+        "name": "get_cb_loan",
+        "outputs": [
+            {
+                "name": "notional",
+                "type": "felt"
+            },
+            {
+                "name": "collateral",
+                "type": "felt"
+            },
+            {
+                "name": "start_ts",
+                "type": "felt"
+            },
+            {
+                "name": "reval_ts",
+                "type": "felt"
+            },
+            {
+                "name": "end_ts",
+                "type": "felt"
+            },
+            {
+                "name": "rate",
+                "type": "felt"
+            },
+            {
+                "name": "hist_accrual",
+                "type": "felt"
+            },
+            {
+                "name": "hist_repay",
+                "type": "felt"
+            },
+            {
+                "name": "liquidate_me",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "user",
+                "type": "felt"
+            },
+            {
+                "name": "notional",
+                "type": "felt"
+            },
+            {
+                "name": "collateral",
+                "type": "felt"
+            },
+            {
+                "name": "start_ts",
+                "type": "felt"
+            },
+            {
+                "name": "reval_ts",
+                "type": "felt"
+            },
+            {
+                "name": "end_ts",
+                "type": "felt"
+            },
+            {
+                "name": "rate",
+                "type": "felt"
+            },
+            {
+                "name": "hist_accrual",
+                "type": "felt"
+            },
+            {
+                "name": "hist_repay",
+                "type": "felt"
+            },
+            {
+                "name": "liquidate_me",
+                "type": "felt"
+            },
+            {
+                "name": "type",
+                "type": "felt"
+            }
+        ],
+        "name": "set_cb_loan",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "index",
+                "type": "felt"
+            }
+        ],
+        "name": "get_staker_index",
+        "outputs": [
+            {
+                "name": "user",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "index",
+                "type": "felt"
+            },
+            {
+                "name": "user",
+                "type": "felt"
+            }
+        ],
+        "name": "set_staker_index",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "user",
+                "type": "felt"
+            }
+        ],
+        "name": "get_staker_details",
+        "outputs": [
+            {
+                "name": "gt_token",
+                "type": "felt"
+            },
+            {
+                "name": "unclaimed_reward",
+                "type": "felt"
+            },
+            {
+                "name": "old_user",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "user",
+                "type": "felt"
+            },
+            {
+                "name": "gt_token",
+                "type": "felt"
+            },
+            {
+                "name": "unclaimed_reward",
+                "type": "felt"
+            }
+        ],
+        "name": "set_staker_details",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_staker_total",
+        "outputs": [
+            {
+                "name": "stake_total",
+                "type": "felt"
+            },
+            {
+                "name": "index",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "stake_total",
+                "type": "felt"
+            },
+            {
+                "name": "index",
+                "type": "felt"
+            }
+        ],
+        "name": "set_staker_total",
+        "outputs": [],
+        "type": "function"
+    }
+]
