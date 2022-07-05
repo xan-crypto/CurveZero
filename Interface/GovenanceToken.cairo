@@ -1,18 +1,18 @@
 ####################################################################################
 # @title GovenanceToken contract
 # @dev all numbers passed into contract must be Math10xx8 type
-# CZT (curvezero) native tokens are staked to provide insurance in the case of massive loan insolveny
+# CZT (curvezero) native tokens are staked to provide insurance in the case of mass loan insolveny
 # in such an event the staked CZT tokens can be slashed to bridge the liquidity gap
 # stakers are rewarded 5% of the accrued interest on all loans for bearing this risk
-# the reward split is in the Settings contract and can be amended by the controller
+# the reward split is in the Settings contract and can be amended by the controller/owner
 # rewards are accrued to CZCore at the time of loan repayment, these are held there pending distribution by controller
 # the controller can call distribute that will update the reward mapping for users
 # this can be done at random to prevent any gaming of the system, since not practical to distribute on each loan repayment
 # Users can
 # - stake CZT tokens to earn a portion of the accrued interest
-# - unstake CZT tokens 
+# - unstake CZT tokens which will retain all rewards to date
 # - view rewards accrued so far
-# - claim rewards
+# - claim rewards accrued so far
 # This contract addy will be stored in the TrustedAddy contract
 # This contract talks directly to the CZCore contract
 # @author xan-crypto
@@ -70,14 +70,11 @@ end
 
 ####################################################################################
 # @dev need to emit GT events so that we can do reporting / dashboard / monitor system
-# TODO check that this reports correctly for negative / reductions
+# gt_stake_unstake_claim need to emit user addy, amount staked/unstaked/claimed and type 
+# 2 - claim / 1 - stake / 0 - unstake
 ####################################################################################
 @event
-func gt_stake_unstake(addy : felt, stake_current : felt):
-end
-
-@event
-func gt_claim(addy : felt, reward : felt):
+func event_gt_stake_unstake_claim(addy : felt, amount : felt, type : felt):
 end
 
 ####################################################################################
@@ -85,11 +82,8 @@ end
 # @param input is the amount of CZT tokens to stake
 ####################################################################################
 @external
-func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt):    
-    alloc_locals
-    # @dev check stake is positve amount
-    check_gt_stake(gt_token)
-    
+func stake_CZT{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt):    
+    alloc_locals   
     # @dev check user have the coins to stake
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
@@ -109,19 +103,19 @@ func czt_stake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     # @dev transfer tokens
     CZCore.erc20_transferFrom(czcore_addy, czt_addy, user, czcore_addy, gt_token)   
     # @dev update user and aggregate
-    let (gt_user_new) = Math10xx8_add(gt_user, gt_token)
-    let (gt_total_new) = Math10xx8_add(gt_total, gt_token)
-    CZCore.set_staker_details(czcore_addy, user, gt_user_new, reward)    
+    let (new_gt_user) = Math10xx8_add(gt_user, gt_token)
+    let (new_gt_total) = Math10xx8_add(gt_total, gt_token)
+    CZCore.set_staker_details(czcore_addy, user, new_gt_user, reward)    
     if old_user == 1:
-        CZCore.set_staker_total(czcore_addy, gt_total_new, index)
+        CZCore.set_staker_total(czcore_addy, new_gt_total, index)
         # @dev emit event
-        gt_stake_unstake.emit(user, gt_user_new)
+        event_gt_stake_unstake_claim.emit(user, gt_token, 1)
         return()
     else:
-        CZCore.set_staker_total(czcore_addy, gt_total_new, index + 1)
+        CZCore.set_staker_total(czcore_addy, new_gt_total, index + 1)
         CZCore.set_staker_index(czcore_addy, index, user)
         # @dev emit event
-        gt_stake_unstake.emit(user, gt_user_new)
+        event_gt_stake_unstake_claim.emit(user, gt_token, 1)
         return()
     end
 end
@@ -131,11 +125,8 @@ end
 # @param input is the amount of CZT tokens to unstake
 ####################################################################################
 @external
-func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt):
+func unstake_CZT{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt):
     alloc_locals
-    # @dev check unstake is positve amount
-    check_gt_stake(gt_token)
-    
     # @dev check insurance shortfall ratio acceptable
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
@@ -152,16 +143,16 @@ func czt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     check_gt_unstake(gt_token, gt_user)
     
     # @dev update user and aggregate
-    let (gt_user_new) = Math10xx8_sub(gt_user, gt_token)
-    let (gt_total_new) = Math10xx8_sub(gt_total, gt_token)
+    let (new_gt_user) = Math10xx8_sub(gt_user, gt_token)
+    let (new_gt_total) = Math10xx8_sub(gt_total, gt_token)
 
     # @dev transfer tokens, update user and aggregate
     let (czt_addy) = TrustedAddy.get_czt_addy(_trusted_addy)
-    CZCore.set_staker_details(czcore_addy, user, gt_user_new, reward)   
-    CZCore.set_staker_total(czcore_addy, gt_total_new, index)
+    CZCore.set_staker_details(czcore_addy, user, new_gt_user, reward)   
+    CZCore.set_staker_total(czcore_addy, new_gt_total, index)
     CZCore.erc20_transfer(czcore_addy, czt_addy, user, gt_token)            
     # @dev emit event
-    gt_stake_unstake.emit(user, gt_user_new)
+    event_gt_stake_unstake_claim.emit(user, gt_token, 0)
     return()
 end
 
@@ -183,7 +174,8 @@ func view_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
 end
 
 ####################################################################################
-# @dev claim rewards in portion to CZT staked
+# @dev claim rewards in that have been distributed to this user
+# distrubtion is portional to CZT staked
 ####################################################################################
 @external
 func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -191,15 +183,13 @@ func claim_rewards{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (_trusted_addy) = trusted_addy.read()
     let (user) = get_caller_address()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
-    # @dev get current user stake
     let (gt_user, reward, old_user) = CZCore.get_staker_details(czcore_addy,user)
-    # @dev transfer tokens
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     # @dev update user rewards
     CZCore.set_staker_details(czcore_addy, user, gt_user, 0)   
     # @dev transfer tokens
     CZCore.erc20_transfer(czcore_addy, usdc_addy, user, reward)   
     # @dev emit event
-    gt_claim.emit(user, reward)
+    event_gt_stake_unstake_claim.emit(user, reward, 2)
     return()
 end

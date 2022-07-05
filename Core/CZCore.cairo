@@ -9,7 +9,7 @@
 # - transfer erc20 tokens to addy from CZCore
 # - mint/burn LP tokens for a user (erc20 tokens equivalent)
 # - get/set cz state (lp total, capital total, loan total, insolvency total, reward total)
-# - get/set accrued interest state (accrued interest total, weighted average rate, last accrual ts)
+# - get/set accrued interest state (accrued interest total, weighted average rate, last accrual ts, interest total)
 # - get/set a user loan
 # - get/set index of stakers needed for distributions
 # - get/set a users stake and unclaimed rewards
@@ -219,9 +219,10 @@ end
 # the accrued interest total (when added with capital total, gives total asset pot of LPs)
 # the weighted average simple rate (this is weighted by the notional of each loan)
 # the last accrual ts (when last was the loan book accrued, any new accrual is from this point to current block timestamp)
+# the total interest earn by the protocol (for UX)
 ####################################################################################
 @storage_var
-func accrued_interest() -> (res : (felt, felt, felt)):
+func accrued_interest() -> (res : (felt, felt, felt, felt)):
 end
 
 ####################################################################################
@@ -230,11 +231,12 @@ end
 # - the accrued interest total
 # - the weighted avg simple interest rate
 # - last ts of interest accrual
+# - total interest earned by protocol
 ####################################################################################
 @view
-func get_accrued_interest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (accrued_interest_total : felt, wt_avg_rate : felt, last_accrual_ts : felt):
+func get_accrued_interest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (accrued_interest_total : felt, wt_avg_rate : felt, last_accrual_ts : felt, interest_total : felt):
     let (res) = accrued_interest.read()
-    return (res[0], res[1], res[2])
+    return (res[0], res[1], res[2], res[3])
 end
 
 ####################################################################################
@@ -258,7 +260,7 @@ func set_update_accrual{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (rate_year_frac) = Math10xx8_mul(ai[1], year_frac)
     let (accrued_interest_add) = Math10xx8_mul(cz[2], rate_year_frac)
     let (new_accrued_interest_total) = Math10xx8_add(ai[0], accrued_interest_add)
-    accrued_interest.write((new_accrued_interest_total, ai[1], block_ts))
+    accrued_interest.write((new_accrued_interest_total, ai[1], block_ts, ai[3]))
     return (new_accrued_interest_total)
 end
 
@@ -282,18 +284,18 @@ func set_update_rate{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         let (total_exposure) = Math10xx8_add(old_exposure, new_exposure)
         let (new_loan_total) = Math10xx8_add(cz[2], new_loan)
         let (new_wt_avg_rate) = Math10xx8_div(total_exposure, new_loan_total)
-        accrued_interest.write((ai[0], new_wt_avg_rate, ai[2]))
+        accrued_interest.write((ai[0], new_wt_avg_rate, ai[2], ai[3]))
         return()
     else:
         # @dev special check needed for remove
         let (test) = is_le(cz[2], new_loan)
         if test == 1:
-            accrued_interest.write((ai[0], 0, ai[2]))
+            accrued_interest.write((ai[0], 0, ai[2], ai[3]))
         else:
             let (total_exposure) = Math10xx8_sub(old_exposure, new_exposure)
             let (new_loan_total) = Math10xx8_sub(cz[2], new_loan)
             let (new_wt_avg_rate) = Math10xx8_div(total_exposure, new_loan_total)
-            accrued_interest.write((ai[0], new_wt_avg_rate, ai[2]))
+            accrued_interest.write((ai[0], new_wt_avg_rate, ai[2], ai[3]))
         end
         return()
     end
@@ -309,12 +311,13 @@ func set_reduce_accrual{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     alloc_locals
     authorised_callers()
     let (ai) = accrued_interest.read()
+    let (new_interest_total) = Math10xx8_add(ai[3], payment)
     let (test_accrued_less_payment) = is_le(ai[0], payment)
     if test_accrued_less_payment == 1:
-        accrued_interest.write((0, ai[1], ai[2]))
+        accrued_interest.write((0, ai[1], ai[2], new_interest_total))
     else:
         let (new_accrued_interest_total) = Math10xx8_sub(ai[0], payment)
-        accrued_interest.write((new_accrued_interest_total, ai[1], ai[2]))
+        accrued_interest.write((new_accrued_interest_total, ai[1], ai[2], new_interest_total))
     end
     return()
 end

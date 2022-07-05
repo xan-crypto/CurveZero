@@ -20,7 +20,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_nn, assert_le
 from starkware.cairo.common.math_cmp import is_in_range
 from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_add, Math10xx8_sub, Math10xx8_one, Math10xx8_fromUint256, Math10xx8_convert_to
-from InterfaceAll import TrustedAddy, Settings, CZCore, Erc20
+from InterfaceAll import TrustedAddy, Settings, CZCore, Erc20, Oracle
 from Functions.Checks import check_is_owner, check_user_balance, get_user_balance
 
 ####################################################################################
@@ -215,20 +215,25 @@ end
 # - current liabilities (capital, reward, reward_unclaimed)
 ####################################################################################
 @view
-func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (loan_total : felt, accrued_interest_total : felt, usd_bal_total : felt, capital_total : felt, insolvency_total : felt, reward_total : felt, unclaimed_reward_total):
+func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (loan_total : felt, collateral_total : felt, accrued_interest_total : felt, usdc_bal_total : felt, capital_total : felt, insolvency_total : felt, reward_total : felt, unclaimed_reward_total):
     alloc_locals
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
+    let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
+    let (oracle_addy) = TrustedAddy.get_oracle_addy(_trusted_addy)
+    let (price) = Oracle.get_oracle_price(oracle_addy)
     let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)   
     let (accrued_interest_total) = CZCore.set_update_accrual(czcore_addy)
     let (stake_total, index) = CZCore.get_staker_total(czcore_addy)
     
     # @dev get the total unclaimed rewards by all users    
     let (unclaimed_reward_total) = sum_unclaimed_rewards(czcore_addy, index)
-    # @dev get USDC balance of for czcore 
-    let (usd_bal_total) = get_user_balance(usdc_addy, czcore_addy)
-    return(loan_total, accrued_interest_total, usd_bal_total, capital_total, insolvency_total, reward_total, unclaimed_reward_total)
+    # @dev get USDC / WETH balance of for czcore 
+    let (usdc_bal_total) = get_user_balance(usdc_addy, czcore_addy)
+    let (weth_bal_total) = get_user_balance(weth_addy, czcore_addy)
+    let (collateral_total) = Math10xx8_mul(weth_bal_total,price)
+    return(loan_total, collateral_total, accrued_interest_total, usdc_bal_total, capital_total, insolvency_total, reward_total, unclaimed_reward_total)
 end
 
 ####################################################################################

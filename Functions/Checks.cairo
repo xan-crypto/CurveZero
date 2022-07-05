@@ -323,7 +323,7 @@ end
 func check_gt_unstake{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(gt_token : felt, gt_user : felt):
     alloc_locals
     with_attr error_message("User does not have sufficient funds to unstake."):
-        assert_le(gt_token, gt_user)
+        assert_nn_le(gt_token, gt_user)
     end
     return()
 end

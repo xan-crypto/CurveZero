@@ -61,7 +61,7 @@ namespace CZCore:
     end
     func erc20_burn(erc_addy : felt, account : felt, amount : felt):
     end   
-    func get_accrued_interest() -> (accrued_interest_total : felt, wt_avg_rate : felt, last_accrual_ts : felt):
+    func get_accrued_interest() -> (accrued_interest_total : felt, wt_avg_rate : felt, last_accrual_ts : felt, interest_total : felt):
     end
     func set_update_accrual() -> (accrued_interest_total : felt):
     end

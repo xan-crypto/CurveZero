@@ -2,10 +2,11 @@
 # @title LiquidityProvider contract
 # @dev all numbers passed into contract must be Math10xx8 type
 # Users can
-# - mint lp tokens by depositing USDC
-# - burn lp token by withdrawing USDC 
+# - deposit USDC which mints lp tokens
+# - withdraw USDC which burns lp tokens
+# - withdraw all USDC which burn all lp tokens (UX to simplify since lp position can be 8 decimals)
 # - value what their lp tokens are worth in USDC
-# - get the value of 1 lp token in USDC
+# - value what 1 lp token is worth in USDC
 # This contract addy will be stored in the TrustedAddy contract
 # This contract talks directly to the CZCore contract
 # @author xan-crypto
@@ -15,7 +16,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 from InterfaceAll import TrustedAddy, CZCore, Settings, Erc20
-from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_sub, Math10xx8_add
+from Functions.Math10xx8 import Math10xx8_mul, Math10xx8_div, Math10xx8_sub, Math10xx8_add, Math10xx8_one
 from Functions.Checks import check_is_owner, check_user_balance, get_user_balance, check_insurance_shortfall_ratio, check_min_max_deposit, check_max_capital, calc_capital_lp_accrued_interest
 
 ####################################################################################
@@ -63,18 +64,21 @@ end
 
 ####################################################################################
 # @dev emit LP events for reporting / dashboard to monitor system
-# user addy, new user lp balance, lp change, captial change and type 1 - mint type 0 - burn
+# user addy, lp price, lp change, captial change and type
+# use this on frontend, lp price and lp change needed in order to construct price basis for reporting
+# capital change for UX so user can see historic in and out flows
+# type also for UX type 1 - Deposit type 0 - Withdrawal
 ####################################################################################
 @event
-func event_lp_token(addy : felt, lp_balance : felt, lp_change : felt, capital_change : felt, type : felt):
+func event_lp_deposit_withdraw(addy : felt, lp_price : felt, lp_change : felt, capital_change : felt, type : felt):
 end
 
 ####################################################################################
-# @dev mint LP tokens for user vs deposit of USDC
+# @dev deposit USDC and mint LP tokens for user
 # @param input is the USDC depo from user
 ####################################################################################
 @external
-func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(usdc_deposit : felt) -> ():
+func deposit_USDC{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(usdc_deposit : felt) -> ():
     alloc_locals
     # @dev check that usdc deposit within restricted deposit range
     let (_trusted_addy) = trusted_addy.read()
@@ -91,62 +95,35 @@ func mint_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     check_user_balance(usdc_addy, user, usdc_deposit)
 
-    # @dev get user current lp token balance
+    # @dev get user current lp token balance and lp price for issuance (lp price not affected by deposit/withdraw)
     let (lpt_addy) = TrustedAddy.get_lpt_addy(_trusted_addy)
     let (lp_balance) = get_user_balance(lpt_addy, user)
+    let (lp_price) = value_lp_token()
+    let (lp_issuance) = Math10xx8_div(usdc_deposit, lp_price)
 
-    # @dev update incremental accrued interest and calc capital + lp accrued interest
-    let (accrued_capital_total) = calc_capital_lp_accrued_interest(czcore_addy, settings_addy, capital_total)
+    # @dev get new lp total and capital total
+    let (new_lp_total) = Math10xx8_add(lp_total, lp_issuance)
     let (new_capital_total) = Math10xx8_add(capital_total, usdc_deposit)
 
     # @dev check deposit does not result in max capital breach
     check_max_capital(settings_addy, new_capital_total)
 
-    # dev get lp issuance and new lp total
-    let (new_lp_total, lp_issuance) = lp_update(lp_total, usdc_deposit, accrued_capital_total)
-
-    # @dev transfer the USDC, update variables and mint the lp token
+    # @dev transfer the USDC, update variables and mint the lp token for user
     CZCore.erc20_transferFrom(czcore_addy, usdc_addy, user, czcore_addy, usdc_deposit)
     CZCore.set_cz_state(czcore_addy, new_lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
     CZCore.erc20_mint(czcore_addy, lpt_addy, user, lp_issuance)
     
-    # @dev emit event, need user balance at end for lender count, can remove if ERC20 supports this
-    let (new_lp_balance) = Math10xx8_add(lp_balance, lp_issuance)
-    event_lp_token.emit(user, new_lp_balance, lp_issuance, usdc_deposit, 1)
+    # @dev emit event, get lender count from ERC20 contract
+    event_lp_deposit_withdraw.emit(user, lp_price, lp_issuance, usdc_deposit, 1)
     return ()
 end
 
 ####################################################################################
-# @dev calcultes new lp total and lp issuance, used within the mint_lp_token function
-# @param input is
-# - the current total lp tokens from CZCore
-# - the USDC depo from user
-# - the current capital + accrued interest total from CZCore
-# @return 
-# - the new total lp tokens to be stored in CZCore
-# - the lp issuance for the user
-####################################################################################
-func lp_update{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_total : felt, usdc_deposit : felt, accrued_capital_total : felt) -> (new_lp_total : felt, lp_issuance : felt):
-    alloc_locals
-    if lp_total == 0:
-        let new_lp_total = usdc_deposit
-        let lp_issuance = usdc_deposit
-        return(new_lp_total, lp_issuance)
-    else:
-        let (new_accrued_capital_total) = Math10xx8_add(accrued_capital_total, usdc_deposit)
-        let (capital_ratio) = Math10xx8_div(new_accrued_capital_total, accrued_capital_total)
-        let (new_lp_total) = Math10xx8_mul(lp_total, capital_ratio)
-        let (lp_issuance) = Math10xx8_sub(new_lp_total, lp_total)
-        return(new_lp_total, lp_issuance)
-    end
-end
-
-####################################################################################
-# @dev burn LP tokens from user and withdraw USDC
-# @param input is the lp tokens user wants to burn
+# @dev withdraw USDC and burn LP tokens from user
+# @param input is the USDC withdraw amount to make UX easy
 ####################################################################################
 @external
-func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lp_token : felt) -> ():
+func withdraw_USDC{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(usdc_withdraw : felt) -> ():
     alloc_locals
     # @dev check insurance shortfall ratio acceptable
     let (_trusted_addy) = trusted_addy.read()
@@ -158,30 +135,37 @@ func burn_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     # @dev verify user has sufficient LP tokens to redeem
     let (user) = get_caller_address()
     let (lpt_addy) = TrustedAddy.get_lpt_addy(_trusted_addy)
-    check_user_balance(lpt_addy, user, lp_token)
-
-    # @dev get user current lp token balance
-    let (lp_balance) = get_user_balance(lpt_addy, user)
-    
-    # @dev update incremental accrued interest and calc capital + lp accrued interest
-    let (accrued_capital_total) = calc_capital_lp_accrued_interest(czcore_addy, settings_addy, capital_total)
-    
-    # dev get capital redeemed and new lp total
-    let (new_lp_total) = Math10xx8_sub(lp_total, lp_token)
-    let (lp_ratio) = Math10xx8_div(new_lp_total, lp_total)   
-    let (new_accrued_capital_total) = Math10xx8_mul(accrued_capital_total, lp_ratio)
-    let (capital_redeem) = Math10xx8_sub(accrued_capital_total, new_accrued_capital_total)
-    let (new_capital_total) = Math10xx8_sub(capital_total, capital_redeem)
+    let (lp_price) = value_lp_token()
+    let (lp_redeem) = Math10xx8_div(usdc_withdraw, lp_price)
+    check_user_balance(lpt_addy, user, lp_redeem)
+   
+    # dev get new lp total and new capital total
+    let (new_lp_total) = Math10xx8_sub(lp_total, lp_redeem)
+    let (new_capital_total) = Math10xx8_sub(capital_total, usdc_withdraw)
 
     # @dev burn the lp token, update variables and transfer the USDC
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    CZCore.erc20_burn(czcore_addy, lpt_addy, user, lp_token)
+    CZCore.erc20_burn(czcore_addy, lpt_addy, user, lp_redeem)
     CZCore.set_cz_state(czcore_addy, new_lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
-    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, capital_redeem)    
+    CZCore.erc20_transfer(czcore_addy, usdc_addy, user, usdc_withdraw)    
     
-    # @dev emit event, need user balance at end for lender count, can remove if ERC20 supports this
-    let (new_lp_balance) = Math10xx8_sub(lp_balance, lp_token)
-    event_lp_token.emit(user, new_lp_balance, lp_token, capital_redeem, 0)
+    # @dev emit event, get lender count from ERC20 contract
+    event_lp_deposit_withdraw.emit(user, lp_price, lp_redeem, usdc_withdraw, 0)
+    return ()
+end
+
+####################################################################################
+# @dev withdraw all USDC and burns all the users remaining LP tokens
+# this is mainly needed for UX because 8 decimal LP balances make it hard to redeem all
+# @param / @return 
+####################################################################################
+@external
+func withdraw_all_USDC{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> ():
+    alloc_locals
+    # @dev get user lp balance
+    let (user) = get_caller_address()
+    let (lp_balance, capital_user) = value_user_lp_token(user)
+    withdraw_USDC(capital_user)
     return ()
 end
 
@@ -193,15 +177,15 @@ end
 # - the USDC value of those tokens
 ####################################################################################
 @view
-func value_user_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_balance : felt, usd_value):
+func value_user_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(user : felt) -> (lp_balance : felt, capital_user):
     alloc_locals
     # @dev get user lp balance
     let (_trusted_addy) = trusted_addy.read()
     let (lpt_addy) = TrustedAddy.get_lpt_addy(_trusted_addy)
     let (lp_balance) = get_user_balance(lpt_addy, user)
     # @dev calc user capital
-    let (usd_value) = value_lp_token()
-    let (capital_user) = Math10xx8_mul(usd_value, lp_balance)
+    let (lp_price) = value_lp_token()
+    let (capital_user) = Math10xx8_mul(lp_price, lp_balance)
     return (lp_balance, capital_user)
 end
 
@@ -211,7 +195,7 @@ end
 # - the USDC value of 1 lp token
 ####################################################################################
 @view
-func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (usd_value):
+func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (lp_price):
     alloc_locals
     # @dev get variables
     let (_trusted_addy) = trusted_addy.read()
@@ -221,9 +205,10 @@ func value_lp_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     # @dev update incremental accrued interest and calc capital + lp accrued interest
     let (accrued_capital_total) = calc_capital_lp_accrued_interest(czcore_addy, settings_addy, capital_total)
     if lp_total == 0:
-        return (0)
+        let (lp_price) = Math10xx8_one()
+        return (lp_price)
     else:
-        let (usd_value) = Math10xx8_div(accrued_capital_total, lp_total)
-        return (usd_value)
+        let (lp_price) = Math10xx8_div(accrued_capital_total, lp_total)
+        return (lp_price)
     end
 end
