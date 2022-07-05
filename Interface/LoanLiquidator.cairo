@@ -70,10 +70,10 @@ end
 # type 1 - no loss, type 2 - interest loss only, type 3 - interest and capital loss
 ####################################################################################
 @event
-func event_loan_liquidate(addy : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt):
+func event_ll_loan_book(addy : felt, notional : felt, collateral : felt, start_ts : felt, reval_ts : felt, end_ts : felt, rate : felt, hist_accrual : felt, hist_repay : felt, liquidate_me : felt):
 end
 @event
-func event_liquidate_details(liquidator : felt, addy : felt, notional : felt, type : felt, interest_loss : felt, capital_loss):
+func event_ll_loan_liquidate(liquidator : felt, addy : felt, notional : felt, type : felt, interest_loss : felt, capital_loss):
 end
 
 ####################################################################################
@@ -201,8 +201,8 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
                 let (new_reward_total) = Math10xx8_add(reward_total, accrued_interest_gt)
                 CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, new_reward_total)
                 CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                event_liquidate_details.emit(liquidator, user, total_acrrued_notional_os, 1, 0, 0)
+                event_ll_loan_book.emit(user, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                event_ll_loan_liquidate.emit(liquidator, user, total_acrrued_notional_os, 1, 0, 0)
                 return()
             else:      
 
@@ -220,8 +220,8 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
                     let (new_capital_total) = Math10xx8_add(capital_total, residual)
                     CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, insolvency_total, reward_total)
                     CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                    event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                    event_liquidate_details.emit(liquidator, user, total_acrrued_notional_os, 2, total_loss, 0)
+                    event_ll_loan_book.emit(user, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                    event_ll_loan_liquidate.emit(liquidator, user, total_acrrued_notional_os, 2, total_loss, 0)
                     return()
                 else:
                     let (residual) = Math10xx8_sub(residual_loan_capital, ll_amount_receive)
@@ -229,8 +229,8 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
                     let (new_insolvency_total) = Math10xx8_add(insolvency_total, residual)
                     CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, new_loan_total, new_insolvency_total, reward_total)
                     CZCore.set_cb_loan(czcore_addy, user, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                    event_loan_liquidate.emit(user, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                    event_liquidate_details.emit(liquidator, user, total_acrrued_notional_os, 3, total_loss-residual, residual)
+                    event_ll_loan_book.emit(user, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                    event_ll_loan_liquidate.emit(liquidator, user, total_acrrued_notional_os, 3, total_loss-residual, residual)
                     return()
                 end
             end
@@ -255,8 +255,8 @@ func liquidate_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
             # @dev update cz state
             let (new_loan_total) = Math10xx8_sub(loan_total, residual_loan_capital)
             CZCore.set_cz_state(czcore_addy, lp_total, capital_total, new_loan_total, insolvency_total, reward_total)
-            event_loan_liquidate.emit(user, notional, new_collateral, start_ts, block_ts, end_ts, rate, total_accrual, new_repay, liquidate_me)
-            event_liquidate_details.emit(liquidator, user, amount, 1, 0, 0)
+            event_ll_loan_book.emit(user, notional, new_collateral, start_ts, block_ts, end_ts, rate, total_accrual, new_repay, liquidate_me)
+            event_ll_loan_liquidate.emit(liquidator, user, amount, 0, 0, 0)
             return()
         end
         
