@@ -1,1 +1,1 @@
-*.cairo linguist-language=cairo linguist-detectable=true
+*.cairo linguist-language=python linguist-detectable=false
