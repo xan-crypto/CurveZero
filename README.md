@@ -18,7 +18,7 @@ https://twitter.com/curve_zero<br>
 Protocol (cairo) - 65%<br>
 Services (python) - 25%<br>
 Website design - 50%<br>
-Website integration - 10%<br>
+Website integration - 50%<br>
 Community building - 10%<br>
 Audits - 0%<br>
 
@@ -33,6 +33,7 @@ Audits - 0%<br>
 14 Apr 2022 - CurveZero wins best L2 Dapp in the StarkNet x Encode hackathon<br>
 16 May 2022 - Solved for continuous accrual of interest to LPs<br>
 23 May 2022 - Architecture changed, curve stripping now happens natively on-chain
+04 July 2022 - Frontend and protocol fully live and functional on testnet
 
 **Our Mantras**:<br>
 Make products that people love<br>
