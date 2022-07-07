@@ -5733,12 +5733,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 49,
+                        "end_line": 50,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 49
+                        "start_line": 50
                     }
                 },
                 "181": {
@@ -5750,7 +5750,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 40,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
@@ -5764,12 +5764,12 @@
                                 "parent_location": [
                                     {
                                         "end_col": 40,
-                                        "end_line": 50,
+                                        "end_line": 51,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                         },
                                         "start_col": 20,
-                                        "start_line": 50
+                                        "start_line": 51
                                     },
                                     "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                 ],
@@ -5779,7 +5779,7 @@
                             "While expanding the reference 'syscall_ptr' in:"
                         ],
                         "start_col": 21,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "182": {
@@ -5791,12 +5791,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 40,
-                        "end_line": 50,
+                        "end_line": 51,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
                         "start_col": 20,
-                        "start_line": 50
+                        "start_line": 51
                     }
                 },
                 "184": {
@@ -5808,12 +5808,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 30,
-                        "end_line": 52,
+                        "end_line": 53,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 52
+                        "start_line": 53
                     }
                 },
                 "185": {
@@ -5832,36 +5832,36 @@
                         "parent_location": [
                             {
                                 "end_col": 40,
-                                "end_line": 50,
+                                "end_line": 51,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 40,
-                                        "end_line": 48,
+                                        "end_line": 49,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                         },
                                         "parent_location": [
                                             {
                                                 "end_col": 13,
-                                                "end_line": 54,
+                                                "end_line": 55,
                                                 "input_file": {
                                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                                 },
                                                 "start_col": 5,
-                                                "start_line": 54
+                                                "start_line": 55
                                             },
                                             "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                         ],
                                         "start_col": 21,
-                                        "start_line": 48
+                                        "start_line": 49
                                     },
                                     "While expanding the reference 'syscall_ptr' in:"
                                 ],
                                 "start_col": 20,
-                                "start_line": 50
+                                "start_line": 51
                             },
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
@@ -5878,36 +5878,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 69,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 69,
-                                "end_line": 48,
+                                "end_line": 49,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 13,
-                                        "end_line": 54,
+                                        "end_line": 55,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                         },
                                         "start_col": 5,
-                                        "start_line": 54
+                                        "start_line": 55
                                     },
                                     "While trying to retrieve the implicit argument 'pedersen_ptr' in:"
                                 ],
                                 "start_col": 42,
-                                "start_line": 48
+                                "start_line": 49
                             },
                             "While expanding the reference 'pedersen_ptr' in:"
                         ],
                         "start_col": 42,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "187": {
@@ -5919,36 +5919,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 86,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 86,
-                                "end_line": 48,
+                                "end_line": 49,
                                 "input_file": {
                                     "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 13,
-                                        "end_line": 54,
+                                        "end_line": 55,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                         },
                                         "start_col": 5,
-                                        "start_line": 54
+                                        "start_line": 55
                                     },
                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                 ],
                                 "start_col": 71,
-                                "start_line": 48
+                                "start_line": 49
                             },
                             "While expanding the reference 'range_check_ptr' in:"
                         ],
                         "start_col": 71,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "188": {
@@ -5960,12 +5960,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 13,
-                        "end_line": 54,
+                        "end_line": 55,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 54
+                        "start_line": 55
                     }
                 },
                 "189": {
@@ -17671,7 +17671,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 40,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
@@ -17712,7 +17712,7 @@
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
                         "start_col": 21,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "614": {
@@ -17725,7 +17725,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 69,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
@@ -17766,7 +17766,7 @@
                             "While trying to update the implicit return value 'pedersen_ptr' in:"
                         ],
                         "start_col": 42,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "615": {
@@ -21413,7 +21413,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 40,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
@@ -21454,7 +21454,7 @@
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
                         "start_col": 21,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "743": {
@@ -21467,7 +21467,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 69,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
@@ -21508,7 +21508,7 @@
                             "While trying to update the implicit return value 'pedersen_ptr' in:"
                         ],
                         "start_col": 42,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "744": {
@@ -50903,7 +50903,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 40,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
@@ -50917,7 +50917,7 @@
                                 "parent_location": [
                                     {
                                         "end_col": 40,
-                                        "end_line": 48,
+                                        "end_line": 49,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                         },
@@ -50934,7 +50934,7 @@
                                             "While trying to update the implicit return value 'syscall_ptr' in:"
                                         ],
                                         "start_col": 21,
-                                        "start_line": 48
+                                        "start_line": 49
                                     },
                                     "While auto generating local variable for 'syscall_ptr'."
                                 ],
@@ -50944,7 +50944,7 @@
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
                         "start_col": 21,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "1670": {
@@ -50957,7 +50957,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 69,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
@@ -50971,7 +50971,7 @@
                                 "parent_location": [
                                     {
                                         "end_col": 69,
-                                        "end_line": 48,
+                                        "end_line": 49,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                         },
@@ -50988,7 +50988,7 @@
                                             "While trying to update the implicit return value 'pedersen_ptr' in:"
                                         ],
                                         "start_col": 42,
-                                        "start_line": 48
+                                        "start_line": 49
                                     },
                                     "While auto generating local variable for 'pedersen_ptr'."
                                 ],
@@ -50998,7 +50998,7 @@
                             "While trying to update the implicit return value 'pedersen_ptr' in:"
                         ],
                         "start_col": 42,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "1671": {
@@ -51113,7 +51113,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 40,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
@@ -51127,7 +51127,7 @@
                                 "parent_location": [
                                     {
                                         "end_col": 40,
-                                        "end_line": 48,
+                                        "end_line": 49,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                         },
@@ -51168,7 +51168,7 @@
                                             "While trying to update the implicit return value 'syscall_ptr' in:"
                                         ],
                                         "start_col": 21,
-                                        "start_line": 48
+                                        "start_line": 49
                                     },
                                     "While auto generating local variable for 'syscall_ptr'."
                                 ],
@@ -51178,7 +51178,7 @@
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
                         "start_col": 21,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "1681": {
@@ -51191,7 +51191,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 69,
-                        "end_line": 48,
+                        "end_line": 49,
                         "input_file": {
                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                         },
@@ -51205,7 +51205,7 @@
                                 "parent_location": [
                                     {
                                         "end_col": 69,
-                                        "end_line": 48,
+                                        "end_line": 49,
                                         "input_file": {
                                             "filename": "/home/ec2-user/Cairo/CurveZero/Functions/Checks.cairo"
                                         },
@@ -51246,7 +51246,7 @@
                                             "While trying to update the implicit return value 'pedersen_ptr' in:"
                                         ],
                                         "start_col": 42,
-                                        "start_line": 48
+                                        "start_line": 49
                                     },
                                     "While auto generating local variable for 'pedersen_ptr'."
                                 ],
@@ -51256,7 +51256,7 @@
                             "While trying to update the implicit return value 'pedersen_ptr' in:"
                         ],
                         "start_col": 42,
-                        "start_line": 48
+                        "start_line": 49
                     }
                 },
                 "1682": {

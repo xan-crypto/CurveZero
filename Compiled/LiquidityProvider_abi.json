@@ -52,7 +52,7 @@
                 "type": "felt"
             },
             {
-                "name": "lp_balance",
+                "name": "lp_price",
                 "type": "felt"
             },
             {
@@ -69,7 +69,7 @@
             }
         ],
         "keys": [],
-        "name": "event_lp_token",
+        "name": "event_lp_deposit_withdraw",
         "type": "event"
     },
     {
@@ -79,18 +79,24 @@
                 "type": "felt"
             }
         ],
-        "name": "mint_lp_token",
+        "name": "deposit_USDC",
         "outputs": [],
         "type": "function"
     },
     {
         "inputs": [
             {
-                "name": "lp_token",
+                "name": "usdc_withdraw",
                 "type": "felt"
             }
         ],
-        "name": "burn_lp_token",
+        "name": "withdraw_USDC",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "withdraw_all_USDC",
         "outputs": [],
         "type": "function"
     },
@@ -108,7 +114,7 @@
                 "type": "felt"
             },
             {
-                "name": "usd_value",
+                "name": "capital_user",
                 "type": "felt"
             }
         ],
@@ -120,7 +126,7 @@
         "name": "value_lp_token",
         "outputs": [
             {
-                "name": "usd_value",
+                "name": "lp_price",
                 "type": "felt"
             }
         ],

@@ -72,6 +72,18 @@
     },
     {
         "inputs": [],
+        "name": "get_production",
+        "outputs": [
+            {
+                "name": "res",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "get_lp_addy",
         "outputs": [
             {

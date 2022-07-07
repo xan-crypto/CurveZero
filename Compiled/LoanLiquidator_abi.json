@@ -89,7 +89,7 @@
             }
         ],
         "keys": [],
-        "name": "event_loan_liquidate",
+        "name": "event_ll_loan_book",
         "type": "event"
     },
     {
@@ -120,7 +120,7 @@
             }
         ],
         "keys": [],
-        "name": "event_liquidate_details",
+        "name": "event_ll_loan_liquidate",
         "type": "event"
     },
     {

@@ -140,6 +140,10 @@
             {
                 "name": "last_accrual_ts",
                 "type": "felt"
+            },
+            {
+                "name": "interest_total",
+                "type": "felt"
             }
         ],
         "stateMutability": "view",

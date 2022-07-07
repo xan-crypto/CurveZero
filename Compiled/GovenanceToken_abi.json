@@ -52,27 +52,16 @@
                 "type": "felt"
             },
             {
-                "name": "stake_current",
-                "type": "felt"
-            }
-        ],
-        "keys": [],
-        "name": "gt_stake_unstake",
-        "type": "event"
-    },
-    {
-        "data": [
-            {
-                "name": "addy",
+                "name": "amount",
                 "type": "felt"
             },
             {
-                "name": "reward",
+                "name": "type",
                 "type": "felt"
             }
         ],
         "keys": [],
-        "name": "gt_claim",
+        "name": "event_gt_stake_unstake_claim",
         "type": "event"
     },
     {
@@ -82,7 +71,7 @@
                 "type": "felt"
             }
         ],
-        "name": "czt_stake",
+        "name": "stake_CZT",
         "outputs": [],
         "type": "function"
     },
@@ -93,7 +82,7 @@
                 "type": "felt"
             }
         ],
-        "name": "czt_unstake",
+        "name": "unstake_CZT",
         "outputs": [],
         "type": "function"
     },

@@ -4,6 +4,7 @@
 # this is a group of useful functions that are needed by most of the contracts
 # Functions include
 # - check if the caller is owner
+# - check if system is in production (0 - false 1 - true)
 # - check if the caller is czcore
 # - check if the caller is controller
 # - check if deposit within min max range
@@ -50,6 +51,18 @@ func check_is_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (caller) = get_caller_address()
     with_attr error_message("Only owner can access this."):
         assert caller = owner
+    end
+    return()
+end
+
+####################################################################################
+# @dev check if prod
+# @param production storage var
+####################################################################################
+func check_is_prod{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(prod : felt):
+    alloc_locals
+    with_attr error_message("Can not update contracts in production."):
+        assert prod = 0
     end
     return()
 end

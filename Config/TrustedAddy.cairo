@@ -22,6 +22,7 @@
 # - LPT addy
 # - CZT addy
 # - Oracle addy
+# - is production (0 - false 1 - true) contracts not upgradable in production, can change df addy and oracle addy
 # Owner can set all of the above except the Owner which is set by the constructor
 # @author xan-crypto
 ####################################################################################
@@ -30,7 +31,7 @@
 %builtins pedersen range_check
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
-from Functions.Checks import check_is_owner
+from Functions.Checks import check_is_owner, check_is_prod
 
 # @dev addy of the owner
 @storage_var
@@ -112,6 +113,11 @@ end
 func oracle_addy() -> (addy : felt):
 end
 
+# @dev is system in prod 0 - false 1 - true
+@storage_var
+func production() -> (res : felt):
+end
+
 # @dev set the relevant addys on deployment, is there a better way to do this?
 # check with starknet devs
 @constructor
@@ -148,7 +154,15 @@ func constructor{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr
     weth_addy.write(_weth_addy)
     lpt_addy.write(_lpt_addy)    
     oracle_addy.write(_oracle_addy)
+    production.write(0)
     return ()
+end
+
+# @dev view is production 0 - false 1 - true
+@view
+func get_production{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}() -> (res : felt):
+    let (res) = production.read()
+    return (res)
 end
 
 # @dev view/set lp addy
@@ -161,6 +175,8 @@ end
 func set_lp_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)
     lp_addy.write(addy)
     return ()
 end
@@ -175,6 +191,8 @@ end
 func set_pp_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)
     pp_addy.write(addy)
     return ()
 end
@@ -189,6 +207,8 @@ end
 func set_cb_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)    
     cb_addy.write(addy)
     return ()
 end
@@ -203,6 +223,8 @@ end
 func set_ll_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)    
     ll_addy.write(addy)
     return ()
 end
@@ -217,6 +239,8 @@ end
 func set_gt_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)  
     gt_addy.write(addy)
     return ()
 end
@@ -231,6 +255,8 @@ end
 func set_if_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)  
     if_addy.write(addy)
     return ()
 end
@@ -244,7 +270,7 @@ end
 @external
 func set_df_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
-    check_is_owner(owner)
+    check_is_owner(owner) 
     df_addy.write(addy)
     return ()
 end
@@ -259,6 +285,8 @@ end
 func set_czcore_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)  
     czcore_addy.write(addy)
     return ()
 end
@@ -273,6 +301,8 @@ end
 func set_controller_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)  
     controller_addy.write(addy)
     return ()
 end
@@ -287,6 +317,8 @@ end
 func set_settings_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)  
     settings_addy.write(addy)
     return ()
 end
@@ -301,6 +333,8 @@ end
 func set_usdc_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)  
     usdc_addy.write(addy)
     return ()
 end
@@ -315,6 +349,8 @@ end
 func set_weth_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)  
     weth_addy.write(addy)
     return ()
 end
@@ -329,6 +365,8 @@ end
 func set_lpt_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)  
     lpt_addy.write(addy)
     return ()
 end
@@ -343,6 +381,8 @@ end
 func set_czt_addy{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}(addy : felt):
     let (owner) = owner_addy.read()
     check_is_owner(owner)
+    let (prod) = production.read()
+    check_is_prod(prod)  
     czt_addy.write(addy)
     return ()
 end

@@ -89,7 +89,30 @@
             }
         ],
         "keys": [],
-        "name": "event_loan_change",
+        "name": "event_cb_loan_book",
+        "type": "event"
+    },
+    {
+        "data": [
+            {
+                "name": "addy",
+                "type": "felt"
+            },
+            {
+                "name": "amount",
+                "type": "felt"
+            },
+            {
+                "name": "loan_os",
+                "type": "felt"
+            },
+            {
+                "name": "type",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "event_cb_loan_change",
         "type": "event"
     },
     {
