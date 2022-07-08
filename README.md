@@ -15,10 +15,10 @@ https://twitter.com/curve_zero<br>
 ![image](https://user-images.githubusercontent.com/62293102/169762326-378a5a73-d79a-4a3d-a046-b401a02a8429.png)
 
 **Progress**:<br>
-Protocol (cairo) - 65%<br>
+Protocol (cairo) - 70%<br>
 Services (python) - 25%<br>
 Website design - 50%<br>
-Website integration - 50%<br>
+Website integration - 75%<br>
 Community building - 10%<br>
 Audits - 0%<br>
 
