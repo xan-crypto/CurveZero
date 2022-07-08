@@ -54,10 +54,14 @@
             {
                 "name": "insolvency_total",
                 "type": "felt"
+            },
+            {
+                "name": "type",
+                "type": "felt"
             }
         ],
         "keys": [],
-        "name": "event_insurance_payout",
+        "name": "event_if_payout",
         "type": "event"
     },
     {
@@ -76,6 +80,10 @@
         "inputs": [
             {
                 "name": "payout",
+                "type": "felt"
+            },
+            {
+                "name": "upgrade",
                 "type": "felt"
             }
         ],

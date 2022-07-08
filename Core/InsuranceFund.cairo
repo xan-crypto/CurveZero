@@ -3,7 +3,9 @@
 # @dev all numbers passed into contract must be Math10xx8 type
 # User can call
 # - insurance fund value, this is the USDC balance of the insurance fund - any user can call
-# - insurance fund payout, this effectively refunds CZCore for any some amount of the insolvency loss - only owner can call
+# - insurance fund payout
+# this effectively refunds CZCore for some amount of the insolvency loss - only owner can call (upgrade = 0)
+# insurance fund transfer to LPs (need this in the case of protocol upgrade, transfer the insurance fund to czcore => LPs) - only owner can call (upgrade = 1)
 # This contract addy will be stored in the TrustedAddy contract
 # This contract talks directly to the CZCore contract
 # @author xan-crypto
@@ -64,9 +66,11 @@ end
 ####################################################################################
 # @dev emit insurance payout events, useful for tracking the insolvency of the system over time (monitoring/dashboard)
 # all we need to emit is the USDC paid into CZCore, and the insolvency total post pay out
+# also emit type, will mainly be 0 insurance pay out for insolvency
+# will be 1 when this version of the protocol is shutdown and IF paid to LPs
 ####################################################################################
 @event
-func event_insurance_payout(payout : felt, insolvency_total : felt):
+func event_if_payout(payout : felt, insolvency_total : felt, type : felt):
 end
 
 ####################################################################################
@@ -85,23 +89,25 @@ func insurance_fund_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 end
 
 ####################################################################################
-# @dev this triggers an insurance payout to CZCore
+# @dev this triggers an insurance payout to CZCore (upgrade = 0)
 # @dev transfers USDC into CZCore, increases the capital total and decreases the insolvency total in cz state 
+# @dev this triggers a transfer of the payout from insurance fund to czcore => LPs (upgrade = 1)
+# @dev transfers USDC into CZCore, increases the capital total in cz state, used on protocol upgrade, basicaly returns IF to LPs on protocol upgrade
 # @param input is 
 # - the amount in USDC of the payout
+# - upgrade - 0 for normal, 1 for protocol upgrade
 ####################################################################################
 @external
-func insurance_fund_payout{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(payout : felt):
+func insurance_fund_payout{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(payout : felt, upgrade : felt):
     alloc_locals
     let (owner) = owner_addy.read()
     check_is_owner(owner)
-    # @dev check that the amount payout is <= the insolvency total else LPs benefiting from IF
+    
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (if_addy) = TrustedAddy.get_if_addy(_trusted_addy)
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
-    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)
-    check_if_payout(payout, insolvency_total)
+    let (lp_total, capital_total, loan_total, insolvency_total, reward_total) = CZCore.get_cz_state(czcore_addy)    
 
     # @dev check that the IF has sufficient USDC reserves to make the payout
     check_user_balance(usdc_addy, if_addy, payout)
@@ -110,9 +116,18 @@ func insurance_fund_payout{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     Erc20.ERC20_transfer(usdc_addy, czcore_addy, payout_unit)
     # @dev update CZCore
     let (new_capital_total) = Math10xx8_add(capital_total, payout)
-    let (new_insolvency_total) = Math10xx8_sub(insolvency_total, payout)
-    CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, loan_total, new_insolvency_total, reward_total)
-    # emit event
-    event_insurance_payout.emit(payout, new_insolvency_total)
-    return()
+    if upgrade != 1:
+        # @dev check that the amount payout is <= the insolvency total else LPs benefiting from IF
+        check_if_payout(payout, insolvency_total)
+        let (new_insolvency_total) = Math10xx8_sub(insolvency_total, payout)
+        CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, loan_total, new_insolvency_total, reward_total)
+        # emit event
+        event_if_payout.emit(payout, new_insolvency_total, 0)
+        return()
+    else:
+        CZCore.set_cz_state(czcore_addy, lp_total, new_capital_total, loan_total, insolvency_total, reward_total)
+        # emit event
+        event_if_payout.emit(payout, insolvency_total, 1)
+        return()
+    end
 end
