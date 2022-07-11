@@ -194,7 +194,7 @@ end
 # - 1 - slashing percentage
 # - index / count of number of stakers
 ####################################################################################
-func run_slash{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(czcore_addy : felt, remain : felt, index : felt):
+func run_slash{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(czcore_addy : felt , remain : felt, index : felt):
     alloc_locals
     if index == 0:
         return()
@@ -215,7 +215,7 @@ end
 # - current liabilities (capital, reward, reward_unclaimed)
 ####################################################################################
 @view
-func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (loan_total : felt, collateral_total : felt, accrued_interest_total : felt, usdc_bal_total : felt, capital_total : felt, insolvency_total : felt, reward_total : felt, unclaimed_reward_total):
+func system_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (loan_total : felt, collateral_total : felt, accrued_interest_total : felt, usdc_bal_total : felt, capital_total : felt, insolvency_total : felt, reward_total : felt, unclaimed_reward_total : felt):
     alloc_locals
     let (_trusted_addy) = trusted_addy.read()
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
