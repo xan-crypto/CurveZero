@@ -14,7 +14,7 @@ https://twitter.com/curve_zero<br>
 **Protocol Architecture**:
 ![image](https://user-images.githubusercontent.com/62293102/169762326-378a5a73-d79a-4a3d-a046-b401a02a8429.png)
 
-**Progress V1**:<br>
+**Progress v1**:<br>
 Protocol (cairo) - 90%<br>
 Services (python) - 25%<br>
 Website design - 50%<br>
