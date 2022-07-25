@@ -47,7 +47,7 @@ starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 85836867 8
 starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 67908410 67908410 0 0 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065
 starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 8769847210 8769847210 0 0 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065
 starknet deploy --contract Compiled/ERC20_special_compiled.json --inputs 76808410 76808410 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065
-starknet deploy --contract Compiled/Oracle_compiled.json --inputs 8769847210 8769847210
+starknet deploy --contract Compiled/Oracle_compiled.json --inputs 8769847210 8769847210 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 --inputs 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065 \
     0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065 \

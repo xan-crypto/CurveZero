@@ -49,7 +49,7 @@ for file in files:
 # ['starknet', 'deploy', '--contract', 'Compiled/ERC20_base_compiled.json', '--inputs', '67908410', '67908410', '0', '0', owner],
 # ['starknet', 'deploy', '--contract', 'Compiled/ERC20_base_compiled.json', '--inputs', '8769847210', '8769847210', '0', '0', owner],
 # ['starknet', 'deploy', '--contract', 'Compiled/ERC20_special_compiled.json', '--inputs', '76808410', '76808410', owner],
-# ['starknet', 'deploy', '--contract', 'Compiled/Oracle_compiled.json', '--inputs', '8769847210', '8769847210'],
+# ['starknet', 'deploy', '--contract', 'Compiled/Oracle_compiled.json', '--inputs', '8769847210', '8769847210', owner],
 # ['starknet', 'deploy', '--contract', 'Compiled/TrustedAddy_compiled.json', '--inputs', owner, owner]]
 # last = files[-1]
 

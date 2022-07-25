@@ -70,7 +70,7 @@ end
 # - the capture timestamp for comparison to the block timestamp
 # - the data array lenght
 # - the data array
-# currently fixed len of n, if n-2x pounts then x 0,0 points at front of curve, owner update will ensure conforms
+# currently fixed len of n, if n-2x points then x 0,0 points at front of curve, owner update will ensure conforms
 ####################################################################################
 @external
 func set_curve_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(ts_capture : felt, data_len : felt, data : felt*):

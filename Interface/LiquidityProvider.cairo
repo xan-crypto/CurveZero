@@ -95,9 +95,8 @@ func deposit_USDC{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     let (usdc_addy) = TrustedAddy.get_usdc_addy(_trusted_addy)
     check_user_balance(usdc_addy, user, usdc_deposit)
 
-    # @dev get user current lp token balance and lp price for issuance (lp price not affected by deposit/withdraw)
+    # @dev get lp price for issuance (lp price not affected by deposit/withdraw)
     let (lpt_addy) = TrustedAddy.get_lpt_addy(_trusted_addy)
-    let (lp_balance) = get_user_balance(lpt_addy, user)
     let (lp_price) = value_lp_token()
     let (lp_issuance) = Math10xx8_div(usdc_deposit, lp_price)
 
