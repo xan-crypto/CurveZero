@@ -43476,7 +43476,7 @@
                     "flow_tracking_data": null,
                     "hints": [],
                     "inst": {
-                        "end_col": 101,
+                        "end_col": 94,
                         "end_line": 197,
                         "input_file": {
                             "filename": "Core/Controller.cairo"
@@ -43505,7 +43505,7 @@
                     "flow_tracking_data": null,
                     "hints": [],
                     "inst": {
-                        "end_col": 116,
+                        "end_col": 110,
                         "end_line": 197,
                         "input_file": {
                             "filename": "Core/Controller.cairo"
@@ -43522,7 +43522,7 @@
                             },
                             "While expanding the reference 'remain' in:"
                         ],
-                        "start_col": 103,
+                        "start_col": 97,
                         "start_line": 197
                     }
                 },
@@ -43698,7 +43698,7 @@
                     "flow_tracking_data": null,
                     "hints": [],
                     "inst": {
-                        "end_col": 101,
+                        "end_col": 94,
                         "end_line": 197,
                         "input_file": {
                             "filename": "Core/Controller.cairo"
@@ -43915,7 +43915,7 @@
                     "flow_tracking_data": null,
                     "hints": [],
                     "inst": {
-                        "end_col": 101,
+                        "end_col": 94,
                         "end_line": 197,
                         "input_file": {
                             "filename": "Core/Controller.cairo"
@@ -44084,7 +44084,7 @@
                     "flow_tracking_data": null,
                     "hints": [],
                     "inst": {
-                        "end_col": 116,
+                        "end_col": 110,
                         "end_line": 197,
                         "input_file": {
                             "filename": "Core/Controller.cairo"
@@ -44101,7 +44101,7 @@
                             },
                             "While expanding the reference 'remain' in:"
                         ],
-                        "start_col": 103,
+                        "start_col": 97,
                         "start_line": 197
                     }
                 },
@@ -44272,7 +44272,7 @@
                     "flow_tracking_data": null,
                     "hints": [],
                     "inst": {
-                        "end_col": 101,
+                        "end_col": 94,
                         "end_line": 197,
                         "input_file": {
                             "filename": "Core/Controller.cairo"

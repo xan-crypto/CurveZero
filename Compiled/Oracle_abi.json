@@ -8,6 +8,10 @@
             {
                 "name": "symbol",
                 "type": "felt"
+            },
+            {
+                "name": "owner",
+                "type": "felt"
             }
         ],
         "name": "constructor",

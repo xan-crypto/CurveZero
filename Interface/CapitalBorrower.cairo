@@ -391,7 +391,7 @@ func refinance_loan{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     check_ltv(oracle_addy, settings_addy, notional, collateral)
     let (weth_addy) = TrustedAddy.get_weth_addy(_trusted_addy)
     check_user_balance(weth_addy, user, add_collateral)
-    check_utilization(settings_addy, notional, loan_total, capital_total)
+    check_utilization(settings_addy, add_notional, loan_total, capital_total)
     let (start_ts) = Math10xx8_ts()
     check_max_term(settings_addy, start_ts, end_ts)
     check_loan_range(settings_addy, notional)
