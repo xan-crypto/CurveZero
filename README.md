@@ -1,7 +1,7 @@
 # CurveZero - Fixed rate USD loan protocol
 
 **CurveZero Testnet website - work in progress**:<br>
-http://curvezero.fi/
+http://curvezero.fi/<br>
 **CurveZero living litepaper**:<br>
 https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY<br>
 **CurveZero twitter account**:<br> 
