@@ -1,7 +1,7 @@
 # CurveZero - Fixed rate USD loan protocol
 
 **CurveZero testnet website - work in progress**:<br>
-http://curvezero.fi<br>
+https://curvezero.fi<br>
 **CurveZero living litepaper**:<br>
 https://docs.google.com/document/d/1rrYC32w63FzzV61rJWqqYomEMgfZ3cRR1jOlJmnnxeY<br>
 **CurveZero twitter account**:<br> 
@@ -36,6 +36,7 @@ Audits - 0%<br>
 16 May 2022 - Solved for continuous accrual of interest to LPs<br>
 23 May 2022 - Architecture changed, curve stripping now happens natively on-chain<br>
 04 July 2022 - Frontend and protocol fully live and functional on testnet
+29 July 2022 - Pulbic website live => https://curvezero.fi
 
 **Our Mantras**:<br>
 Make products that people love<br>
