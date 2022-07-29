@@ -35,7 +35,7 @@ Audits - 0%<br>
 14 Apr 2022 - CurveZero wins best L2 Dapp in the StarkNet x Encode hackathon<br>
 16 May 2022 - Solved for continuous accrual of interest to LPs<br>
 23 May 2022 - Architecture changed, curve stripping now happens natively on-chain<br>
-04 July 2022 - Frontend and protocol fully live and functional on testnet
+04 July 2022 - Frontend and protocol fully live and functional on testnet<br>
 29 July 2022 - Pulbic website live => https://curvezero.fi
 
 **Our Mantras**:<br>
