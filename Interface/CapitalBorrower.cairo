@@ -296,8 +296,9 @@ func increase_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     check_user_balance(weth_addy, user, add_collateral)
     
     # @dev transfers
-    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, add_collateral)
     let (notional, old_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me) = CZCore.get_cb_loan(czcore_addy, user)
+    check_user_loan(notional)
+    CZCore.erc20_transferFrom(czcore_addy, weth_addy, user, czcore_addy, add_collateral)    
     let (new_collateral) = Math10xx8_add(old_collateral, add_collateral)
     CZCore.set_cb_loan(czcore_addy, user, notional, new_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me, 0)
     # @dev emit event
@@ -320,6 +321,7 @@ func decrease_collateral{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (settings_addy) = TrustedAddy.get_settings_addy(_trusted_addy)
     let (czcore_addy) = TrustedAddy.get_czcore_addy(_trusted_addy)
     let (notional, old_collateral, start_ts, reval_ts, end_ts, rate, hist_accrual, hist_repay, liquidate_me, accrued_interest) = view_loan_detail(user)
+    check_user_loan(notional)
     check_collateral_withdraw(dec_collateral, old_collateral)
 
     # @dev check withdrawal would not make loan insolvent
