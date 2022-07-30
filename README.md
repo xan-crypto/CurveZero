@@ -18,7 +18,7 @@ https://twitter.com/curve_zero<br>
 
 **Progress v1**:<br>
 Protocol (cairo) - 90%<br>
-Services (python) - 25%<br>
+Services (python) - 90%<br>
 Website design - 50%<br>
 Website integration - 90%<br>
 Community building - 10%<br>
