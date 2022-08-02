@@ -8,10 +8,6 @@
             {
                 "name": "symbol",
                 "type": "felt"
-            },
-            {
-                "name": "owner",
-                "type": "felt"
             }
         ],
         "name": "constructor",
@@ -64,17 +60,6 @@
             }
         ],
         "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "name": "price",
-                "type": "felt"
-            }
-        ],
-        "name": "set_oracle_price",
-        "outputs": [],
         "type": "function"
     }
 ]

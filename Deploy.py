@@ -17,11 +17,11 @@ files = [
 ['starknet-compile', 'Core/InsuranceFund.cairo', '--output', 'Compiled/InsuranceFund_compiled.json', '--abi', 'Compiled/InsuranceFund_abi.json'],
 ['starknet-compile', 'Core/CZCore.cairo', '--output', 'Compiled/CZCore_compiled.json', '--abi', 'Compiled/CZCore_abi.json'],
 ['starknet-compile', 'Core/Controller.cairo', '--output', 'Compiled/Controller_compiled.json', '--abi', 'Compiled/Controller_abi.json'],
+['starknet-compile', 'Core/Oracle.cairo', '--output', 'Compiled/Oracle_compiled.json', '--abi', 'Compiled/Oracle_abi.json'],
 ['starknet-compile', 'Config/Settings.cairo', '--output', 'Compiled/Settings_compiled.json', '--abi', 'Compiled/Settings_abi.json'],
 ['starknet-compile', 'Config/TrustedAddy.cairo', '--output', 'Compiled/TrustedAddy_compiled.json', '--abi', 'Compiled/TrustedAddy_abi.json'],
 ['starknet-compile', 'Testing/ERC20_base.cairo', '--output', 'Compiled/ERC20_base_compiled.json', '--abi', 'Compiled/ERC20_base_abi.json'],
-['starknet-compile', 'Testing/ERC20_special.cairo', '--output', 'Compiled/ERC20_special_compiled.json', '--abi', 'Compiled/ERC20_special_abi.json'],
-['starknet-compile', 'Testing/Oracle.cairo', '--output', 'Compiled/Oracle_compiled.json', '--abi', 'Compiled/Oracle_abi.json']]
+['starknet-compile', 'Testing/ERC20_special.cairo', '--output', 'Compiled/ERC20_special_compiled.json', '--abi', 'Compiled/ERC20_special_abi.json']]
 
 for file in files:
     process = subprocess.Popen(file,stdout=subprocess.PIPE,universal_newlines=True)
@@ -49,7 +49,7 @@ for file in files:
 # ['starknet', 'deploy', '--contract', 'Compiled/ERC20_base_compiled.json', '--inputs', '67908410', '67908410', '0', '0', owner],
 # ['starknet', 'deploy', '--contract', 'Compiled/ERC20_base_compiled.json', '--inputs', '8769847210', '8769847210', '0', '0', owner],
 # ['starknet', 'deploy', '--contract', 'Compiled/ERC20_special_compiled.json', '--inputs', '76808410', '76808410', owner],
-# ['starknet', 'deploy', '--contract', 'Compiled/Oracle_compiled.json', '--inputs', '8769847210', '8769847210', owner],
+# ['starknet', 'deploy', '--contract', 'Compiled/Oracle_compiled.json', '--inputs', '8769847210', '8769847210'],
 # ['starknet', 'deploy', '--contract', 'Compiled/TrustedAddy_compiled.json', '--inputs', owner, owner]]
 # last = files[-1]
 

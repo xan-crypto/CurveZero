@@ -27,9 +27,9 @@ starknet-compile Core/PriceProvider.cairo --output Compiled/PriceProvider_compil
 starknet-compile Core/InsuranceFund.cairo --output Compiled/InsuranceFund_compiled.json --abi Compiled/InsuranceFund_abi.json
 starknet-compile Core/CZCore.cairo --output Compiled/CZCore_compiled.json --abi Compiled/CZCore_abi.json
 starknet-compile Core/Controller.cairo --output Compiled/Controller_compiled.json --abi Compiled/Controller_abi.json
+starknet-compile Core/Oracle.cairo --output Compiled/Oracle_compiled.json --abi Compiled/Oracle_abi.json
 starknet-compile Testing/ERC20_base.cairo --output Compiled/ERC20_base_compiled.json --abi Compiled/ERC20_base_abi.json
 starknet-compile Testing/ERC20_special.cairo --output Compiled/ERC20_special_compiled.json --abi Compiled/ERC20_special_abi.json
-starknet-compile Testing/Oracle.cairo --output Compiled/Oracle_compiled.json --abi Compiled/Oracle_abi.json
 starknet-compile Config/Settings.cairo --output Compiled/Settings_compiled.json --abi Compiled/Settings_abi.json
 starknet-compile Config/TrustedAddy.cairo --output Compiled/TrustedAddy_compiled.json --abi Compiled/TrustedAddy_abi.json
 
@@ -47,7 +47,7 @@ starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 85836867 8
 starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 67908410 67908410 0 0 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065
 starknet deploy --contract Compiled/ERC20_base_compiled.json --inputs 8769847210 8769847210 0 0 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065
 starknet deploy --contract Compiled/ERC20_special_compiled.json --inputs 76808410 76808410 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065
-starknet deploy --contract Compiled/Oracle_compiled.json --inputs 8769847210 8769847210 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065
+starknet deploy --contract Compiled/Oracle_compiled.json --inputs 8769847210 8769847210
 starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 --inputs 0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065 \
     0x06875f16514700b2943Bff47846594975E57A28CD64822bd1c9d433676757065 \
@@ -82,7 +82,7 @@ starknet deploy --contract Compiled/TrustedAddy_compiled.json \
 [czt] = 0x020fddbdf908230df89cb36a82adc3e5a5296a81252d2106d04c38b931359d45
 [weth] = 0x019326bccfb6f8de91a9271f4e480a835bc2a5ca1c7ff8f9de78210d80e64b97
 [lpt] = 0x02212217e5bb816dfdafa4de1a63055c00ac9310a10294e345fdc90c0263dd87
-[oracle] = 0x06d0b2f162f6a842c841eb19c77f97cee3ac13be286f3a6987c6d47f1f88ad33
+[oracle] = 0x060e9b8319ef5b6753085c6073cd617ad82c0d78da80024f92ccedf4b7ed2108
 [trusted] = 0x041aaf88cd4a3639d48552bbd88eeb931786cef45024cf731c9d44d6ecc3071c
 
 # check transactions / testing
